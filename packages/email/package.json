@@ -1,0 +1,21 @@
+{
+  "name": "@repo/email",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "exports":{
+    "./email":"./src/index.ts"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "resend": "^6.6.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.15.3"
+  }
+}
