@@ -11,6 +11,7 @@ app.use(express.json());
 
 app.use("/api/auth", authRouter);
 app.use("/api/admin/contest", adminContestRouter);
+
 app.use("/api/user/contest", userContestRouter);
 
 app.listen(3001, () => {
