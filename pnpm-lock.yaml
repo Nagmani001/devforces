@@ -112,6 +112,9 @@ importers:
 
   packages/email:
     dependencies:
+      dotenv:
+        specifier: ^17.2.3
+        version: 17.2.3
       resend:
         specifier: ^6.6.0
         version: 6.6.0

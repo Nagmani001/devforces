@@ -9,9 +9,9 @@ const app = express();
 
 app.use(express.json());
 
-app.use("api/auth", authRouter);
-app.use("api/admin/contest", adminContestRouter);
-app.use("api/user/contest", userContestRouter);
+app.use("/api/auth", authRouter);
+app.use("/api/admin/contest", adminContestRouter);
+app.use("/api/user/contest", userContestRouter);
 
 app.listen(3001, () => {
   console.log("Server is running on port 3001");

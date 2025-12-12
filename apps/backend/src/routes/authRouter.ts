@@ -16,7 +16,7 @@ authRouter.post("/signup", async (req: Request, res: Response) => {
   }
   const { email, username, password } = parsedData.data;
 
-  const hashedPassword = await bcrypt.hash(password, process.env.SALT_ROUNDS || 10);
+  const hashedPassword = await bcrypt.hash(password, 10);
 
   const userExists = await prisma.user.findFirst({
     where: {
@@ -109,7 +109,21 @@ authRouter.post("/verify-otp/:userId", async (req: Request, res: Response) => {
       message: "wrong otp"
     });
   }
-  //TODO: check if the otp is not expired  
+
+  if (new Date() > user.otpExpiry) {
+    return res.status(410).json({
+      message: "you are late"
+    });
+  }
+
+  await prisma.user.update({
+    where: {
+      id: Number(userId)
+    },
+    data: {
+      isVerified: true
+    }
+  });
 
   const token = jwt.sign({ userId: user.id }, process.env.JWT_SECRET || "nagmani", { expiresIn: "15d" });
   res.json({

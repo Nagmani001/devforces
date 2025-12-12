@@ -1,7 +1,10 @@
 import { Resend } from "resend";
+import { config } from "dotenv";
 
+config({ path: "/home/nagmani/root/projects/devforces/packages/email/.env" });
+
+console.log("api key ", process.env.RESEND_API_KEY);
 const resend = new Resend(process.env.RESEND_API_KEY);
-
 
 export async function sendEmail(otp: string, sendTo: string, type: string) {
   if (type == "OTP") {
