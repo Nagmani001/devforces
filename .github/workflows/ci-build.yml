@@ -23,3 +23,5 @@ jobs:
 
       - name: Build docker image for backend 
         run: docker build -f ./docker/backend/Dockerfile -t backend:${{ github.sha }} .
+
+## building should be done for the whole repo , how is it different
