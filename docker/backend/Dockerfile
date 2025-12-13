@@ -8,11 +8,11 @@ COPY ./pnpm-workspace.yaml .
 COPY ./turbo.json .
 
 COPY ./packages ./packages
-COPY ./apps/web ./apps/web
+COPY ./apps/backend ./apps/backend
 
 RUN npm install -g pnpm
 
 RUN pnpm install 
 RUN pnpm build
 
-CMD ["pnpm","start:web"]
+CMD ["pnpm","start:backend"]
