@@ -1,7 +1,24 @@
-function getOtp() {
-  let otp = "0";
-  for (let i = 0; i < 6; i++) {
-    otp = Math.floor(Math.random() * 9) * 10 + otp;
+import prisma from "@repo/db/client";
+import { Response } from "express";
+
+export function unauthorized(res: Response) {
+  return res.status(403).json({
+    message: "invalid auth"
+  })
+}
+
+export async function checkUserIsAdmin(userId: string, res: Response) {
+  try {
+    const user = await prisma.user.findFirst({
+      where: {
+        id: userId
+      }
+    });
+    return user?.isAdmin;
+
+  } catch (err) {
+    return res.status(500).json({
+      message: "error occured during database fetching"
+    });
   }
-  return otp;
 }

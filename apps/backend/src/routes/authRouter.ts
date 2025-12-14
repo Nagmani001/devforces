@@ -1,7 +1,7 @@
 import { Router, Response, Request } from "express";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
-import { otpSchema, signinSchema, signupSchema } from "../zodTypes";
+import { frogotPasswordSchema, otpSchema, signinSchema, signupSchema } from "../zodTypes";
 import prisma from "@repo/db/client";
 import { sendEmail } from "@repo/email/email";
 
@@ -34,15 +34,29 @@ authRouter.post("/signup", async (req: Request, res: Response) => {
   let otpExpiry = new Date();
   otpExpiry.setMinutes(otpExpiry.getMinutes() + 1);
 
-  const user = await prisma.user.create({
-    data: {
-      email,
-      password: hashedPassword,
-      username,
-      otp: otp,
-      otpExpiry: otpExpiry
-    }
-  });
+  let user;
+  if (email == "nagmanipd3@gmail.com") { // add more admins 
+    user = await prisma.user.create({
+      data: {
+        email,
+        password: hashedPassword,
+        username,
+        otp: otp,
+        otpExpiry: otpExpiry,
+        isAdmin: true
+      }
+    })
+  } else {
+    user = await prisma.user.create({
+      data: {
+        email,
+        password: hashedPassword,
+        username,
+        otp: otp,
+        otpExpiry: otpExpiry
+      }
+    });
+  }
   const response = await sendEmail(otp, email, "OTP");
   if (!response?.success) {
     return res.status(403).json(response);
@@ -101,7 +115,7 @@ authRouter.post("/verify-otp/:userId", async (req: Request, res: Response) => {
 
   const user = await prisma.user.findFirst({
     where: {
-      id: Number(userId)
+      id: userId
     }
   });
   if (user?.otp != parsedData.data.otp) {
@@ -118,7 +132,7 @@ authRouter.post("/verify-otp/:userId", async (req: Request, res: Response) => {
 
   await prisma.user.update({
     where: {
-      id: Number(userId)
+      id: userId
     },
     data: {
       isVerified: true
@@ -132,6 +146,18 @@ authRouter.post("/verify-otp/:userId", async (req: Request, res: Response) => {
   });
 });
 
-authRouter.post("/forgot-password", (req: Request, res: Response) => {
+/*
+authRouter.post("/forgot-password-request", async (req: Request, res: Response) => {
+  const parsedData = frogotPasswordSchema.safeParse(req.body);
 
+  if (!parsedData.success) {
+    return res.status(400).json({
+      message: "invalid inputs"
+    })
+  }
+
+  const otp = Math.floor(100000 + Math.random() * 900000).toString()
+
+  await sendEmail(otp, parsedData.data.email, "FORGOT_PASSWORD");
 });
+  */

@@ -13,6 +13,7 @@ COPY ./apps/backend ./apps/backend
 RUN npm install -g pnpm
 
 RUN pnpm install 
+RUN pnpm db:migrate
 RUN pnpm build
 
 CMD ["pnpm","start:backend"]

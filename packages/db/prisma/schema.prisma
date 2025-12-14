@@ -14,45 +14,71 @@ datasource db {
 }
 
 model User {
-  id         Int          @id @default(autoincrement())
-  username   String
-  email      String
-  password   String
-  imageUrl   String?
-  isVerified Boolean      @default(false)
-  otp        String
-  otpExpiry  DateTime
-  isAdmin    Boolean      @default(false)
-  challenges Challenges[]
+  id               String            @id @default(uuid())
+  username         String
+  email            String
+  password         String
+  imageUrl         String?
+  isVerified       Boolean           @default(false)
+  otp              String
+  otpExpiry        DateTime
+  isAdmin          Boolean           @default(false)
+  contestResults   ContestResult[]
+  challengeResults ChallengeResult[]
+  contests         Contest[]
 }
 
 model Contest {
-  id         String        @id @default(uuid())
-  title      String
-  duration   Int // seconds
-  startsAt   DateTime
-  status     ContestStatus @default(NOTSTARTED)
-  challenges Challenges[]
+  id            String         @id @default(uuid())
+  title         String
+  duration      Int // seconds
+  startsAt      DateTime
+  challenges    Challenge[]
+  contestResult ContestResult?
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime?
+  user          User           @relation(fields: [userId], references: [id])
+  userId        String // how do i enforce one more constraint that user can only be admin 
 }
 
-model Challenges {
-  id                String          @id @default(uuid())
+model Challenge {
+  id                String           @id @default(uuid())
   title             String
   notionLink        String
   testFile          String
   dockerComposeFile String
   startupScript     String
   totalTestCases    Int
-  passedTestCases   Int?
-  challengeStatus   ChallengeStatus @default(NOTATTEMPTED)
   contestId         String
-  contest           Contest         @relation(fields: [contestId], references: [id])
-  user              User            @relation(fields: [userId], references: [id])
-  userId            Int
+  contest           Contest          @relation(fields: [contestId], references: [id])
+  challengeResult   ChallengeResult?
 }
 
 model ContestResult {
-  id String @id @default(uuid())
+  id                    String            @id @default(uuid())
+  status                ContestStatus     @default(NOTSTARTED)
+  totalPassingTestCases Int
+  contestId             String            @unique
+  contest               Contest           @relation(fields: [contestId], references: [id])
+  challengeResult       ChallengeResult[]
+  userId                String
+  user                  User              @relation(fields: [userId], references: [id])
+
+  @@unique([userId, contestId])
+}
+
+model ChallengeResult {
+  id               String          @id @default(uuid())
+  challengeStatus  ChallengeStatus @default(NOTATTEMPTED)
+  passingTestCases Int
+  contestResult    ContestResult   @relation(fields: [contestResultId], references: [id])
+  contestResultId  String
+  challengeId      String          @unique
+  challenge        Challenge       @relation(fields: [challengeId], references: [id])
+  userId           String
+  user             User            @relation(fields: [userId], references: [id])
+
+  @@unique([userId, contestResultId])
 }
 
 enum ContestStatus {

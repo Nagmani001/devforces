@@ -15,5 +15,5 @@ jobs:
       - name: Checkout the code 
         uses: actions/checkout@v3 
 
-## linting should be done for the whole repo
+## linting should be done for the whole repo , how is it different
 
