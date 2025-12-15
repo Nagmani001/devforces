@@ -8,7 +8,7 @@ export default function Home() {
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-cyan-50">
       <NavBar />
       <main className="max-w-7xl mx-auto px-6 py-20">
-        <div className="text-center mb-16">
+        <div className="text-center  mb-16">
           <h1 className="text-6xl font-bold text-gray-900 mb-6 leading-tight">
             Welcome to the Future
             <br />
