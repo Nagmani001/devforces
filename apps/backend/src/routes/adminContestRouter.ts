@@ -1,7 +1,7 @@
 import { Router, Response, Request } from "express";
 import { checkUserIsAdmin, unauthorized } from "../lib/utils";
 import prisma from "@repo/db/client";
-import { createContestSchema, updateContestSchema } from "../zodTypes";
+import { createContestSchema, updateContestSchema } from "@repo/common/zodTypes";
 
 export const adminContestRouter: Router = Router();
 

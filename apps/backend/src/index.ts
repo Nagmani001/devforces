@@ -1,5 +1,6 @@
 import express from "express";
 import { config } from "dotenv";
+import cors from "cors";
 import { authRouter } from "./routes/authRouter";
 import { adminContestRouter } from "./routes/adminContestRouter";
 import { userContestRouter } from "./routes/userContestRouter";
@@ -16,6 +17,10 @@ declare global {
   }
 }
 app.use(express.json());
+app.use(cors({
+  origin: "http://localhost:3000",
+  credentials: true
+}));
 
 app.use("/api/auth", authRouter);
 app.use("/api/admin/contest", authMiddleware, adminContestRouter);

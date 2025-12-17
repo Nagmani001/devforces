@@ -1,4 +1,7 @@
+//WARNING: fix: typescript issues
+
 import prisma from "@repo/db/client";
+import axios2 from "axios";
 import { Response } from "express";
 
 export function unauthorized(res: Response) {
@@ -22,3 +25,46 @@ export async function checkUserIsAdmin(userId: string, res: Response) {
     });
   }
 }
+
+export const axios = {
+  post: async (...args: any) => {
+    try {
+      //@ts-ignore
+      const res = await axios2.post(...args);
+      return res;
+    } catch (e: any) {
+      return e.response;
+    }
+  },
+
+  get: async (...args: any) => {
+    try {
+      //@ts-ignore
+      const res = await axios2.get(...args);
+      return res;
+    } catch (e: any) {
+      return e.response;
+    }
+  },
+
+  put: async (...args: any) => {
+    try {
+      //@ts-ignore
+      const res = await axios2.put(...args);
+      return res;
+    } catch (e: any) {
+      return e.response;
+    }
+  },
+
+  delete: async (...args: any) => {
+    try {
+      //@ts-ignore
+      const res = await axios2.delete(...args);
+      return res;
+    } catch (e: any) {
+      return e.response;
+    }
+  }
+
+};

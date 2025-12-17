@@ -1,9 +1,10 @@
 import { Router, Response, Request } from "express";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
-import { frogotPasswordSchema, otpSchema, signinSchema, signupSchema } from "../zodTypes";
 import prisma from "@repo/db/client";
 import { sendEmail } from "@repo/email/email";
+import { otpSchema, signinSchema, signupSchema } from "@repo/common/zodTypes";
+import { authMiddleware } from "../middlewares/authMiddleware";
 
 export const authRouter: Router = Router();
 
@@ -97,6 +98,7 @@ authRouter.post("/signin", async (req: Request, res: Response) => {
     });
   }
   const token = jwt.sign({ userId: user.id }, process.env.JWT_SECRET || "nagmani", { expiresIn: "15d" });
+  res.cookie("token", token);
   res.json({
     message: "signin successful",
     token
@@ -140,9 +142,35 @@ authRouter.post("/verify-otp/:userId", async (req: Request, res: Response) => {
   });
 
   const token = jwt.sign({ userId: user.id }, process.env.JWT_SECRET || "nagmani", { expiresIn: "15d" });
+  res.cookie("token", token);
   res.json({
     message: "correct otp",
     token
+  });
+});
+
+authRouter.get("/me", authMiddleware, async (req: Request, res: Response) => {
+  const userId = req.userId;
+  if (!userId) {
+    return res.status(403).json({
+      message: "invalid auth"
+    });
+  };
+
+  const user = await prisma.user.findFirst({
+    where: {
+      id: userId
+    }
+  });
+  if (!user) {
+    return res.status(404).json({
+      message: "user not found"
+    });
+  }
+  res.json({
+    isAdmin: user.isAdmin,
+    username: user.username,
+    email: user.email
   });
 });
 
