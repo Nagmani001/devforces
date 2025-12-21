@@ -1,0 +1,2 @@
+-- AlterTable
+ALTER TABLE "Contest" ALTER COLUMN "startsAt" SET DATA TYPE TIMESTAMPTZ;

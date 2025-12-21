@@ -1,7 +1,6 @@
 import CreateContest from "@/app/components/createContest";
 
-export default function AdminContestPage({ contest }: any) {
-
+export default function Page() {
   return <div>
     <CreateContest />
   </div>

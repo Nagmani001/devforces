@@ -9,7 +9,7 @@ import UserButton from "./userButton";
 
 export default function NavBar() {
   const router = useRouter();
-  const user = useUser();
+  //  const user = useUser();
 
   return < nav className="px-6 py-4 flex justify-between items-center max-w-7xl mx-auto" >
     <div className="flex items-center gap-2">
@@ -17,12 +17,9 @@ export default function NavBar() {
       <span className="text-2xl font-bold text-gray-900">Devforces</span>
     </div>
     <div>
-      {!user.success ?
-        <Button onClick={() => {
-          router.push("/signin")
-        }} variant="link">Login</Button>
-        // @ts-ignore
-        : <UserButton name={user.userInfo.username} />}
+      <Button onClick={() => {
+        router.push("/signin")
+      }} variant="link">Login</Button>
       <ThemeToggle />
     </div>
   </nav >

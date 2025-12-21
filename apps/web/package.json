@@ -9,10 +9,11 @@
     "lint": "eslint"
   },
   "dependencies": {
-    "@repo/ui": "workspace:*",
     "@repo/common": "workspace:*",
+    "@repo/ui": "workspace:*",
     "@tanstack/react-query": "^5.90.12",
     "axios": "^1.13.2",
+    "date-fns": "^4.1.0",
     "lucide-react": "^0.561.0",
     "next": "16.0.10",
     "next-themes": "^0.4.6",

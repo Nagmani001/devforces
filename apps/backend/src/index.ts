@@ -22,6 +22,7 @@ app.use(cors({
   credentials: true
 }));
 
+
 app.use("/api/auth", authRouter);
 app.use("/api/admin/contest", authMiddleware, adminContestRouter);
 app.use("/api/user/contest", authMiddleware, userContestRouter);

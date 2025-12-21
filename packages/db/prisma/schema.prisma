@@ -31,8 +31,10 @@ model User {
 model Contest {
   id            String         @id @default(uuid())
   title         String
+  subtitle      String?
   duration      Int // seconds
-  startsAt      DateTime
+  isDeleted     Boolean        @default(false)
+  startsAt      DateTime       @db.Timestamptz(3)
   challenges    Challenge[]
   contestResult ContestResult?
   createdAt     DateTime       @default(now())
@@ -56,7 +58,7 @@ model Challenge {
 
 model ContestResult {
   id                    String            @id @default(uuid())
-  status                ContestStatus     @default(NOTSTARTED)
+  status                ContestStatus
   totalPassingTestCases Int
   contestId             String            @unique
   contest               Contest           @relation(fields: [contestId], references: [id])
@@ -69,7 +71,7 @@ model ContestResult {
 
 model ChallengeResult {
   id               String          @id @default(uuid())
-  challengeStatus  ChallengeStatus @default(NOTATTEMPTED)
+  challengeStatus  ChallengeStatus
   passingTestCases Int
   contestResult    ContestResult   @relation(fields: [contestResultId], references: [id])
   contestResultId  String
@@ -77,8 +79,6 @@ model ChallengeResult {
   challenge        Challenge       @relation(fields: [challengeId], references: [id])
   userId           String
   user             User            @relation(fields: [userId], references: [id])
-
-  @@unique([userId, contestResultId])
 }
 
 enum ContestStatus {
@@ -88,7 +88,7 @@ enum ContestStatus {
 }
 
 enum ChallengeStatus {
+  SUBMITTED
   NOTATTEMPTED
-  COMPLETED
   ATTEMPTED
 }

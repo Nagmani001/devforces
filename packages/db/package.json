@@ -8,10 +8,11 @@
   },
   "dependencies": {
     "@prisma/client": "6.3.0",
-    "@repo/typescript-config": "workspace:*"
+    "@repo/typescript-config": "workspace:*",
+    "bcrypt": "^6.0.0"
   },
-  "exports":{
-  "./client":"./src/index.ts"
+  "exports": {
+    "./client": "./src/index.ts"
   },
   "keywords": [],
   "author": "",

@@ -19,10 +19,6 @@ export const otpSchema = z.object({
 export const frogotPasswordSchema = z.object({
   email: z.email()
 });
-/*
-    user: UserCreateNestedOneWithoutChallengesInput
-    challengeResult?: ChallengeResultCreateNestedOneWithoutChallengeInput
- * */
 
 export const challengesSchema = z.object({
   title: z.string(),
@@ -35,8 +31,9 @@ export const challengesSchema = z.object({
 
 export const createContestSchema = z.object({
   title: z.string(),
+  subtitle: z.string().optional(),
   duration: z.number(), // seconds
-  startsAt: z.date(),
+  startsAt: z.string(), //TODO: make this dateTime and make sure you show the user errors accordingly
   challenges: z.array(challengesSchema)
 });
 

@@ -33,7 +33,7 @@ export default function SigninPage() {
     onSuccess: (success: any) => {
       toast.success("successfully sigined in");
       localStorage.setItem("token", success.data.token);
-      router.push(`/contests/${success.data.token}`);
+      router.push(`/contests`);
     }
   })
 

@@ -20,22 +20,38 @@ adminContestRouter.get("/", async (req: Request, res: Response) => {
   try {
     const contests = page == 1 ? await prisma.contest.findMany({
       where: {
-        userId
+        userId,
+        isDeleted: false
       },
       take: 10,
       orderBy: {
         createdAt: "asc"
+      },
+      include: {
+        _count: {
+          select: {
+            challenges: true
+          }
+        }
       }
     })
       :
       await prisma.contest.findMany({
         where: {
-          userId
+          userId,
+          isDeleted: false
         },
         take: 10,
         skip: (page * 10) - 10,
         orderBy: {
           createdAt: "asc"
+        },
+        include: {
+          _count: {
+            select: {
+              challenges: true
+            }
+          }
         }
       });
 
@@ -68,12 +84,13 @@ adminContestRouter.post("/create", async (req: Request, res: Response) => {
       message: "invalid inputs"
     })
   }
-  const { title, duration, startsAt, challenges } = parsedData.data;
+  const { title, subtitle, duration, startsAt, challenges } = parsedData.data;
 
   try {
     const createSchema = await prisma.contest.create({
       data: {
         title,
+        subtitle,
         duration,
         startsAt,
         userId,
@@ -92,7 +109,7 @@ adminContestRouter.post("/create", async (req: Request, res: Response) => {
   }
 });
 
-adminContestRouter.delete("/create/:id", async (req: Request, res: Response) => {
+adminContestRouter.delete("/delete/:id", async (req: Request, res: Response) => {
   const userId = req.userId;
   if (!userId) return unauthorized(res);
   const contestId = req.params.id;
@@ -118,11 +135,12 @@ adminContestRouter.delete("/create/:id", async (req: Request, res: Response) => 
       });
     }
 
-    //WARNING: might want to put it somewhere else ....
-    await prisma.contest.delete({
-      where: { id: contestId }, include: {
-        challenges: true,
-        contestResult: true
+    await prisma.contest.update({
+      where: {
+        id: contestId
+      },
+      data: {
+        isDeleted: true
       }
     });
 

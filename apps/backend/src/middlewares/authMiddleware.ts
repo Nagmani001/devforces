@@ -10,6 +10,7 @@ export async function authMiddleware(req: Request, res: Response, next: NextFunc
   };
 
   try {
+    //@ts-ignore
     const decoded = jwt.verify(token, process.env.JWT_SECRET || "");
 
     //@ts-ignore

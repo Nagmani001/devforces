@@ -46,10 +46,10 @@ export default function OtpClient({ userId }: any) {
   const mutation = useMutation({
     mutationFn: (value: otp) => {
       return axios.post(`${BASE_URL}/api/auth/verify-otp/${userId}`, value, {
+        withCredentials: true,
         headers: {
           'Content-Type': 'application/json'
         },
-        withCredentials: true
       });
     },
     onError: (error: any) => {
@@ -59,7 +59,7 @@ export default function OtpClient({ userId }: any) {
     onSuccess: (success) => {
       toast.success("OTP verified successfully!");
       localStorage.setItem("token", success.data.token);
-      router.push(`/contests/${success.data.token}`);
+      router.push(`/contests`);
     }
   });
 

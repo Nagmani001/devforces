@@ -15,7 +15,9 @@ import { BASE_URL, buildISTDate, emptyChallenge, getTimeInNumbers } from "../con
 import axios from "axios";
 
 
-export default function CreateContest() {
+export default function UpdateContest({ contestId }: {
+  contestId: string
+}) {
   const [contestTitle, setContestTitle] = useState("");
   const [contestSubtitle, setContestSubtitle] = useState("");
   const [totalTimeHours, setTotalTimeHours] = useState<number>(0);
@@ -60,7 +62,7 @@ export default function CreateContest() {
       challenges,
     };
     try {
-      await axios.post(`${BASE_URL}/api/admin/contest/create`, {
+      await axios.post(`${BASE_URL}/api/admin/contest/update/${contestId}`, {
         title: payload.title,
         subtitle: payload.subTitle,
         duration: payload.duration, // seconds
@@ -94,7 +96,7 @@ export default function CreateContest() {
 
         {/* Header */}
         <div className="bg-white border border-slate-200 rounded-lg p-6">
-          <h1 className="text-2xl font-semibold text-slate-900 mb-1">Create Contest</h1>
+          <h1 className="text-2xl font-semibold text-slate-900 mb-1">Update Contest</h1>
           <p className="text-sm text-slate-600">Set up a new coding contest with challenges and configurations</p>
         </div>
 
