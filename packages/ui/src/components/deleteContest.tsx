@@ -30,7 +30,6 @@ export default function DeleteContestDialog({
   const [open, setOpen] = useState(false);
   const [value, setValue] = useState("");
   const [isDeleting, setIsDeleting] = useState(false);
-  console.log("inside deleteContestDislogue", contestName);
 
   const matches = value.trim() == contestName;
 

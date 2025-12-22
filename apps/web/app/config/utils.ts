@@ -221,3 +221,20 @@ export async function getChallengesForContest(contestId: string, token: string) 
     challenges: response.data
   }
 }
+
+export async function deleteContest(contestId: string, token: string) {
+  try {
+    await axios.delete(`${BASE_URL}/api/admin/contest/delete/${contestId}`, {
+      headers: {
+        Authorization: token
+      }
+    });
+    return {
+      success: true
+    }
+  } catch (err) {
+    return {
+      success: false
+    }
+  }
+}

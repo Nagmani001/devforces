@@ -7,7 +7,7 @@ import { AdminContestCard } from "@repo/ui/components/adminContest";
 import { Input } from "@repo/ui/components/input";
 import { Filter, Plus, Search } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { getStatusOfContest, getTimeFromSeconds } from "@/app/config/utils";
+import { deleteContest, getStatusOfContest, getTimeFromSeconds } from "@/app/config/utils";
 import { useState } from "react";
 import { LIVE, NOT_STARTED } from "@repo/common/consts";
 
@@ -72,7 +72,6 @@ export default function AdminContestPage({ contests }: any) {
           {contests.map((x: any) => {
             const duration = getTimeFromSeconds(x.duration);
             const contestStatus = getStatusOfContest(x.startsAt, x.duration);
-            console.log("from adminContese", x.title);
             return contestStatus.status == NOT_STARTED
               ? <AdminContestCard
                 id={x.id}
@@ -92,12 +91,13 @@ export default function AdminContestPage({ contests }: any) {
                   <DeleteContestDialog
                     contestName={x.title}
                     onDelete={async () => {
-                      // Add your delete API call here
-                      console.log("Deleting contest:", x.id);
+                      //TODO: make this a mutation in react query
+                      //@ts-ignore
+                      const value = await deleteContest(x.id, localStorage.getItem("token"));
+                      if (value.success) { router.refresh() }
                     }}
                     trigger={
                       <Button onClick={() => {
-                        console.log(x);
                       }} size="sm" variant="destructive">
                         Delete
                       </Button>
