@@ -258,3 +258,21 @@ export async function getContestForUpdate(contestId: string, token: string) {
   }
 
 }
+
+export async function getChallengeDetails(challengeId: string, token: string) {
+  try {
+    const challenge = await axios.get(`${BASE_URL}/api/user/contest/challenge/${challengeId}`, {
+      headers: {
+        Authorization: token
+      }
+    });
+    return {
+      success: true,
+      data: challenge
+    }
+  } catch (err) {
+    return {
+      success: false,
+    }
+  }
+}
