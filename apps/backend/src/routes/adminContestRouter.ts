@@ -6,6 +6,7 @@ import { createContestSchema, updateContestSchema } from "@repo/common/zodTypes"
 export const adminContestRouter: Router = Router();
 
 adminContestRouter.get("/", async (req: Request, res: Response) => {
+  await new Promise(r => setTimeout(r, 2000));
   const userId = req.userId;
   const page = Number(req.query.page);
   if (!userId) return unauthorized(res);
@@ -154,6 +155,40 @@ adminContestRouter.delete("/delete/:id", async (req: Request, res: Response) => 
   }
 });
 
+
+adminContestRouter.get("/update/:id", async (req: Request, res: Response) => {
+
+  const userId = req.userId;
+  if (!userId) return unauthorized(res);
+  const contestId = req.params.id;
+
+  const isAdmin = await checkUserIsAdmin(userId, res);
+
+  if (!isAdmin) {
+    return res.status(400).json({
+      message: "you are not admin"
+    });
+  }
+  //WARNING: there is no check for you did not create this contest
+
+  try {
+    const contestWithChallenges = await prisma.contest.findFirst({
+      where: {
+        id: contestId,
+      },
+      include: {
+        challenges: true
+      }
+    });
+    res.json({
+      contests: contestWithChallenges
+    })
+  } catch (err) {
+    res.status(500).json({
+      message: "something went wrong"
+    })
+  }
+});
 
 adminContestRouter.put("/update/:id", async (req: Request, res: Response) => {
 

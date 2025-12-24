@@ -12,6 +12,7 @@ import { Button } from "./button";
 export type ContestCardProps = {
   id?: string | number;
   title: string;
+  subtitle: string;
   duration?: string;
   startTimeLabel?: string;
   isContestStarted?: boolean;
@@ -27,6 +28,7 @@ export type ContestCardProps = {
 
 export function ContestCard({
   title,
+  subtitle,
   duration,
   startTimeLabel,
   isContestStarted = false,
@@ -85,13 +87,16 @@ export function ContestCard({
           <div className="flex items-start justify-between gap-4">
             <div className="flex flex-col">
               <h3 className="text-lg font-medium leading-tight">{title}</h3>
+              {subtitle && (
+                <p className="mt-1 text-sm text-muted-foreground">{subtitle}</p>
+              )}
             </div>
 
             <div className="flex flex-col items-end gap-2">
               {isLive ? (
                 <Badge className="rounded-full px-3 py-1">Live</Badge>
               ) : isContestStarted ? (
-                <Badge className="rounded-full px-3 py-1">Started</Badge>
+                <Badge className="rounded-full px-3 py-1">Ended</Badge>
               ) : (
                 <span className="text-sm text-muted-foreground">
                   {startTimeLabel}
@@ -171,7 +176,7 @@ export function AdminContestCard({
     ),
     running: (
       <Button size="sm" onClick={onSeeResult}>
-        See Result
+        See Live Result
       </Button>
     ),
     ended: (

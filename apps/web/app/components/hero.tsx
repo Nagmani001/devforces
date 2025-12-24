@@ -1,10 +1,6 @@
-"use client";
-
-import { Button } from "@repo/ui/components/button";
-import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 export default function Hero() {
-  const router = useRouter();
   return <div className="text-center  mb-16">
     <h1 className="text-6xl font-bold text-gray-900 mb-6 leading-tight">
       Welcome to the Future
@@ -15,10 +11,8 @@ export default function Hero() {
       Transform your ideas into reality with our cutting-edge platform.
       Join thousands of innovators who are building the future today.
     </p>
-    <Button onClick={() => {
-      router.push("/signup")
-    }} size="lg">
+    <Link className="bg-primary rounded-md text-primary-foreground hover:bg-primary/90 h-9 px-4 py-2 has-[>svg]:px-3" href="/signup" prefetch>
       Get Started
-    </Button>
+    </Link>
   </div>
 }

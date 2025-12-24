@@ -5,7 +5,6 @@ import { Button } from "@repo/ui/components/button";
 import { Trophy } from "lucide-react";
 
 export default function Challenges({ challenges }: any) {
-  console.log(challenges);
   const router = useRouter();
   return (
     <div className="container max-w-6xl mx-auto px-4 py-8 flex flex-col gap-8">

@@ -4,8 +4,6 @@ import { Button } from "@repo/ui/components/button";
 import { Sparkles } from "lucide-react";
 import ThemeToggle from "./themeToggle";
 import { useRouter } from "next/navigation";
-import { useUser } from "../hooks/useUser";
-import UserButton from "./userButton";
 
 export default function NavBar() {
   const router = useRouter();

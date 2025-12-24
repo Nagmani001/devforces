@@ -1,6 +1,7 @@
 "use client";
 import { Clock, Play, Calendar } from "lucide-react";
 import { Card, CardContent } from "./card";
+import { LIVE, NOT_STARTED, ENDED } from "@repo/common/consts";
 import { Badge } from "./badge";
 import { Button } from "./button";
 
@@ -8,34 +9,24 @@ export type ContestCardProps = {
   id?: string | number;
   title: string;
   subtitle?: string;
-  duration?: string; // e.g. "2 hour" or "30 min"
-  startTimeLabel?: string; // e.g. "Starts at 7:30 pm" or "Start now"
-  isContestStarted?: boolean;
-  isLive?: boolean;
+  duration?: string;
   challengeCount?: number;
+  status: string;
+  startTimeLabel?: string;
+  rightText?: string;
+
   onClick?: () => void;
   variant?: "default" | "outline" | "compact";
-  rightText?: string; // any text to show on the right side
   className?: string;
 };
 
-/**
- * ContestCard
- *
- * Single reusable component to render contests in different states.
- * Uses shadcn/ui Card + Badge + Button and tailwind for layout.
- *
- * Props control appearance (started / live / compact) so the same component
- * can represent many contest types on the platform.
- */
 export default function UserContest({
   id,
   title,
   subtitle,
   duration,
+  status,
   startTimeLabel,
-  isContestStarted = false,
-  isLive = false,
   challengeCount = 0,
   onClick,
   variant = "default",
@@ -98,13 +89,13 @@ export default function UserContest({
 
             {/* Right side: status / start time */}
             <div className="flex flex-col items-end justify-center gap-2">
-              {isLive ? (
+              {status == LIVE ?
                 <Badge className="rounded-full px-3 py-1">Live</Badge>
-              ) : isContestStarted ? (
-                <Badge className="rounded-full px-3 py-1">Started</Badge>
-              ) : (
-                <span className="text-sm text-muted-foreground whitespace-nowrap">{startTimeLabel}</span>
-              )}
+                : status == NOT_STARTED ?
+                  <span className="text-sm text-muted-foreground whitespace-nowrap">{startTimeLabel}</span>
+                  :
+                  <Badge className="rounded-full px-3 py-1">Ended</Badge>
+              }
 
               {rightText && (
                 <div className="text-sm font-medium text-muted-foreground">{rightText}</div>
@@ -117,17 +108,24 @@ export default function UserContest({
 
             <div className="flex items-center gap-2">
               {/* action button — style depends on started state */}
-              <Button size="sm" variant={isContestStarted || isLive ? "ghost" : "default"} onClick={(e) => { e.stopPropagation(); onClick?.(); }}>
-                {isContestStarted || isLive ? (
+              <Button size="sm" variant={status == LIVE ? "ghost" : "default"} onClick={(e) => { e.stopPropagation(); onClick?.(); }}>
+                {status == LIVE ?
+
                   <div className="flex items-center gap-2">
                     <Play className="h-4 w-4" />
                     <span>Enter</span>
                   </div>
-                ) : (
-                  <div className="flex items-center gap-2">
-                    <span>View</span>
-                  </div>
-                )}
+                  : status == NOT_STARTED ?
+                    <div className="flex items-center gap-2">
+                      <span>Notify</span>
+                    </div>
+                    :
+                    <div className="flex items-center gap-2">
+                      <span>See Leaderboard</span>
+                    </div>
+                }
+
+
               </Button>
             </div>
           </div>
@@ -137,27 +135,3 @@ export default function UserContest({
   );
 }
 
-/*
-Usage examples (copy into any React page):
-
-<ContestCard
-  id={1}
-  title="build a http backend for a quiz platform"
-  subtitle="2 hour"
-  duration="2 hour"
-  startTimeLabel="Starts at 7:30 pm"
-  isContestStarted={false}
-  challengeCount={4}
-  onClick={() => console.log('open contest')}
-/>
-
-<ContestCard
-  id={2}
-  title="build a websocket server for chat app"
-  duration="2 hour"
-  startTimeLabel="Start now"
-  isContestStarted={true}
-  isLive={true}
-  challengeCount={6}
-/>
-*/

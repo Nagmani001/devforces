@@ -238,3 +238,23 @@ export async function deleteContest(contestId: string, token: string) {
     }
   }
 }
+export async function getContestForUpdate(contestId: string, token: string) {
+  try {
+
+    const contests = await axios.get(`${BASE_URL}/api/admin/contest/update/${contestId}`, {
+      headers: {
+        Authorization: token
+      }
+    });
+
+    return {
+      success: true,
+      contests
+    }
+  } catch (err) {
+    return {
+      success: false,
+    }
+  }
+
+}

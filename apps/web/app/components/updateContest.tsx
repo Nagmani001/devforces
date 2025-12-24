@@ -5,13 +5,13 @@
 //TODO: i don't think there is any next js specific optimizations but consider that as well 
 
 import { DatePicker } from "@repo/ui/components/datePicker";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import LabelWithInput from "@repo/ui/components/labbledInput";
 import { Plus, Trash2, FileText, Clock } from "lucide-react";
 import { Button } from "@repo/ui/components/button";
 import TimePicker from "@repo/ui/components/timePicker";
 import { Challenge } from "../config/types";
-import { BASE_URL, buildISTDate, emptyChallenge, getTimeInNumbers } from "../config/utils";
+import { BASE_URL, buildISTDate, emptyChallenge, getContestForUpdate, getTimeInNumbers } from "../config/utils";
 import axios from "axios";
 
 
@@ -45,6 +45,24 @@ export default function UpdateContest({ contestId }: {
       s.map((c) => (c.id === id ? { ...c, [field]: value } : c))
     );
 
+  useEffect(() => {
+    const fetchContestDetails = async () => {
+      //@ts-ignore
+      const contests = await getContestForUpdate(contestId, localStorage.getItem("token"));
+      const actualContest = contests.contests?.data.contests;
+      //BUG : very ugly state updates , should be better
+      setContestTitle(actualContest.title);
+      setContestSubtitle(actualContest.subtitle);
+      /*
+      setChallenges(actualContest.challenges);
+      setTotalTimeHours();
+      setTotalTimeMinutes();
+      setDate();
+      setTime()
+       * */
+    }
+    fetchContestDetails();
+  });
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!actualTime?.hour || !actualTime.minute || !actualTime.second) {
