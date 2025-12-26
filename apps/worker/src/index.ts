@@ -1,10 +1,11 @@
 import { REDIS_QUEUE_NAME } from "@repo/common/consts";
-import fs from 'node:fs/promises';
+import { writeFile } from 'fs/promises';
 import { createClient } from "redis";
 import util from "util";
 const exec = util.promisify(require('child_process').exec);
 import prisma from "@repo/db/client";
 import { downloadAndUnzipFile } from "./lib/utils";
+import axios from "axios";
 
 const redisClient = createClient();
 const pubSub = createClient();
@@ -27,7 +28,18 @@ async function main() {
 
     await exec(`cd src/${nameOfProject} && docker compose up -d`);
 
+    let numberOfErrors = 0;
+    while (true) {
+      try {
+        await axios.get("http://localhost:8000/todos");
+        break;
+      } catch (err) {
+        numberOfErrors++;
+        continue;
+      }
+    }
 
+    // most probably the backend isn't starting correclty that is why the tests are failing
     const testFile = await prisma.challenge.findFirst({
       where: {
         id: "74a70518-d1df-47f6-8baa-472d9547464c"
@@ -37,9 +49,7 @@ async function main() {
       }
     });
 
-    await fs.writeFile("/home/nagmani/root/projects/devforces/apps/worker/src/index.test.ts", testFile?.testFile!);
-
-    await new Promise(r => setTimeout(r, 5000));
+    const response = await writeFile("/home/nagmani/root/projects/devforces/apps/worker/src/index.test.ts", testFile?.testFile!);
     const { stdout, stderr } = await exec(`pnpm test`);
 
     await exec(`cd src/${nameOfProject} && docker compose down`);
@@ -50,8 +60,9 @@ async function main() {
     const endTime = new Date().getTime();
     console.log(stdout);
     console.log("total time taken", (endTime - startTime) / 1000, "seconds");
+    console.log("total number of errors it throwed = ", numberOfErrors);
 
-    //; put entry in the database
+    // add entry in the database
 
     pubSub.publish(id, JSON.stringify({
       msg: "hi"
