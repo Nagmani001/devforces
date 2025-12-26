@@ -44,16 +44,19 @@ model Contest {
 }
 
 model Challenge {
-  id                String           @id @default(uuid())
-  title             String
-  notionLink        String
-  testFile          String
-  dockerComposeFile String
-  startupScript     String
-  totalTestCases    Int
-  contestId         String
-  contest           Contest          @relation(fields: [contestId], references: [id])
-  challengeResult   ChallengeResult?
+  id                    String           @id @default(uuid())
+  title                 String
+  notionLink            String
+  testFile              String
+  baseGithubUrl         String?
+  engineExecutionScript String?
+  withDocker            Boolean?
+  dockerComposeFile     String
+  startupScript         String
+  totalTestCases        Int
+  contestId             String
+  contest               Contest          @relation(fields: [contestId], references: [id])
+  challengeResult       ChallengeResult?
 }
 
 model ContestResult {

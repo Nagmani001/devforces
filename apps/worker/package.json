@@ -4,13 +4,21 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "yet to write tests",
-    "build":"tsc -b",
-    "start":"node dist/index.js",
-    "dev":"npm run build && npm run start"
+    "test": "npx vitest ./src/index.test.ts",
+    "build": "tsc -b",
+    "start": "node dist/index.js",
+    "dev": "npm run build && npm run start"
   },
-  "dependencies":{
-  "@repo/typescript-config":"workspace:*"
+  "dependencies": {
+    "@repo/common": "workspace:*",
+    "@repo/db": "workspace:*",
+    "@repo/typescript-config": "workspace:*",
+    "@types/axios": "^0.14.4",
+    "axios": "^1.13.2",
+    "dockerode": "^4.0.9",
+    "node-stream-zip": "^1.15.0",
+    "redis": "^5.10.0",
+    "vitest": "^4.0.15"
   },
   "keywords": [],
   "author": "",

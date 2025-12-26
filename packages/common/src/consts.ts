@@ -17,3 +17,5 @@ export const MONTH_NAMES = [
   "November",
   "December",
 ] as const;
+
+export const REDIS_QUEUE_NAME = "submissions";
