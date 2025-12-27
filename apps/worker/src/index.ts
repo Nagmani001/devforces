@@ -28,6 +28,20 @@ async function main() {
 
     let numberOfErrors = 0;
 
+
+    const testFile = await prisma.challenge.findFirst({
+      where: {
+        id: "74a70518-d1df-47f6-8baa-472d9547464c"
+      },
+      select: {
+        testFile: true,
+        totalTestCases: true
+      }
+    });
+
+
+    await writeFile("src/index.test.ts", testFile?.testFile!);
+
     while (true) {
       try {
         await axios.get("http://localhost:8000/todos");
@@ -38,49 +52,35 @@ async function main() {
       }
     }
 
-    const testFile = await prisma.challenge.findFirst({
-      where: {
-        id: "74a70518-d1df-47f6-8baa-472d9547464c"
-      },
-      select: {
-        testFile: true,
-      }
-    });
+    try {
+      const { stdout, stderr } = await exec(`pnpm test`);
+      const outputString = stdout.replace(/\\n/g, "\n").replace(/\\s/g, " ") || stderr.replace(/\\n/g, "\n").replace(/\\s/g, " ");
+      const clean = outputString.replace(/\u001b\[[0-9;]*m/g, "");
+      const match = clean.match(/Tests\s+(\d+)\s+passed/i);
+      const numberOfPassedTestCases = Number(match[1]);
+      console.log("number of passed test cases = ", numberOfPassedTestCases);
+      console.log("total Test cases", testFile?.totalTestCases)
+    } catch (err) {
+      //@ts-ignore
+      const clean = err.stdout.replace(/\x1B\[[0-9;]*m/g, "");
+      const match = clean.match(/(\d+)\s+failed/);
+      const numberOfFailedTestCases = Number(match[1]);
+      console.log("number of passed failedcases = ", numberOfFailedTestCases);
+      console.log("total Test cases", testFile?.totalTestCases)
+    } finally {
+      await exec(`cd src/${nameOfProject} && docker compose down --rmi all`);
+      await exec(`cd src/ && rm -rf extracted && rm -rf ${id}.zip && rm -rf index.test.ts`)
+      const endTime = new Date().getTime();
+      console.log("total time taken", (endTime - startTime) / 1000, "seconds");
+      console.log("total number of errors it throwed = ", numberOfErrors);
 
-    await writeFile("src/index.test.ts", testFile?.testFile!);
-    const { stdout, stderr } = await exec(`pnpm test`);
+      // add entry in the database
+      // respond to user 
 
-    console.log("stdout", stdout);
-    console.log("hi");
-    console.log("stderr", stderr);
-
-    await exec(`cd src/${nameOfProject} && docker compose down --rmi all`);
-
-    await exec(`cd src/ && rm -rf extracted && rm -rf ${id}.zip && rm -rf index.test.ts`)
-
-    const endTime = new Date().getTime();
-
-
-    /*
-    const clean = stdout.replace(/\x1B\[[0-9;]*m/g, "");
-    const testsPassedMatch = clean.match(/Tests\s+(\d+)\s+passed/);
-    const testsFailedMatch = clean.match(/Tests\s+(\d+)\s+failed/);
-
-    const passed = testsPassedMatch ? Number(testsPassedMatch[1]) : 0;
-    const failed = testsFailedMatch ? Number(testsFailedMatch[1]) : 0;
-
-    console.log({ passed, failed });
-     * */
-
-
-    console.log("total time taken", (endTime - startTime) / 1000, "seconds");
-    console.log("total number of errors it throwed = ", numberOfErrors);
-
-    // add entry in the database
-
-    pubSub.publish(id, JSON.stringify({
-      msg: "hi"
-    }));
+      pubSub.publish(id, JSON.stringify({
+        msg: "hi"
+      }));
+    }
   }
 }
 
