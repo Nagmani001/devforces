@@ -22,13 +22,12 @@ async function main() {
     const startTime = new Date().getTime();
     const { id, challengeId, url } = JSON.parse(popped?.element!);
 
-    // download user code 
-    await downloadAndUnzipFile(url, id)
-    const nameOfProject = "with-database-http-express";
+    const nameOfProject = await downloadAndUnzipFile(url, id);
 
-    await exec(`cd src/${nameOfProject} && docker compose up -d`);
+    await exec(`cd src/${nameOfProject} && docker compose build --no-cache  && docker compose up -d`);
 
     let numberOfErrors = 0;
+
     while (true) {
       try {
         await axios.get("http://localhost:8000/todos");
@@ -39,7 +38,6 @@ async function main() {
       }
     }
 
-    // most probably the backend isn't starting correclty that is why the tests are failing
     const testFile = await prisma.challenge.findFirst({
       where: {
         id: "74a70518-d1df-47f6-8baa-472d9547464c"
@@ -49,16 +47,32 @@ async function main() {
       }
     });
 
-    const response = await writeFile("/home/nagmani/root/projects/devforces/apps/worker/src/index.test.ts", testFile?.testFile!);
+    await writeFile("src/index.test.ts", testFile?.testFile!);
     const { stdout, stderr } = await exec(`pnpm test`);
 
-    await exec(`cd src/${nameOfProject} && docker compose down`);
+    console.log("stdout", stdout);
+    console.log("hi");
+    console.log("stderr", stderr);
 
+    await exec(`cd src/${nameOfProject} && docker compose down --rmi all`);
 
-    await exec(`cd src/ && rm -rf ${nameOfProject} && rm -rf ${id}.zip && rm -rf index.test.ts`);
+    await exec(`cd src/ && rm -rf extracted && rm -rf ${id}.zip && rm -rf index.test.ts`)
 
     const endTime = new Date().getTime();
-    console.log(stdout);
+
+
+    /*
+    const clean = stdout.replace(/\x1B\[[0-9;]*m/g, "");
+    const testsPassedMatch = clean.match(/Tests\s+(\d+)\s+passed/);
+    const testsFailedMatch = clean.match(/Tests\s+(\d+)\s+failed/);
+
+    const passed = testsPassedMatch ? Number(testsPassedMatch[1]) : 0;
+    const failed = testsFailedMatch ? Number(testsFailedMatch[1]) : 0;
+
+    console.log({ passed, failed });
+     * */
+
+
     console.log("total time taken", (endTime - startTime) / 1000, "seconds");
     console.log("total number of errors it throwed = ", numberOfErrors);
 
