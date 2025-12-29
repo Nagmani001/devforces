@@ -34,7 +34,7 @@ echo "Generate Client"
 pnpm dlx prisma@6.3.0 generate --schema "$PROJECT_ROOT/packages/db/prisma/schema.prisma"
 
 echo "Building backend"
-RESEND_API_KEY=re_E9EvbkYY_G3cXHiEBEBnUAa591UTxPRqp pnpm build
+pnpm build
 
 echo '🟡 - Starting backend server...'
 pnpm start &
