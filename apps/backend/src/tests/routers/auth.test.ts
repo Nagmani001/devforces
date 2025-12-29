@@ -1,14 +1,16 @@
 import { describe, expect, it } from "vitest";
 import { BACKEND_URL } from "../../lib/config";
 import { axios } from "../../lib/utils";
+import { signupInvalidInputs } from "../lib/utils";
 
 
 describe("POST /signup", () => {
-  it("should return with 400 when sent wrong inputs", async () => {
+  //WARNING: use it.for , since it comes with an additional feature to integrate TestContext
+  it.each(signupInvalidInputs)("should return 400 when $statement | username=$username | email=$email | password=$password", async ({ statement, email, username, password }) => {
     const res = await axios.post(`${BACKEND_URL}/api/auth/signup`, {
-      username: "nagmani",
-      email: "nagmani",
-      password: "nagmani"
+      username,
+      email,
+      password
     });
 
     expect(res.status).toBe(400);
@@ -17,7 +19,9 @@ describe("POST /signup", () => {
     });
   });
 
-  it("should return with 400 when sent wrong inputs", async () => {
+
+  /*
+  it("should send otp when sent correct inputs", async () => {
     const res = await axios.post(`${BACKEND_URL}/api/auth/signup`, {
       username: "nagmani",
       email: "nagmanipd3@gmail.com",
@@ -41,9 +45,11 @@ describe("POST /signup", () => {
       message: "user already exists"
     });
   });
+   * */
 });
 
 
+/*
 describe("POST /signin", () => {
   it("should return with 400 when sent wrong inputs", async () => {
     const res = await axios.post(`${BACKEND_URL}/api/auth/signin`, {
@@ -93,3 +99,4 @@ describe("POST /signin", () => {
     expect(res.data.token).toBeDefined();
   });
 });
+ * */

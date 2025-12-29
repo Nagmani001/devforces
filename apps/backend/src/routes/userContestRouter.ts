@@ -103,4 +103,9 @@ userContestRouter.get("/challenge/:challengeId", async (req: Request, res: Respo
     })
 
   }
-})
+});
+
+userContestRouter.post("/started/:contestId/:challengeId", (req: Request, res: Response) => {
+  const contestId = req.params.contestId;
+
+});

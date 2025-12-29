@@ -1,0 +1,71 @@
+# wrong 
+version: '3.8'
+services:
+  database:
+    image: postgres
+    container_name: postgres
+    restart: always
+    environment:
+      - POSTGRES_PASSWORD=nagmani
+    ports:
+      - '5432:5432'
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis 
+    container_name: redis 
+    restart: always
+    ports:
+      - '6379:6379'
+
+  backend:
+    build:
+      context: ./backend/Dockerfile
+    environment:
+      DATABASE_URL: postgresql://postgres:nagmani@database:5432/postgres
+    depends_on:
+      database:
+        condition: service_healthy
+    ports:
+      - "3001:3001"
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8000/todos" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  worker:
+    build:
+      context: ./backend/Dockerfile
+    environment:
+      DATABASE_URL: postgresql://postgres:nagmani@database:5432/postgres
+    depends_on:
+      database:
+        condition: service_healthy
+    ports:
+      - "3001:3001"
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8000/todos" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  web:
+    build:
+      context: ./web/Dockerfile
+    environment:
+      DATABASE_URL: postgresql://postgres:nagmani@database:5432/postgres
+    depends_on:
+      database:
+        condition: service_healthy
+    ports:
+      - "3001:3001"
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8000/todos" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5

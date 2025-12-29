@@ -52,12 +52,38 @@ async function main() {
       }
     }
 
+    /*
+    VJUDGE / CODEFORCES STYLE RANKING
+    total_penalty = sigma(each_penalty(problem_i), for all SOLVED problem_i)
+    each_penalty(p) = Number_of_Fail_Before_1st_AC * 20min + time_of_1st_AC_since_contest_start
+    */
+
     try {
       const { stdout, stderr } = await exec(`pnpm test`);
       const outputString = stdout.replace(/\\n/g, "\n").replace(/\\s/g, " ") || stderr.replace(/\\n/g, "\n").replace(/\\s/g, " ");
       const clean = outputString.replace(/\u001b\[[0-9;]*m/g, "");
       const match = clean.match(/Tests\s+(\d+)\s+passed/i);
       const numberOfPassedTestCases = Number(match[1]);
+
+      await prisma.challengeResult.create({
+        data: {
+          score: numberOfPassedTestCases,
+          penalty: 23,
+          contestResultId: "asdf",
+          userId: "asdf",
+          challengeId: "asdf"
+        }
+      }),
+
+        await prisma.contestResult.create({
+          data: {
+            score: numberOfPassedTestCases, // sigma
+            penalty: 23, // sigma
+            status: "RUNNING",
+            contestId: "ASDf",
+            userId: "asdf",
+          }
+        })
       console.log("number of passed test cases = ", numberOfPassedTestCases);
       console.log("total Test cases", testFile?.totalTestCases)
     } catch (err) {

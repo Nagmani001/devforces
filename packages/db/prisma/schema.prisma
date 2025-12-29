@@ -60,38 +60,35 @@ model Challenge {
 }
 
 model ContestResult {
-  id                    String            @id @default(uuid())
-  status                ContestStatus
-  totalPassingTestCases Int
-  contestId             String            @unique
-  contest               Contest           @relation(fields: [contestId], references: [id])
-  challengeResult       ChallengeResult[]
-  userId                String
-  user                  User              @relation(fields: [userId], references: [id])
+  id      String        @id @default(uuid())
+  status  ContestStatus
+  score   Int           @default(0)
+  penalty Int           @default(0)
+
+  challengeResult ChallengeResult[]
+  contestId       String            @unique
+  contest         Contest           @relation(fields: [contestId], references: [id])
+  userId          String
+  user            User              @relation(fields: [userId], references: [id])
 
   @@unique([userId, contestId])
 }
 
 model ChallengeResult {
-  id               String          @id @default(uuid())
-  challengeStatus  ChallengeStatus
-  passingTestCases Int
-  contestResult    ContestResult   @relation(fields: [contestResultId], references: [id])
-  contestResultId  String
-  challengeId      String          @unique
-  challenge        Challenge       @relation(fields: [challengeId], references: [id])
-  userId           String
-  user             User            @relation(fields: [userId], references: [id])
+  id              String        @id @default(uuid())
+  score           Int           @default(0)
+  penalty         Int           @default(0)
+  duration        Int           @default(0)
+  penaltyFactor   Int           @default(0)
+  contestResultId String
+  contestResult   ContestResult @relation(fields: [contestResultId], references: [id])
+  challengeId     String        @unique
+  challenge       Challenge     @relation(fields: [challengeId], references: [id])
+  userId          String
+  user            User          @relation(fields: [userId], references: [id])
 }
 
 enum ContestStatus {
   RUNNING
   ENDED
-  NOTSTARTED
-}
-
-enum ChallengeStatus {
-  SUBMITTED
-  NOTATTEMPTED
-  ATTEMPTED
 }
