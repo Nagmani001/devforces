@@ -33,6 +33,9 @@ DATABASE_URL="postgresql://postgres:nagmani@localhost:5432/postgres" pnpm dlx pr
 echo "Generate Client"
 pnpm dlx prisma@6.3.0 generate --schema "$PROJECT_ROOT/packages/db/prisma/schema.prisma"
 
+echo "RESEND_API_KEY present: ${RESEND_API_KEY:+YES}"
+echo "RESEND_API_KEY present: ${RESEND_API_KEY}"
+
 echo "Building backend"
 pnpm build
 
