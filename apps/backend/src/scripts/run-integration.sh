@@ -28,10 +28,10 @@ echo '🟡 - Waiting for redis to be ready...'
 $PROJECT_ROOT/apps/backend/src/scripts/wait-for-it.sh localhost:6379 -- echo "redis has started"
 
 echo "Applying migration"
-npx prisma@6.3.0 migrate deploy --schema "$PROJECT_ROOT/packages/db/prisma/schema.prisma"
+pnpm dlx prisma@6.3.0 migrate deploy --schema "$PROJECT_ROOT/packages/db/prisma/schema.prisma"
 
 echo "Generate Client"
-npx prisma@6.3.0 migrate deploy --schema "$PROJECT_ROOT/packages/db/prisma/schema.prisma"
+pnpm dlx prisma@6.3.0 generate --schema "$PROJECT_ROOT/packages/db/prisma/schema.prisma"
 
 echo "Building backend"
 pnpm build
