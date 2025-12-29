@@ -55,8 +55,8 @@ jobs:
 
 #      - name: Generate Prisma client 
 #        run: cd packages/db && npx prisma generate 
-        env:
-           RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+#        env:
+#           RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
 
       - name: Run integration tests
         run: cd apps/backend && pnpm run test:integration
