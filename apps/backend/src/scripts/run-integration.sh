@@ -28,7 +28,7 @@ echo '🟡 - Waiting for redis to be ready...'
 $PROJECT_ROOT/apps/backend/src/scripts/wait-for-it.sh localhost:6379 -- echo "redis has started"
 
 echo "Applying migration"
-pnpm dlx prisma@6.3.0 migrate deploy --schema "$PROJECT_ROOT/packages/db/prisma/schema.prisma"
+DATABASE_URL="postgresql://postgres:nagmani@localhost:5432/postgres" pnpm dlx prisma@6.3.0 migrate deploy --schema "$PROJECT_ROOT/packages/db/prisma/schema.prisma"
 
 echo "Generate Client"
 pnpm dlx prisma@6.3.0 generate --schema "$PROJECT_ROOT/packages/db/prisma/schema.prisma"
