@@ -31,3 +31,30 @@ jobs:
 
       - name: Build the project 
         run: pnpm run build 
+  
+
+  integration-test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout the code 
+        uses: actions/checkout@v3
+
+      - name: Setup PNPM  
+        uses: pnpm/action-setup@v2
+        with: 
+          version: 9.0.0
+
+      - name: Setup Node JS 
+        uses: actions/setup-node@v4
+        with: 
+          node-version: '24.11.0'
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+#      - name: Generate Prisma client 
+#        run: cd packages/db && npx prisma generate 
+
+      - name: Run integration tests
+        run: cd apps/backend && pnpm run test:integration
