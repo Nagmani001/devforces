@@ -10,23 +10,25 @@ cleanup() {
     kill $BACKEND_PID || true
   fi
   sleep 5
-  docker compose -f /home/nagmani/root/projects/devforces/docker/docker-compose-test.yml down
+  docker compose -f /"$PROJECT_ROOT/docker/docker-compose-test.yml" down
 }
 
 trap cleanup EXIT
 
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_ROOT="$(cd "$SCRIPT_DIR/../../../.." && pwd)"
+
 echo "Starting auxilary services"
-docker compose -f /home/nagmani/root/projects/devforces/docker/docker-compose-test.yml up -d
+docker compose -f "$PROJECT_ROOT/docker/docker-compose-test.yml" up -d
 
 echo '🟡 - Waiting for database to be ready...'
-/home/nagmani/root/projects/devforces/apps/backend/src/scripts/wait-for-it.sh localhost:5432 -- echo "database has started"
+$PROJECT_ROOT/apps/backend/src/scripts/wait-for-it.sh localhost:5432 -- echo "database has started"
 
 echo '🟡 - Waiting for redis to be ready...'
-/home/nagmani/root/projects/devforces/apps/backend/src/scripts/wait-for-it.sh localhost:6379 -- echo "redis has started"
+$PROJECT_ROOT/apps/backend/src/scripts/wait-for-it.sh localhost:6379 -- echo "redis has started"
 
 echo "Applying migration"
-prisma migrate deploy --schema /home/nagmani/root/projects/devforces/packages/db/prisma/schema.prisma
-
+prisma migrate deploy --schema "$PROJECT_ROOT/packages/db/prisma/schema.prisma"
 echo "Building backend"
 pnpm build
 
@@ -35,7 +37,7 @@ pnpm start &
 BACKEND_PID=$!
 
 echo '🟡 - Waiting for backend to be ready...'
-/home/nagmani/root/projects/devforces/apps/backend/src/scripts/wait-for-it.sh localhost:3001 -- echo "backend has started"
+$PROJECT_ROOT/apps/backend/src/scripts/wait-for-it.sh localhost:3001 -- echo "backend has started"
 
 echo "Run integration test"
 pnpm run test
