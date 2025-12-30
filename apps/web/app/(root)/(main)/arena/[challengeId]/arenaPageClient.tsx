@@ -1,7 +1,9 @@
 "use client"
+
 import { useState, useCallback } from "react";
 // @ts-ignore
 import { ResizableBox } from "react-resizable";
+import JSZip from "jszip";
 import "react-resizable/css/styles.css";
 import { useDropzone } from "react-dropzone";
 import { Button } from "@repo/ui/components/button";
@@ -10,6 +12,8 @@ import { Badge } from "@repo/ui/components/badge";
 import { NotionRenderer } from "react-notion-x";
 import { CloudUpload, Play, Loader, Check, GripVertical } from "lucide-react";
 import dynamic from 'next/dynamic'
+import axios from "axios";
+import { BASE_URL, confirmFileSent, sendZippedFile } from "@/app/config/utils";
 
 const Code = dynamic(() =>
   import('react-notion-x/build/third-party/code').then((m) => m.Code)
@@ -18,16 +22,73 @@ const Equation = dynamic(() =>
   import('react-notion-x/build/third-party/equation').then((m) => m.Equation)
 )
 
-export default function ArenaPage({ recordMap }: any) {
+export default function ArenaPage({ recordMap, challengeId }: any) {
   const [leftWidth, setLeftWidth] = useState<number>(760);
   const [loadingNotion, setLoadingNotion] = useState<boolean>(false);
   const [files, setFiles] = useState<File[]>([]);
+  const [testResult, setTestResult] = useState({
+    passed: 0,
+    total: 0,
+    failed: 0
+  });
 
-  // react-dropzone setup
   const onDrop = useCallback((acceptedFiles: File[]) => {
-    setFiles((prev) => [...prev, ...acceptedFiles]);
+    //@ts-ignore
+
+    const actualFiles = acceptedFiles.filter((x: File) => {
+      //@ts-ignore
+      if (x.path.includes("/node_modules/") || x.path.includes("/.git/") || x.path.includes("/dist/")) {
+        return false
+      } else {
+        return true
+      }
+    });
+
+
+    actualFiles.forEach(x => {
+      //@ts-ignore
+      console.log(x.path)
+    });
+
+    setFiles((prev) => [...prev, ...actualFiles]);
   }, []);
-  const { getRootProps, getInputProps, isDragActive } = useDropzone({ onDrop });
+
+  const handleSubmit = async () => {
+    if (files.length < 1) {
+      return alert("no files selected");
+    }
+    const getPresignedUrl = await axios.get(`${BASE_URL}/api/submissions/preSignedUrl/${challengeId}`, {
+      headers: {
+        Authorization: localStorage.getItem("token")
+      }
+    });
+
+    const { preSignedUrl, fields } = getPresignedUrl.data;
+    //    new Promise(r => setTimeout(r, 1000));
+
+    const zip = new JSZip();
+
+    for (const file of files) {
+      // INFO: can also add name of file here , useful in worker after unzipint
+
+      //@ts-ignore
+      zip.file(file.path, file);
+    }
+
+    const zipFile = await zip.generateAsync({ type: "blob" });
+    await sendZippedFile(preSignedUrl, fields, zipFile);
+
+    const response = await confirmFileSent(challengeId);
+    const parsedValue = JSON.parse(response);
+    setTestResult(parsedValue);
+  };
+
+  const { getRootProps, getInputProps, isDragActive } = useDropzone({
+    onDrop,
+    noClick: false,
+    noKeyboard: true,
+    multiple: true,
+  });
 
   return (
     <div className="h-[calc(100vh-4rem)] bg-background text-foreground flex flex-col p-4 w-full overflow-hidden">
@@ -36,7 +97,7 @@ export default function ArenaPage({ recordMap }: any) {
         <h1 className="text-2xl font-bold tracking-tight">Arena Playground</h1>
 
         <div className="flex items-center gap-2">
-          <Button variant="secondary" className="rounded-md">
+          <Button onClick={handleSubmit} variant="secondary" className="rounded-md">
             Submit
           </Button>
           <Button className="rounded-md gap-2">
@@ -128,12 +189,17 @@ export default function ArenaPage({ recordMap }: any) {
                       : "border-muted-foreground/25 bg-muted/50 hover:bg-muted/80")
                   }
                 >
-                  <input {...getInputProps()} />
+
+                  <input {...getInputProps()}
+                    //@ts-ignore
+                    webkitdirectory=""
+                    directory="" />
 
                   <div className="text-center select-none">
                     <CloudUpload className="mx-auto mb-4" size={48} />
                     <h3 className="text-2xl font-handwriting">Drop zone</h3>
-                    <p className="mt-2 text-sm opacity-80">Drop files here or click to select files</p>
+                    <p className="mt-2 text-sm opacity-80">Drop a folder here or click to select a folder</p>
+                    <p className="mt-1 text-xs opacity-60">(node_modules will be filtered out)</p>
 
                     {files.length > 0 && (
                       <div className="mt-4 grid grid-cols-1 gap-2">
@@ -163,21 +229,21 @@ export default function ArenaPage({ recordMap }: any) {
               <div className="flex flex-col gap-2">
                 <div className="flex items-center justify-between">
                   <div>Total tests :</div>
-                  <div className="font-medium">12</div>
+                  <div className="font-medium">{testResult.total}</div>
                 </div>
 
                 <div className="flex items-center justify-between">
                   <div>Tests passed :</div>
                   <div className="flex items-center gap-2">
                     <Badge variant="secondary" className="inline-flex items-center gap-2">
-                      <Check size={14} /> 4
+                      <Check size={14} /> {testResult.passed}
                     </Badge>
                   </div>
                 </div>
 
                 <div className="flex items-center justify-between">
                   <div>Failed tests :</div>
-                  <div className="font-medium text-rose-400">8</div>
+                  <div className="font-medium text-rose-400">{testResult.failed}</div>
                 </div>
 
               </div>

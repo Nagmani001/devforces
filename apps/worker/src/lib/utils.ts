@@ -19,10 +19,11 @@ export async function downloadAndUnzipFile(url: string, id: string) {
       //@ts-ignore
       writer.on("finish", resolve)
     })
+    console.log("i ran till here");
 
     fs.mkdirSync('src/extracted');
 
-    const zip = new StreamZip.async({ file: `src/${id}.zip` });
+    const zip = new StreamZip.async({ file: `src/${id}.zip`, skipEntryNameValidation: true });
     const count = await zip.extract(null, 'src/extracted/');
     await zip.close();
 

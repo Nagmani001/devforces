@@ -9,7 +9,7 @@ export const signupSchema = z.strictObject({
 
 export const signinSchema = z.object({
   email: z.email(),
-  password: z.string(),
+  password: z.string().trim().min(5).max(15),
 });
 
 export const otpSchema = z.object({

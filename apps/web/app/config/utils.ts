@@ -1,6 +1,8 @@
 //TODO: should be react query mutation 
 import axios from "axios";
-import { Challenge, getStatusOfContestReturns } from "./types";
+
+const FormData = require('form-data');
+import { Challenge, getStatusOfContestReturns, S3PresignedPostFields } from "./types";
 import { ENDED, LIVE, MONTH_NAMES, NOT_STARTED } from "@repo/common/consts";
 
 export const BASE_URL = "http://localhost:3001";
@@ -275,4 +277,35 @@ export async function getChallengeDetails(challengeId: string, token: string) {
       success: false,
     }
   }
+}
+
+export async function sendZippedFile(url: string, conf: S3PresignedPostFields, file: Blob) {
+  let data = new FormData();
+  data.append('Policy', conf.Policy);
+  data.append('X-Amz-Signature', conf["X-Amz-Signature"]);
+  data.append('bucket', conf.bucket);
+  data.append('X-Amz-Algorithm', conf["X-Amz-Algorithm"]);
+  data.append('X-Amz-Credential', conf["X-Amz-Credential"]);
+  data.append('key', conf.key);
+  data.append('X-Amz-Date', conf["X-Amz-Date"]);
+  data.append('file', file);
+
+  let config = {
+    method: 'post',
+    maxBodyLength: Infinity,
+    url: url,
+    data: data
+  };
+
+  const response = await axios.request(config);
+  console.log("uploaded to s3 successfully", response);
+}
+
+export async function confirmFileSent(challengeId: string) {
+  const sendConfirmation = await axios.post(`${BASE_URL}/api/submissions/submit/confirm/${challengeId}`, {}, {
+    headers: {
+      Authorization: localStorage.getItem("token")
+    }
+  });
+  return sendConfirmation.data;
 }

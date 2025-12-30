@@ -31,7 +31,7 @@ async function main() {
 
     const testFile = await prisma.challenge.findFirst({
       where: {
-        id: "74a70518-d1df-47f6-8baa-472d9547464c"
+        id: challengeId
       },
       select: {
         testFile: true,
@@ -65,25 +65,12 @@ async function main() {
       const match = clean.match(/Tests\s+(\d+)\s+passed/i);
       const numberOfPassedTestCases = Number(match[1]);
 
-      await prisma.challengeResult.create({
-        data: {
-          score: numberOfPassedTestCases,
-          penalty: 23,
-          contestResultId: "asdf",
-          userId: "asdf",
-          challengeId: "asdf"
-        }
-      }),
+      pubSub.publish(id, JSON.stringify({
+        passed: numberOfPassedTestCases,
+        total: testFile?.totalTestCases,
+        failed: testFile?.totalTestCases! - numberOfPassedTestCases
+      }));
 
-        await prisma.contestResult.create({
-          data: {
-            score: numberOfPassedTestCases, // sigma
-            penalty: 23, // sigma
-            status: "RUNNING",
-            contestId: "ASDf",
-            userId: "asdf",
-          }
-        })
       console.log("number of passed test cases = ", numberOfPassedTestCases);
       console.log("total Test cases", testFile?.totalTestCases)
     } catch (err) {
@@ -91,6 +78,13 @@ async function main() {
       const clean = err.stdout.replace(/\x1B\[[0-9;]*m/g, "");
       const match = clean.match(/(\d+)\s+failed/);
       const numberOfFailedTestCases = Number(match[1]);
+
+      pubSub.publish(id, JSON.stringify({
+        passed: testFile?.totalTestCases! - numberOfFailedTestCases,
+        total: testFile?.totalTestCases,
+        failed: numberOfFailedTestCases
+      }));
+
       console.log("number of passed failedcases = ", numberOfFailedTestCases);
       console.log("total Test cases", testFile?.totalTestCases)
     } finally {
@@ -103,9 +97,6 @@ async function main() {
       // add entry in the database
       // respond to user 
 
-      pubSub.publish(id, JSON.stringify({
-        msg: "hi"
-      }));
     }
   }
 }

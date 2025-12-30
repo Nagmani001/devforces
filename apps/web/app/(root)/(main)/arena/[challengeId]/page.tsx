@@ -15,5 +15,5 @@ export default async function Page({
   const notion = new NotionAPI()
   const challenge = await getChallengeDetails(challengeId, token);
   const recordMap = await notion.getPage(challenge.data?.data.challenge.notionLink);
-  return <ArenaPage recordMap={recordMap} />
+  return <ArenaPage recordMap={recordMap} challengeId={challengeId} />
 }
