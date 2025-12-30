@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 // @ts-ignore
 import { ResizableBox } from "react-resizable";
 import JSZip from "jszip";
@@ -10,10 +10,11 @@ import { Button } from "@repo/ui/components/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@repo/ui/components/card";
 import { Badge } from "@repo/ui/components/badge";
 import { NotionRenderer } from "react-notion-x";
-import { CloudUpload, Play, Loader, Check, GripVertical } from "lucide-react";
+import { CloudUpload, Play, Loader, Check, GripVertical, CheckCircle } from "lucide-react";
 import dynamic from 'next/dynamic'
 import axios from "axios";
 import { BASE_URL, confirmFileSent, sendZippedFile } from "@/app/config/utils";
+import { ArenaDropzoneLoader } from "@/app/components/arenaDropzoneLoader";
 
 const Code = dynamic(() =>
   import('react-notion-x/build/third-party/code').then((m) => m.Code)
@@ -25,12 +26,53 @@ const Equation = dynamic(() =>
 export default function ArenaPage({ recordMap, challengeId }: any) {
   const [leftWidth, setLeftWidth] = useState<number>(760);
   const [loadingNotion, setLoadingNotion] = useState<boolean>(false);
+  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [files, setFiles] = useState<File[]>([]);
+  const [logs, setLogs] = useState<string[]>([]);
   const [testResult, setTestResult] = useState({
     passed: 0,
     total: 0,
     failed: 0
   });
+
+  const dummyLogs = [
+    "Starting Docker services...",
+    "Creating network 'devforces_network'...",
+    "Starting container 'postgres-db'...",
+    "Starting container 'redis-cache'...",
+    "Services started successfully.",
+    "Building user application image...",
+    "Step 1/5 : FROM node:18-alpine",
+    "Step 2/5 : WORKDIR /app",
+    "Step 3/5 : COPY package*.json ./",
+    "Installing dependencies...",
+    "Step 4/5 : COPY . .",
+    "Step 5/5 : EXPOSE 3000",
+    "Successfully built image 'user-backend:latest'",
+    "Starting backend service...",
+    "Backend service listening on port 3000",
+    "Waiting for health check...",
+    "Health check passed.",
+    "Running test suite...",
+    "Executing tests..."
+  ];
+
+  useEffect(() => {
+    if (isSubmitting) {
+      setLogs([]);
+      let currentIndex = 0;
+      const interval = setInterval(() => {
+        if (currentIndex < dummyLogs.length) {
+          setLogs(prev => [...prev, dummyLogs[currentIndex]]);
+          currentIndex++;
+        } else {
+          clearInterval(interval);
+        }
+      }, 500); // Add a new log line every 500ms
+
+      return () => clearInterval(interval);
+    }
+  }, [isSubmitting]);
 
   const onDrop = useCallback((acceptedFiles: File[]) => {
     //@ts-ignore
@@ -76,11 +118,22 @@ export default function ArenaPage({ recordMap, challengeId }: any) {
     }
 
     const zipFile = await zip.generateAsync({ type: "blob" });
-    await sendZippedFile(preSignedUrl, fields, zipFile);
 
-    const response = await confirmFileSent(challengeId);
-    const parsedValue = JSON.parse(response);
-    setTestResult(parsedValue);
+    setIsSubmitting(true);
+    setLogs([]);
+    try {
+      await sendZippedFile(preSignedUrl, fields, zipFile);
+
+      const response = await confirmFileSent(challengeId);
+      const parsedValue = JSON.parse(response);
+      setTestResult(parsedValue);
+      setFiles([]);
+    } catch (e) {
+      console.error(e);
+      alert("Error submitting file");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
@@ -162,7 +215,7 @@ export default function ArenaPage({ recordMap, challengeId }: any) {
         </ResizableBox>
 
         {/* Right column */}
-        <div className="flex-1 flex flex-col gap-6">
+        <div className="flex-1 flex flex-col gap-6 h-full">
           {/* Top resizable box inside right column: Dropzone */}
           <ResizableBox
             className="rounded-lg overflow-hidden border bg-card relative"
@@ -178,77 +231,128 @@ export default function ArenaPage({ recordMap, challengeId }: any) {
               </div>
             }
           >
-            <Card className="h-full flex flex-col justify-center items-center">
+
+            <Card className="h-full flex flex-col justify-center items-center relative overflow-hidden">
               <CardContent className="h-full w-full flex flex-col items-center justify-center p-10">
-                <div
-                  {...getRootProps()}
-                  className={
-                    "w-full h-full border-2 border-dashed rounded-lg flex items-center justify-center p-6 transition-all " +
-                    (isDragActive
-                      ? "border-primary bg-primary/10"
-                      : "border-muted-foreground/25 bg-muted/50 hover:bg-muted/80")
-                  }
-                >
+                {isSubmitting ? (
+                  <ArenaDropzoneLoader />
+                ) : (
+                  <div
+                    {...getRootProps()}
+                    className={
+                      "w-full h-full border-2 border-dashed rounded-lg flex items-center justify-center p-6 transition-all " +
+                      (isDragActive
+                        ? "border-primary bg-primary/10"
+                        : "border-muted-foreground/25 bg-muted/50 hover:bg-muted/80")
+                    }
+                  >
 
-                  <input {...getInputProps()}
-                    //@ts-ignore
-                    webkitdirectory=""
-                    directory="" />
+                    <input {...getInputProps()}
+                      //@ts-ignore
+                      webkitdirectory=""
+                      directory="" />
 
-                  <div className="text-center select-none">
-                    <CloudUpload className="mx-auto mb-4" size={48} />
-                    <h3 className="text-2xl font-handwriting">Drop zone</h3>
-                    <p className="mt-2 text-sm opacity-80">Drop a folder here or click to select a folder</p>
-                    <p className="mt-1 text-xs opacity-60">(node_modules will be filtered out)</p>
-
-                    {files.length > 0 && (
-                      <div className="mt-4 grid grid-cols-1 gap-2">
-                        {files.map((f, idx) => (
-                          <div
-                            key={idx}
-                            className="text-sm bg-muted/50 border px-3 py-2 rounded-md flex items-center justify-between"
-                          >
-                            <span className="truncate max-w-[220px] font-medium">{f.name}</span>
-                            <span className="text-xs text-muted-foreground">{Math.round(f.size / 1024)} KB</span>
-                          </div>
-                        ))}
-                      </div>
-                    )}
+                    <div className="text-center select-none">
+                      {files.length > 0 ? (
+                        <div className="flex flex-col items-center">
+                          <CheckCircle className="mx-auto mb-4 text-green-500" size={48} />
+                          <h3 className="text-2xl font-handwriting">Ready to submit</h3>
+                          <p className="mt-2 text-sm opacity-80">Proceed to submit your code</p>
+                        </div>
+                      ) : (
+                        <>
+                          <CloudUpload className="mx-auto mb-4" size={48} />
+                          <h3 className="text-2xl font-handwriting">Drop zone</h3>
+                          <p className="mt-2 text-sm opacity-80">Drop a folder here or click to select a folder</p>
+                          <p className="mt-1 text-xs opacity-60">(node_modules will be filtered out)</p>
+                        </>
+                      )}
+                    </div>
                   </div>
-                </div>
+                )}
               </CardContent>
             </Card>
+
           </ResizableBox>
 
           {/* Bottom stats card */}
-          <Card className="h-[260px]">
-            <CardHeader>
-              <CardTitle className="text-lg">Test results</CardTitle>
-            </CardHeader>
-            <CardContent className="h-full p-6">
-              <div className="flex flex-col gap-2">
-                <div className="flex items-center justify-between">
-                  <div>Total tests :</div>
-                  <div className="font-medium">{testResult.total}</div>
-                </div>
+          <div className="flex-1 rounded-lg overflow-hidden border bg-[#1e1e1e] font-mono text-sm shadow-lg flex flex-col min-h-[200px]">
+            {/* Terminal Header */}
+            <div className="bg-[#2d2d2d] px-4 py-2 flex items-center gap-2 border-b border-[#3e3e3e]">
+              <div className="flex gap-1.5">
+                <div className="w-3 h-3 rounded-full bg-[#ff5f56]" />
+                <div className="w-3 h-3 rounded-full bg-[#ffbd2e]" />
+                <div className="w-3 h-3 rounded-full bg-[#27c93f]" />
+              </div>
+              <div className="flex-1 text-center text-xs text-gray-400 font-sans">
+                test_results.log
+              </div>
+            </div>
 
-                <div className="flex items-center justify-between">
-                  <div>Tests passed :</div>
-                  <div className="flex items-center gap-2">
-                    <Badge variant="secondary" className="inline-flex items-center gap-2">
-                      <Check size={14} /> {testResult.passed}
-                    </Badge>
+            {/* Terminal Content */}
+            <div className="flex-1 p-4 text-gray-300 overflow-auto font-mono">
+              {isSubmitting ? (
+                <div className="flex flex-col gap-1">
+                  <div className="text-blue-400">
+                    <span className="mr-2">$</span>
+                    <span className="text-white">deploy_and_test.sh</span>
+                  </div>
+                  {logs.map((log, index) => (
+                    <div key={index} className="text-xs text-gray-400 font-mono whitespace-pre-wrap">
+                      <span className="mr-2 text-gray-600">[{new Date().toLocaleTimeString('en-US', { hour12: false, hour: "2-digit", minute: "2-digit", second: "2-digit" })}]</span>
+                      {log}
+                    </div>
+                  ))}
+                  <div className="mt-2 text-green-500 animate-pulse">
+                    <span className="mr-2">$</span>
+                    <span className="inline-block w-2 h-4 bg-green-500 align-middle"></span>
                   </div>
                 </div>
+              ) : (
+                <div className="flex flex-col gap-1">
+                  <div className="text-green-500">
+                    <span className="mr-2">$</span>
+                    <span className="text-white">verify_submission</span>
+                  </div>
 
-                <div className="flex items-center justify-between">
-                  <div>Failed tests :</div>
-                  <div className="font-medium text-rose-400">{testResult.failed}</div>
+                  <div className="mt-2 space-y-1">
+                    <div className="flex items-center gap-2">
+                      <span className="text-blue-400">ℹ</span>
+                      <span>Total test cases found:</span>
+                      <span className="text-white font-bold">{testResult.total}</span>
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                      <span className="text-green-500">✔</span>
+                      <span>Passed test cases:</span>
+                      <span className="text-green-400 font-bold">{testResult.passed}</span>
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                      <span className="text-red-500">✘</span>
+                      <span>Failed test cases:</span>
+                      <span className="text-red-400 font-bold">{testResult.failed}</span>
+                    </div>
+                  </div>
+
+                  {testResult.total > 0 && (
+                    <div className="mt-4">
+                      {testResult.failed === 0 ? (
+                        <span className="text-green-500 font-bold">SUCCESS: All tests passed.</span>
+                      ) : (
+                        <span className="text-red-500 font-bold">FAILURE: Some tests failed.</span>
+                      )}
+                    </div>
+                  )}
+
+                  <div className="mt-2 text-green-500 animate-pulse">
+                    <span className="mr-2">$</span>
+                    <span className="inline-block w-2 h-4 bg-green-500 align-middle"></span>
+                  </div>
                 </div>
-
-              </div>
-            </CardContent>
-          </Card>
+              )}
+            </div>
+          </div>
         </div>
       </main>
     </div>

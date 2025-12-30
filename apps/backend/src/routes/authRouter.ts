@@ -170,7 +170,8 @@ authRouter.get("/me", authMiddleware, async (req: Request, res: Response) => {
   res.json({
     isAdmin: user.isAdmin,
     username: user.username,
-    email: user.email
+    email: user.email,
+    imageUrl: user.imageUrl
   });
 });
 
