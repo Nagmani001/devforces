@@ -6,6 +6,7 @@ import { Challenge, getStatusOfContestReturns, S3PresignedPostFields } from "./t
 import { ENDED, LIVE, MONTH_NAMES, NOT_STARTED } from "@repo/common/consts";
 
 export const BASE_URL = "http://localhost:3001";
+export const BASE_FRONTEND_URL = "http://localhost:3000";
 
 export async function getUserInfo(token: string) {
   try {
@@ -309,3 +310,24 @@ export async function confirmFileSent(challengeId: string) {
   });
   return sendConfirmation.data;
 }
+export const getPageNumbers = (currentPage: number, totalPages: number) => {
+  const pages = [];
+
+  if (totalPages <= 7) {
+    for (let i = 1; i <= totalPages; i++) pages.push(i);
+  } else {
+    pages.push(1);
+    if (currentPage > 3) pages.push("...");
+    let start = Math.max(2, currentPage - 1);
+    let end = Math.min(totalPages - 1, currentPage + 1);
+    if (currentPage <= 3) { start = 2; end = 4; }
+    if (currentPage >= totalPages - 2) { start = totalPages - 3; end = totalPages - 1; }
+    for (let i = start; i <= end; i++) {
+      pages.push(i);
+    }
+    if (currentPage < totalPages - 2) pages.push("...");
+    pages.push(totalPages);
+  }
+
+  return pages;
+};

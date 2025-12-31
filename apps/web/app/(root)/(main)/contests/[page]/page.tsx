@@ -1,9 +1,14 @@
 import { getUserInfo } from "@/app/config/utils";
+import { cookies } from "next/headers";
 import AdminContestPage from "./adminContestPage";
 import UserContestPage from "./userContestPage";
-import { cookies } from "next/headers";
 
-export default async function Page() {
+export default async function Page({
+  params,
+}: {
+  params: Promise<{ page: string }>
+}) {
+  const { page } = await params;
   const token = (await cookies()).get("token")?.value;
   if (!token) return;
 
@@ -13,8 +18,8 @@ export default async function Page() {
   }
 
   if (me.data.isAdmin) {
-    return <AdminContestPage token={token} />
+    return <AdminContestPage token={token} page={page} />
   } else {
-    return <UserContestPage token={token} />
+    return <UserContestPage token={token} page={page} />
   }
 }

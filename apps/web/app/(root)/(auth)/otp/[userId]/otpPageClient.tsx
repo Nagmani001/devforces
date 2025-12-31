@@ -59,7 +59,7 @@ export default function OtpClient({ userId }: any) {
     onSuccess: (success) => {
       toast.success("OTP verified successfully!");
       localStorage.setItem("token", success.data.token);
-      router.push(`/contests`);
+      router.push(`/contests/1`);
     }
   });
 

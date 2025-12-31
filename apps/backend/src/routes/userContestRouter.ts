@@ -4,7 +4,6 @@ import { Router, Response, Request } from "express";
 export const userContestRouter: Router = Router();
 
 userContestRouter.get("/", async (req: Request, res: Response) => {
-  await new Promise(r => setTimeout(r, 2000));
   const page = Number(req.query.page);
   try {
     const contests = page == 1 ? await prisma.contest.findMany({
@@ -108,4 +107,16 @@ userContestRouter.get("/challenge/:challengeId", async (req: Request, res: Respo
 userContestRouter.post("/started/:contestId/:challengeId", (req: Request, res: Response) => {
   const contestId = req.params.contestId;
 
+});
+
+//WARNING:repeated in adminRouter as well 
+userContestRouter.get("/totalPages", async (req: Request, res: Response) => {
+  const totalContestRows = await prisma.contest.count();
+  const totalPage = totalContestRows / 10;
+
+  res.json({
+    total: totalPage < 1 ? 1
+      : totalPage % 1 == 0 ? totalPage
+        : Math.floor(totalPage + 1)
+  });
 });

@@ -2,11 +2,11 @@ import { Router, Response, Request } from "express";
 import { checkUserIsAdmin, unauthorized } from "../lib/utils";
 import prisma from "@repo/db/client";
 import { createContestSchema, updateContestSchema } from "@repo/common/zodTypes";
+import axios from "axios";
 
 export const adminContestRouter: Router = Router();
 
 adminContestRouter.get("/", async (req: Request, res: Response) => {
-  await new Promise(r => setTimeout(r, 2000));
   const userId = req.userId;
   const page = Number(req.query.page);
   if (!userId) return unauthorized(res);
@@ -258,4 +258,15 @@ adminContestRouter.put("/update/:id", async (req: Request, res: Response) => {
       message: "error while putting to the database"
     });
   }
+});
+
+adminContestRouter.get("/totalPages", async (req: Request, res: Response) => {
+  const totalContestRows = await prisma.contest.count();
+  const totalPage = totalContestRows / 10;
+
+  res.json({
+    total: totalPage < 1 ? 1
+      : totalPage % 1 == 0 ? totalPage
+        : Math.floor(totalPage + 1)
+  });
 });

@@ -13,16 +13,20 @@ export default function NavBar() {
   const user = useUserInfo(token!);
 
   if (user.data) {
-    console.log(user.data);
-    // this is what the data looks like : {isAdmin: true, username: 'Nagmani', email: 'nagmanipd3@gmail.com'}
-    // i want you to display a 
+
     return < nav className="px-6 py-4 flex justify-between items-center max-w-7xl mx-auto" >
       <div className="flex items-center gap-2">
         <Sparkles className="w-8 h-8 text-blue-600" />
         <span className="text-2xl font-bold text-gray-900">Devforces</span>
       </div>
-      <div>
-        <div>user</div>
+      <div className="flex items-center gap-4">
+        <div className={`relative w-10 h-10 rounded-full overflow-hidden flex items-center justify-center bg-gray-200 text-gray-700 font-bold ${user.data.isAdmin ? "border-2 border-yellow-400" : ""}`}>
+          {user.data.imageUrl ? (
+            <img src={user.data.imageUrl} alt={user.data.username} className="w-full h-full object-cover" />
+          ) : (
+            <span>{user.data.username.charAt(0).toUpperCase()}</span>
+          )}
+        </div>
         <ThemeToggle />
       </div>
     </nav >

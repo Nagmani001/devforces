@@ -31,7 +31,7 @@ export default function SigninForm() {
     onSuccess: (success: any) => {
       toast.success("successfully sigined in");
       localStorage.setItem("token", success.data.token);
-      router.push(`/contests`);
+      router.push(`/contests/1`);
     }
   })
 

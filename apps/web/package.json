@@ -16,6 +16,7 @@
     "date-fns": "^4.1.0",
     "form-data": "^4.0.5",
     "framer-motion": "^12.23.26",
+    "jotai": "^2.16.1",
     "jszip": "^3.10.1",
     "katex": "^0.16.27",
     "lucide-react": "^0.561.0",
