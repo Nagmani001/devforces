@@ -8,9 +8,7 @@ import { useUserInfo } from "../hooks/useUser";
 
 export default function NavBar() {
   const router = useRouter();
-  const token = localStorage.getItem("token");
-
-  const user = useUserInfo(token!);
+  const user = useUserInfo();
 
   if (user.data) {
 
@@ -31,7 +29,7 @@ export default function NavBar() {
       </div>
     </nav >
   } else {
-    return < nav className="px-6 py-4 flex justify-between items-center max-w-7xl mx-auto" >
+    return <nav className="px-6 py-4 flex justify-between items-center max-w-7xl mx-auto" >
       <div className="flex items-center gap-2">
         <Sparkles className="w-8 h-8 text-blue-600" />
         <span className="text-2xl font-bold text-gray-900">Devforces</span>
