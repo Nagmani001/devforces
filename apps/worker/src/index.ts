@@ -1,4 +1,5 @@
 import { REDIS_QUEUE_NAME } from "@repo/common/consts";
+import { config } from "dotenv";
 import { writeFile } from 'fs/promises';
 import { createClient } from "redis";
 import util from "util";
@@ -6,9 +7,14 @@ const exec = util.promisify(require('child_process').exec);
 import prisma from "@repo/db/client";
 import { downloadAndUnzipFile } from "./lib/utils";
 import axios from "axios";
+config();
 
-const redisClient = createClient();
-const pubSub = createClient();
+const redisClient = createClient({
+  url: process.env.REDIS_URL
+});
+const pubSub = createClient({
+  url: process.env.REDIS_URL
+});
 
 
 async function main() {

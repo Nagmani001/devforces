@@ -10,8 +10,13 @@ import { createClient, RedisClientType } from "redis";
 
 config();
 const app = express();
-export const redisClient: RedisClientType = createClient(); //6379 
-export const pubSub: RedisClientType = createClient(); //6379 
+export const redisClient: RedisClientType = createClient({
+  url: process.env.REDIS_URL
+});
+
+export const pubSub: RedisClientType = createClient({
+  url: process.env.REDIS_URL
+});
 
 declare global {
   namespace Express {

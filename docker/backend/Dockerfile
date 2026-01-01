@@ -1,29 +1,34 @@
-# TODO
-#
-# summary from: https://turborepo.com/docs/guides/tools/docker 
-# The problem : your docker file is very wrong 
-# 1. any code change will trigger npm install 
-# 2. even you you did something like , copy root package.json , root package-lock.json,  copy apps/backend/package.json 
-# you still end up rerunning npm install if a dependency in apps/web has changed 
-# solution , turbo prune backend --docker , turbo prune created a ./out , with --docker flag it  creates ./out with two divisions
-# solve by using this ./out to write dockerfile , moreover see their --with-docker example to use it to full potential
+ARG NODE_VERSION=24.11.0
+FROM node:${NODE_VERSION}-slim AS base
 
-FROM node:alpine
+
+FROM base AS prepare 
 
 WORKDIR /app
+RUN npm install -g turbo
+COPY . . 
 
-COPY ./package.json .
-COPY ./pnpm-lock.yaml .
-COPY ./pnpm-workspace.yaml .
-COPY ./turbo.json .
+RUN turbo prune backend --docker
 
-COPY ./packages ./packages
-COPY ./apps/backend ./apps/backend
 
-RUN npm install -g pnpm
+FROM base AS builder 
 
-RUN pnpm install 
-RUN pnpm db:migrate
+WORKDIR /app 
+
+RUN npm install -g pnpm 
+COPY --from=prepare ./app/out/json/ . 
+RUN pnpm install  
+
+COPY --from=prepare ./app/out/full/ . 
+RUN cd packages/db && pnpm dlx prisma@6.3.0 generate
 RUN pnpm build
 
-CMD ["pnpm","start:backend"]
+
+FROM node:${NODE_VERSION}-alpine AS runner
+
+
+WORKDIR /app
+COPY --from=builder /app . 
+
+
+CMD [ "node","apps/backend/dist/index.js" ]

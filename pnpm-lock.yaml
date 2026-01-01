@@ -201,6 +201,9 @@ importers:
       dockerode:
         specifier: ^4.0.9
         version: 4.0.9
+      dotenv:
+        specifier: ^17.2.3
+        version: 17.2.3
       node-stream-zip:
         specifier: ^1.15.0
         version: 1.15.0

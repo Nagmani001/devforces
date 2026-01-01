@@ -8,7 +8,8 @@
     "lint": "turbo run lint",
     "format": "prettier --write \"**/*.{ts,tsx,md}\"",
     "check-types": "turbo run check-types",
-    "start:web": "cd apps/web && pnpm run start",
+    "start:web": "cd apps/web && npm run start",
+    "start:webdev": "cd apps/web && npm run dev",
     "start:backend": "cd apps/backend && pnpm run start",
     "db:migrate": "cd packages/db && pnpm dlx prisma@6.3.0 generate && cd ../..",
     "prepare": "husky"
