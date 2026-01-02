@@ -7,13 +7,12 @@ import JSZip from "jszip";
 import "react-resizable/css/styles.css";
 import { useDropzone } from "react-dropzone";
 import { Button } from "@repo/ui/components/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@repo/ui/components/card";
-import { Badge } from "@repo/ui/components/badge";
+import { Card, CardContent } from "@repo/ui/components/card";
 import { NotionRenderer } from "react-notion-x";
-import { CloudUpload, Play, Loader, Check, GripVertical, CheckCircle } from "lucide-react";
+import { CloudUpload, Play, Loader, GripVertical, CheckCircle, Copy, GitBranch, AlertTriangle, Terminal } from "lucide-react";
 import dynamic from 'next/dynamic'
 import axios from "axios";
-import { BASE_URL, confirmFileSent, sendZippedFile } from "@/app/config/utils";
+import { BASE_URL, confirmFileSent, dummyLogs, sendZippedFile } from "@/app/config/utils";
 import { ArenaDropzoneLoader } from "@/app/components/arenaDropzoneLoader";
 
 const Code = dynamic(() =>
@@ -23,7 +22,7 @@ const Equation = dynamic(() =>
   import('react-notion-x/build/third-party/equation').then((m) => m.Equation)
 )
 
-export default function ArenaPage({ recordMap, challengeId }: any) {
+export default function ArenaPage({ recordMap, challengeId, baseGithubUrl, contestId }: any) {
   const [leftWidth, setLeftWidth] = useState<number>(760);
   const [loadingNotion, setLoadingNotion] = useState<boolean>(false);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
@@ -35,27 +34,6 @@ export default function ArenaPage({ recordMap, challengeId }: any) {
     failed: 0
   });
 
-  const dummyLogs = [
-    "Starting Docker services...",
-    "Creating network 'devforces_network'...",
-    "Starting container 'postgres-db'...",
-    "Starting container 'redis-cache'...",
-    "Services started successfully.",
-    "Building user application image...",
-    "Step 1/5 : FROM node:18-alpine",
-    "Step 2/5 : WORKDIR /app",
-    "Step 3/5 : COPY package*.json ./",
-    "Installing dependencies...",
-    "Step 4/5 : COPY . .",
-    "Step 5/5 : EXPOSE 3000",
-    "Successfully built image 'user-backend:latest'",
-    "Starting backend service...",
-    "Backend service listening on port 3000",
-    "Waiting for health check...",
-    "Health check passed.",
-    "Running test suite...",
-    "Executing tests..."
-  ];
 
   useEffect(() => {
     if (isSubmitting) {
@@ -124,7 +102,7 @@ export default function ArenaPage({ recordMap, challengeId }: any) {
     try {
       await sendZippedFile(preSignedUrl, fields, zipFile);
 
-      const response = await confirmFileSent(challengeId);
+      const response = await confirmFileSent(challengeId, contestId);
       const parsedValue = JSON.parse(response);
       setTestResult(parsedValue);
       setFiles([]);
@@ -232,46 +210,69 @@ export default function ArenaPage({ recordMap, challengeId }: any) {
             }
           >
 
-            <Card className="h-full flex flex-col justify-center items-center relative overflow-hidden">
-              <CardContent className="h-full w-full flex flex-col items-center justify-center p-10">
-                {isSubmitting ? (
-                  <ArenaDropzoneLoader />
-                ) : (
-                  <div
-                    {...getRootProps()}
-                    className={
-                      "w-full h-full border-2 border-dashed rounded-lg flex items-center justify-center p-6 transition-all " +
-                      (isDragActive
-                        ? "border-primary bg-primary/10"
-                        : "border-muted-foreground/25 bg-muted/50 hover:bg-muted/80")
-                    }
-                  >
-
-                    <input {...getInputProps()}
-                      //@ts-ignore
-                      webkitdirectory=""
-                      directory="" />
-
-                    <div className="text-center select-none">
-                      {files.length > 0 ? (
-                        <div className="flex flex-col items-center">
-                          <CheckCircle className="mx-auto mb-4 text-green-500" size={48} />
-                          <h3 className="text-2xl font-handwriting">Ready to submit</h3>
-                          <p className="mt-2 text-sm opacity-80">Proceed to submit your code</p>
-                        </div>
-                      ) : (
-                        <>
-                          <CloudUpload className="mx-auto mb-4" size={48} />
-                          <h3 className="text-2xl font-handwriting">Drop zone</h3>
-                          <p className="mt-2 text-sm opacity-80">Drop a folder here or click to select a folder</p>
-                          <p className="mt-1 text-xs opacity-60">(node_modules will be filtered out)</p>
-                        </>
-                      )}
-                    </div>
+            <div className="h-full flex flex-col gap-2 p-1">
+              <div className="shrink-0 p-3 border rounded-lg bg-blue-50/50 text-xs">
+                <div className="flex items-center gap-4 mb-2">
+                  <div className="flex items-center gap-1.5 text-primary font-semibold shrink-0">
+                    <GitBranch className="w-4 h-4" />
+                    <span>Starter Code</span>
                   </div>
-                )}
-              </CardContent>
-            </Card>
+                  <div className="flex-1 flex items-center gap-2 bg-background border px-3 py-1.5 rounded-md text-muted-foreground font-mono min-w-0">
+                    <Terminal className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
+                    <span className="truncate text-xs flex-1">git clone {baseGithubUrl}</span>
+                    <Button variant="ghost" size="icon" className="h-6 w-6 ml-1 shrink-0" onClick={() => navigator.clipboard.writeText(`git clone ${baseGithubUrl}`)}>
+                      <Copy className="w-3.5 h-3.5" />
+                    </Button>
+                  </div>
+                </div>
+
+                <div className="flex gap-2 items-center text-amber-600">
+                  <AlertTriangle className="w-3 h-3 shrink-0" />
+                  <span className="truncate">Do <span className="font-bold">NOT</span> modify <code>Dockerfile</code>, <code>docker-compose.yml</code>, or health check.</span>
+                </div>
+              </div>
+
+              <Card className="flex-1 min-h-0 flex flex-col justify-center items-center relative overflow-hidden">
+                <CardContent className="h-full w-full flex flex-col items-center justify-center p-6">
+                  {isSubmitting ? (
+                    <ArenaDropzoneLoader />
+                  ) : (
+                    <div
+                      {...getRootProps()}
+                      className={
+                        "w-full h-full border-2 border-dashed rounded-lg flex items-center justify-center p-6 transition-all " +
+                        (isDragActive
+                          ? "border-primary bg-primary/10"
+                          : "border-muted-foreground/25 bg-muted/50 hover:bg-muted/80")
+                      }
+                    >
+
+                      <input {...getInputProps()}
+                        //@ts-ignore
+                        webkitdirectory=""
+                        directory="" />
+
+                      <div className="text-center select-none">
+                        {files.length > 0 ? (
+                          <div className="flex flex-col items-center">
+                            <CheckCircle className="mx-auto mb-4 text-green-500" size={48} />
+                            <h3 className="text-2xl font-handwriting">Ready to submit</h3>
+                            <p className="mt-2 text-sm opacity-80">Proceed to submit your code</p>
+                          </div>
+                        ) : (
+                          <>
+                            <CloudUpload className="mx-auto mb-4" size={48} />
+                            <h3 className="text-2xl font-handwriting">Drop zone</h3>
+                            <p className="mt-2 text-sm opacity-80">Drop a folder here or click to select a folder</p>
+                            <p className="mt-1 text-xs opacity-60">(node_modules will be filtered out)</p>
+                          </>
+                        )}
+                      </div>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            </div>
 
           </ResizableBox>
 

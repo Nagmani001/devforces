@@ -4,7 +4,8 @@ import { useRouter } from "next/navigation";
 import { Button } from "@repo/ui/components/button";
 import { Trophy } from "lucide-react";
 
-export default function Challenges({ challenges }: any) {
+export default function Challenges({ challenges, contestId }: any) {
+  console.log(challenges);
   const router = useRouter();
   return (
     <div className="container max-w-6xl mx-auto px-4 py-8 flex flex-col gap-8">
@@ -35,6 +36,19 @@ export default function Challenges({ challenges }: any) {
 
         <div className="flex flex-col gap-6">
           {challenges.challenges.map((x: any) => {
+            return <ChallengeCard
+              id={x.id}
+              key={x.id}
+              title={x.title}
+              totalTestCases={x.totalTestCases}
+              submitted={false}
+              attempted={false}
+              onStart={() => {
+                router.push(`/arena/${contestId}/${x.id}`)
+              }}
+            />
+
+            /* BUG: rethink about this 
             if (x.challengeResult) {
               if (x.challengeResult.challengeStatus == "SUBMITTED") {
                 return <ChallengeCard
@@ -46,8 +60,7 @@ export default function Challenges({ challenges }: any) {
                   submitted={true}
                   attempted={true}
                 />
-
-              } else if (x.challengeResult.challengeStatus == "ATTEMPTED") {
+                } else if (x.challengeResult.challengeStatus == "ATTEMPTED") {
                 return <ChallengeCard
                   id={x.id}
                   key={x.id}
@@ -57,56 +70,27 @@ export default function Challenges({ challenges }: any) {
                   submitted={false}
                   attempted={true}
                   onStart={() => {
-                    router.push(`/arena/${x.id}`)
+                    router.push(`/arena/${contestId}/${x.id}`)
                   }}
                 />
               }
             } else {
-              return <ChallengeCard
-                id={x.id}
-                key={x.id}
-                title={x.title}
-                totalTestCases={x.totalTestCases}
-                submitted={false}
-                attempted={false}
-                onStart={() => {
-                  router.push(`/arena/${x.id}`)
-                }}
-              />
+
+            return <ChallengeCard
+              id={x.id}
+              key={x.id}
+              title={x.title}
+              totalTestCases={x.totalTestCases}
+              submitted={false}
+              attempted={false}
+              onStart={() => {
+                router.push(`/arena/${contestId}/${x.id}`)
+              }}
+            />
             }
+              */
           })}
 
-          {/*
-          <ChallengeCard
-            title="complete authentication"
-            totalTestCases={10}
-            passedTestCases={5}
-            submitted={true}
-            onView={() => { }}
-          />
-
-          <ChallengeCard
-            title="complete endpoints for managing quiz"
-            totalTestCases={12}
-            passedTestCases={8}
-            submitted={true}
-            onView={() => { }}
-          />
-
-          <ChallengeCard
-            title="complete endpoints for interacting with quiz"
-            totalTestCases={10}
-            attempted={true}
-            onStart={() => { }}
-          />
-
-          <ChallengeCard
-            title="final leaderboard endpoints"
-            totalTestCases={20}
-            attempted={false}
-            onStart={() => { }}
-          />
-          */}
         </div>
       </div>
     </div>

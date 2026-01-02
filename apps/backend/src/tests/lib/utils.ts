@@ -194,3 +194,54 @@ export const signupInvalidInputs = [
     payload: [],
   },
 ];
+
+export const signinInvalidInputs = [
+  {
+    statement: "missing email",
+    password: "password123",
+  },
+  {
+    statement: "missing password",
+    email: "test@example.com",
+  },
+  {
+    statement: "email is null",
+    email: null,
+    password: "password123",
+  },
+  {
+    statement: "password is null",
+    email: "test@example.com",
+    password: null,
+  },
+  {
+    statement: "invalid email format",
+    email: "not-an-email",
+    password: "password123",
+  },
+  {
+    statement: "password too short",
+    email: "test@example.com",
+    password: "123",
+  },
+  {
+    statement: "password too long",
+    email: "test@example.com",
+    password: "p".repeat(16),
+  },
+  {
+    statement: "empty email",
+    email: "",
+    password: "password123",
+  },
+  {
+    statement: "empty password",
+    email: "test@example.com",
+    password: "",
+  },
+  {
+    statement: "password only spaces",
+    email: "test@example.com",
+    password: "     ",
+  }
+];

@@ -2,9 +2,11 @@ import { Router, Response, Request } from "express";
 import { v4 as uuidv4 } from 'uuid';
 import * as AWS from "@aws-sdk/client-s3";
 import { createPresignedPost } from '@aws-sdk/s3-presigned-post';
-import { unauthorized } from "../lib/utils";
-import { pubSub, redisClient } from "..";
+import { checkContestResultOrCreate, unauthorized } from "../lib/utils";
+import { pubSub, redisClient, soortedSetClient } from "..";
 import { REDIS_QUEUE_NAME } from "@repo/common/consts";
+import { PAYLOAD_TO_PUSH, PAYLOAD_TO_RECEIVE } from "@repo/common/typescript-types";
+import prisma from "@repo/db/client";
 export const submitRouter: Router = Router();
 
 // envs automatically infered
@@ -35,22 +37,45 @@ submitRouter.get("/preSignedUrl/:challengeId", async (req: Request, res: Respons
 });
 
 //WARNING: what if user uploads but the request to confirm fails ? this approach is not atomic  
-submitRouter.post("/submit/confirm/:challengeId", async (req: Request, res: Response) => {
+submitRouter.post("/submit/confirm/:contestId/:challengeId", async (req: Request, res: Response) => {
   const userId = req.userId;
-
+  const contestId = req.params.contestId;
   const challengeId = req.params.challengeId;
   //TODO: check if challenge exists or not , challenge ka contest is started or not 
 
   if (!userId) return unauthorized(res);
 
   const uniqueId = uuidv4();
-  const payload = {
+
+
+  const payload: PAYLOAD_TO_PUSH = {
     id: uniqueId,
-    challengeId: challengeId,
+    challengeId: challengeId!,
     url: `https://nagmanidevforces.s3.ap-south-1.amazonaws.com/${userId}-challenge-${challengeId}`
   };
 
-  pubSub.subscribe(uniqueId, (response) => {
+  const { contestResultId } = await checkContestResultOrCreate(contestId!, userId);
+
+
+  pubSub.subscribe(uniqueId, async (response) => {
+    const parsedResponse: PAYLOAD_TO_RECEIVE = JSON.parse(response);
+
+    const scoreSum = await prisma.challengeResult.aggregate({
+      _sum: {
+        score: true,
+        penalty: true
+      },
+      where: {
+        userId,
+        contestResultId: contestResultId
+      },
+    });
+
+    soortedSetClient.zAdd(`contest_leaderboard_${contestId}`, {
+      score: scoreSum._sum.score! - (scoreSum._sum.penalty!) / 1000,
+      value: userId
+    });
+
     res.json(response);
   });
 

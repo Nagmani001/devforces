@@ -8,6 +8,7 @@
   },
   "exports":{
   "./zodTypes":"./src/index.ts",
+  "./typescript-types":"./src/types.ts",
   "./consts":"./src/consts.ts"
   
   },

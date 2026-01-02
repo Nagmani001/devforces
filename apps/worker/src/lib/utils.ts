@@ -19,7 +19,6 @@ export async function downloadAndUnzipFile(url: string, id: string) {
       //@ts-ignore
       writer.on("finish", resolve)
     })
-    console.log("i ran till here");
 
     fs.mkdirSync('src/extracted');
 

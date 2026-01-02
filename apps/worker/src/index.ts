@@ -50,7 +50,7 @@ async function main() {
 
     while (true) {
       try {
-        await axios.get("http://localhost:8000/todos");
+        await axios.get("http://localhost:8000/health");
         break;
       } catch (err) {
         numberOfErrors++;

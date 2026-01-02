@@ -13,6 +13,6 @@ export default async function Page({
 
   const challenges = await getChallengesForContest(contestId, token);
   return <div>
-    <Challenges challenges={challenges.challenges} />
+    <Challenges challenges={challenges.challenges} contestId={contestId} />
   </div>
 }

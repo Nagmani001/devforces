@@ -87,23 +87,8 @@ export const emptyChallenge = (): Challenge => ({
   title: "",
   notionLink: "",
   testFile: "",
+  baseGithubUrl: "",
   totalTestCases: "",
-  dockerCompose:
-    `version: "3.8"
-services:
-  db:
-    image: postgres
-    restart: always
-    environment:
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=postgres
-    ports:
-      - "5432:5432"`,
-  startupScript: `# Example startup script
-# 1. Start services
-# 2. Run migrations
-# 3. Run tests
-`,
 });
 
 
@@ -302,8 +287,8 @@ export async function sendZippedFile(url: string, conf: S3PresignedPostFields, f
   console.log("uploaded to s3 successfully", response);
 }
 
-export async function confirmFileSent(challengeId: string) {
-  const sendConfirmation = await axios.post(`${BASE_URL}/api/submissions/submit/confirm/${challengeId}`, {}, {
+export async function confirmFileSent(challengeId: string, contestId: string) {
+  const sendConfirmation = await axios.post(`${BASE_URL}/api/submissions/submit/confirm/${contestId}/${challengeId}`, {}, {
     headers: {
       Authorization: localStorage.getItem("token")
     }
@@ -331,3 +316,26 @@ export const getPageNumbers = (currentPage: number, totalPages: number) => {
 
   return pages;
 };
+
+
+export const dummyLogs = [
+  "Starting Docker services...",
+  "Creating network 'devforces_network'...",
+  "Starting container 'postgres-db'...",
+  "Starting container 'redis-cache'...",
+  "Services started successfully.",
+  "Building user application image...",
+  "Step 1/5 : FROM node:18-alpine",
+  "Step 2/5 : WORKDIR /app",
+  "Step 3/5 : COPY package*.json ./",
+  "Installing dependencies...",
+  "Step 4/5 : COPY . .",
+  "Step 5/5 : EXPOSE 3000",
+  "Successfully built image 'user-backend:latest'",
+  "Starting backend service...",
+  "Backend service listening on port 3000",
+  "Waiting for health check...",
+  "Health check passed.",
+  "Running test suite...",
+  "Executing tests..."
+];

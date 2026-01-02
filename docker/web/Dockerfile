@@ -2,6 +2,7 @@ ARG NODE_VERSION=24.11.0
 FROM node:${NODE_VERSION}-slim AS base
 
 
+
 FROM base AS prepare 
 
 WORKDIR /app

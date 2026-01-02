@@ -15,10 +15,9 @@ export type Challenge = {
   id: string;
   title: string;
   notionLink: string;
+  baseGithubUrl: string;
   testFile: string;
   totalTestCases: number | "";
-  dockerCompose: string;
-  startupScript: string;
 };
 
 export interface getStatusOfContestReturns {

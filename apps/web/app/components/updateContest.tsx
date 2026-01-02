@@ -90,8 +90,6 @@ export default function UpdateContest({ contestId }: {
             title: x.title,
             notionLink: x.notionLink,
             testFile: x.testFile,
-            dockerComposeFile: x.dockerCompose,
-            startupScript: x.startupScript,
             totalTestCases: x.totalTestCases,
           }
         })
@@ -274,22 +272,6 @@ export default function UpdateContest({ contestId }: {
                       min={0}
                     />
                   </div>
-
-                  <LabelWithInput
-                    label="Docker Compose Configuration"
-                    type="textarea"
-                    value={ch.dockerCompose}
-                    onChange={(e) => updateChallenge(ch.id, "dockerCompose", e.target.value)}
-                    rows={8}
-                  />
-
-                  <LabelWithInput
-                    label="Test Startup Script"
-                    type="textarea"
-                    value={ch.startupScript}
-                    onChange={(e) => updateChallenge(ch.id, "startupScript", e.target.value)}
-                    rows={6}
-                  />
                 </div>
               </div>
             ))}

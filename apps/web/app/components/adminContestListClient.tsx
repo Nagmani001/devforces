@@ -3,7 +3,7 @@
 import { useAtomValue } from "jotai";
 import { searchFilter, searchInput } from "../atom";
 import { AdminContestCard } from "@repo/ui/components/challengesCard";
-import { getStatusOfContest, getTimeFromSeconds } from "../config/utils";
+import { deleteContest, getStatusOfContest, getTimeFromSeconds } from "../config/utils";
 import DeleteContestDialog from "@repo/ui/components/deleteContest";
 import { Button } from "@repo/ui/components/button";
 import { ENDED, LIVE, NOT_STARTED } from "@repo/common/consts";
@@ -48,15 +48,13 @@ export default function AdminContestListClient({ contests }: any) {
             <DeleteContestDialog
               contestName={x.title}
               onDelete={async () => {
-                //TODO: make this a mutation in react query
-                //@ts-ignore
-                const value = await deleteContest(x.id, localStorage.getItem("token"));
-                //             if (value.success) { router.refresh() }
+                const response = await deleteContest(x.id, localStorage.getItem("token")!);
+                if (response.success) {
+                  router.refresh();
+                }
               }}
               trigger={
-                <Button onClick={() => {
-
-                }} size="sm" variant="destructive">
+                <Button size="sm" variant="destructive">
                   Delete
                 </Button>
               }
@@ -77,7 +75,7 @@ export default function AdminContestListClient({ contests }: any) {
           status="running"
           challengeCount={x._count.challenges}
           onSeeResult={() => {
-            alert("see result");
+            router.push(`/liveLeaderboard/${x.id}`);
           }}
         />
 
@@ -92,7 +90,7 @@ export default function AdminContestListClient({ contests }: any) {
           status="ended"
           challengeCount={x._count.challenges}
           onSeeResult={() => {
-            alert("see result");
+            router.push(`/leaderboard/${x.id}`);
           }}
         />
 

@@ -49,11 +49,9 @@ model Challenge {
   title                 String
   notionLink            String
   testFile              String
-  baseGithubUrl         String?
+  baseGithubUrl         String
   engineExecutionScript String?
   withDocker            Boolean?
-  dockerComposeFile     String
-  startupScript         String
   totalTestCases        Int
   contestId             String
   contest               Contest          @relation(fields: [contestId], references: [id])
@@ -76,11 +74,13 @@ model ContestResult {
 }
 
 model ChallengeResult {
-  id              String        @id @default(uuid())
-  score           Int           @default(0)
-  penalty         Int           @default(0)
-  duration        Int           @default(0)
-  penaltyFactor   Int           @default(0)
+  id                           String @id @default(uuid())
+  score                        Int
+  penalty                      Int
+  duration                     Int
+  numberOfFailBefore1stAC      Int
+  timeOf1stAcSinceContestStart Int
+
   contestResultId String
   contestResult   ContestResult @relation(fields: [contestResultId], references: [id])
   challengeId     String        @unique

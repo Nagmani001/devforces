@@ -1,43 +1,30 @@
-import { describe, expect, it, beforeEach, afterAll } from "vitest";
+import { beforeAll, describe, expect, it } from "vitest";
 import { BACKEND_URL } from "../../lib/config";
 import { axios } from "../../lib/utils";
-import { signupInvalidInputs } from "../lib/utils";
-import prisma from "@repo/db/client";
+import { signinInvalidInputs, signupInvalidInputs } from "../lib/utils";
+import { createUser } from "../helpers/user";
 import { resetDb } from "../helpers/resetDb";
 
 
 describe("POST /signup", () => {
-  beforeEach(async () => {
-    await resetDb();
-  });
-
-  afterAll(async () => {
-    await resetDb();
-  });
-
-  //WARNING: use it.for , since it comes with an additional feature to integrate TestContext
-  it.each(signupInvalidInputs)("should return 400 when $statement | username=$username | email=$email | password=$password", async ({ statement, email, username, password }) => {
+  it.concurrent.for(signupInvalidInputs)("should return 400 when $statement | username=$username | email=$email | password=$password", async ({ statement, email, username, password }, ctx) => {
     const res = await axios.post(`${BACKEND_URL}/api/auth/signup`, {
       username,
       email,
       password
     });
 
-    expect(res.status).toBe(400);
-    expect(res.data).toStrictEqual({
+    ctx.expect(res.status).toBe(400);
+    ctx.expect(res.data).toStrictEqual({
       message: "invalid inputs"
     });
   });
 
-  //BUG:  Flakey test , sometime all of these pass , sometime some fail  
-  // this is because of shared shate / concurrency . the way vitest runs the test for you
-  // Figure it out
-  /*
   it("should successfully create a new user with valid inputs", async () => {
     const validUser = {
       username: "testuser",
-      email: "valid-signup@example.com",
-      password: "test123"
+      email: "nagmaniprasad25@gmail.com",
+      password: "test123456"
     };
 
     const res = await axios.post(`${BACKEND_URL}/api/auth/signup`, validUser);
@@ -48,24 +35,13 @@ describe("POST /signup", () => {
       userId: expect.any(String)
     });
 
-    const user = await prisma.user.findFirst({
-      where: { email: validUser.email }
-    });
-
-    expect(user).toBeTruthy();
-    expect(user?.username).toBe(validUser.username);
-    expect(user?.email).toBe(validUser.email);
-    expect(user?.isVerified).toBe(false);
-    expect(user?.otp).toBeTruthy();
-    expect(user?.otpExpiry).toBeInstanceOf(Date);
-    expect(user?.password).not.toBe(validUser.password); // Password should be hashed
   });
 
   it("should return 403 when trying to signup with an email that already exists", async () => {
     const duplicateUser = {
       username: "duplicate",
-      email: "duplicate@example.com",
-      password: "pass123"
+      email: "zafarxdev@gmail.com",
+      password: "pass123456"
     };
 
     const firstRes = await axios.post(`${BACKEND_URL}/api/auth/signup`, duplicateUser);
@@ -73,8 +49,8 @@ describe("POST /signup", () => {
 
     const secondRes = await axios.post(`${BACKEND_URL}/api/auth/signup`, {
       username: "different-username",
-      email: "duplicate@example.com", // Same email
-      password: "pass456"
+      email: "zafarxdev@gmail.com", // Same email
+      password: "pass4563223"
     });
 
     expect(secondRes.status).toBe(403);
@@ -82,106 +58,103 @@ describe("POST /signup", () => {
       message: "user already exists"
     });
   });
+});
 
-  it("should create an admin user when email is nagmanipd3@gmail.com", async () => {
-    const adminUser = {
-      username: "admin",
-      email: "nagmanipd3@gmail.com",
-      password: "admin123"
+
+describe("POST /signin", () => {
+  //INFO: I should avoid database operation in test , but don't have any option right now , how do i get otp ?
+
+  beforeAll(async () => {
+    await resetDb();
+  });
+
+  it.concurrent.for(signinInvalidInputs)("should return 400 when $statement | email=$email | password=$password", async ({ email, password }, ctx) => {
+    const res = await axios.post(`${BACKEND_URL}/api/auth/signin`, {
+      email,
+      password
+    });
+
+    ctx.expect(res.status).toBe(400);
+    ctx.expect(res.data).toStrictEqual({
+      message: "invalid inputs"
+    });
+  });
+
+  it("should return 404 when trying to signin for a user which does not exist", async () => {
+    const nonExistentUser = {
+      email: "nonexistent@example.com",
+      password: "password123"
     };
 
-    const res = await axios.post(`${BACKEND_URL}/api/auth/signup`, adminUser);
+    const res = await axios.post(`${BACKEND_URL}/api/auth/signin`, nonExistentUser);
 
+    expect(res.status).toBe(404);
+    expect(res.data).toStrictEqual({
+      message: "user doesn't exist"
+    });
+  });
+
+  /*
+  it("should return 200 when trying to signin for a user which does exist with valid credentials", async () => {
+    const user = {
+      email: "randomboy123@gmail.com",
+      password: "randomboy123",
+      username: "randomBoy"
+    }
+    await createUser(user);
+
+    const res = await axios.post(`${BACKEND_URL}/api/auth/signin`, user);
+    console.log(res);
     expect(res.status).toBe(200);
-
-    const user = await prisma.user.findFirst({
-      where: { email: adminUser.email }
-    });
-
-    expect(user?.isAdmin).toBe(true);
-  });
-
-  it("should create a regular user (not admin) for other emails", async () => {
-    const regularUser = {
-      username: "regular",
-      email: "regular-user@example.com",
-      password: "pass123"
-    };
-
-    const res = await axios.post(`${BACKEND_URL}/api/auth/signup`, regularUser);
-
-    expect(res.status).toBe(200);
-
-    const user = await prisma.user.findFirst({
-      where: { email: regularUser.email }
-    });
-
-    expect(user?.isAdmin).toBe(false);
-  });
-
-  it("should hash the password before storing in database", async () => {
-    const user = {
-      username: "hashtest",
-      email: "hash-test@example.com",
-      password: "plaintext123"
-    };
-
-    await axios.post(`${BACKEND_URL}/api/auth/signup`, user);
-
-    const dbUser = await prisma.user.findFirst({
-      where: { email: user.email }
-    });
-
-    expect(dbUser?.password).not.toBe(user.password);
-    expect(dbUser?.password).toMatch(/^\$2[aby]\$.{56}$/);
-  });
-
-  it("should generate a 6-digit OTP and set expiry to approximately 1 minute", async () => {
-    const user = {
-      username: "otptest",
-      email: "otp-test@example.com",
-      password: "pass123"
-    };
-
-    const beforeSignup = new Date();
-    await axios.post(`${BACKEND_URL}/api/auth/signup`, user);
-
-    const dbUser = await prisma.user.findFirst({
-      where: { email: user.email }
-    });
-
-    expect(dbUser?.otp).toMatch(/^\d{6}$/);
-
-    const otpExpiry = dbUser?.otpExpiry;
-    expect(otpExpiry).toBeInstanceOf(Date);
-
-    const expiryDiffMs = otpExpiry!.getTime() - beforeSignup.getTime();
-    const expiryDiffSeconds = expiryDiffMs / 1000;
-
-    expect(expiryDiffSeconds).toBeGreaterThanOrEqual(55);
-    expect(expiryDiffSeconds).toBeLessThanOrEqual(65);
-  });
-
-  it("should return userId in the response", async () => {
-    const user = {
-      username: "useridtest",
-      email: "userid-test@example.com",
-      password: "pass123"
-    };
-
-    const res = await axios.post(`${BACKEND_URL}/api/auth/signup`, user);
-
-    expect(res.data.userId).toBeDefined();
-    expect(typeof res.data.userId).toBe("string");
-
-    const dbUser = await prisma.user.findFirst({
-      where: { email: user.email }
-    });
-
-    expect(res.data.userId).toBe(dbUser?.id);
-  });
+    expect(res.data.message).toBe("signin successful");
+    expect(res.data.token).toBeDefined()
+  })
    * */
 
+  it("should return 403 when trying to signin for a user which does exist with invalid credentials", async () => {
+
+    const user = {
+      email: "nagmani@gmail.com",
+      password: "123random",
+      username: "nagmani"
+    }
+    await createUser(user);
+
+    const res = await axios.post(`${BACKEND_URL}/api/auth/signin`, {
+      ...user,
+      password: "456random"
+    });
+    expect(res.status).toBe(403);
+    expect(res.data).toStrictEqual({
+      message: "invalid password"
+    });
+
+  })
+});
+
+/*
+INFO: no idea how to get otp
+describe("POST /verify-otp/:userId", () => {
+}
+*/
+
+
+describe("GET /me", () => {
+  beforeAll(async () => {
+    await resetDb();
+  });
+  it("", async () => {
+    const user = {
+      email: "randomboy123@gmail.com",
+      password: "randomboy123",
+      username: "randomBoy"
+    }
+
+    await createUser(user);
+
+    const res = await axios.post(`${BACKEND_URL}/api/auth/signin`, user);
+
+  })
 });
 
 

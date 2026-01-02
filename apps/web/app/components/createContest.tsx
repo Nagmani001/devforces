@@ -69,9 +69,8 @@ export default function CreateContest() {
           return {
             title: x.title,
             notionLink: x.notionLink,
+            baseGithubUrl: x.baseGithubUrl,
             testFile: x.testFile,
-            dockerComposeFile: x.dockerCompose,
-            startupScript: x.startupScript,
             totalTestCases: x.totalTestCases,
           }
         })
@@ -97,6 +96,7 @@ export default function CreateContest() {
           <h1 className="text-2xl font-semibold text-slate-900 mb-1">Create Contest</h1>
           <p className="text-sm text-slate-600">Set up a new coding contest with challenges and configurations</p>
         </div>
+
 
         {/* Basic Info Card */}
         <div className="bg-white border border-slate-200 rounded-lg p-6 space-y-6">
@@ -232,10 +232,11 @@ export default function CreateContest() {
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
                     <div className="md:col-span-2">
                       <LabelWithInput
-                        label="Test File Path"
+                        label="Test File"
+                        type="textarea"
                         value={ch.testFile}
                         onChange={(e) => updateChallenge(ch.id, "testFile", e.target.value)}
-                        placeholder="e.g. tests/test_example.py"
+                        placeholder="e.g. tests/index.test.ts"
                       />
                     </div>
 
@@ -254,22 +255,57 @@ export default function CreateContest() {
                       min={0}
                     />
                   </div>
-
                   <LabelWithInput
-                    label="Docker Compose Configuration"
-                    type="textarea"
-                    value={ch.dockerCompose}
-                    onChange={(e) => updateChallenge(ch.id, "dockerCompose", e.target.value)}
-                    rows={8}
+                    label="Base Github Url"
+                    value={ch.baseGithubUrl}
+                    onChange={(e) => updateChallenge(ch.id, "baseGithubUrl", e.target.value)}
+                    placeholder="https://github.com/Nagmani001"
                   />
 
-                  <LabelWithInput
-                    label="Test Startup Script"
-                    type="textarea"
-                    value={ch.startupScript}
-                    onChange={(e) => updateChallenge(ch.id, "startupScript", e.target.value)}
-                    rows={6}
-                  />
+                  <div className="mt-6 bg-blue-50 border border-blue-100 rounded-lg p-5">
+                    <h3 className="flex items-center gap-2 text-blue-900 font-semibold text-sm mb-4">
+                      <FileText className="w-4 h-4" />
+                      Repository Requirements
+                    </h3>
+                    <ul className="space-y-3">
+                      <li className="flex gap-3 text-sm text-blue-900/80">
+                        <div className="bg-blue-100/50 p-1 rounded-md h-fit">
+                          <span className="w-4 h-4 block font-bold text-center leading-4 text-blue-700">1</span>
+                        </div>
+                        <div>
+                          <span className="font-semibold text-blue-900 block mb-0.5">Base Repository</span>
+                          Create a public GitHub repository containing your challenge code.
+                        </div>
+                      </li>
+                      <li className="flex gap-3 text-sm text-blue-900/80">
+                        <div className="bg-blue-100/50 p-1 rounded-md h-fit">
+                          <span className="w-4 h-4 block font-bold text-center leading-4 text-blue-700">2</span>
+                        </div>
+                        <div>
+                          <span className="font-semibold text-blue-900 block mb-0.5">Docker Configuration</span>
+                          Include a <code className="bg-blue-100 px-1 py-0.5 rounded text-blue-800 text-xs">Dockerfile</code> for your service and a <code className="bg-blue-100 px-1 py-0.5 rounded text-blue-800 text-xs">docker-compose.yml</code> that defines the service and any dependencies.
+                        </div>
+                      </li>
+                      <li className="flex gap-3 text-sm text-blue-900/80">
+                        <div className="bg-blue-100/50 p-1 rounded-md h-fit">
+                          <span className="w-4 h-4 block font-bold text-center leading-4 text-blue-700">3</span>
+                        </div>
+                        <div>
+                          <span className="font-semibold text-blue-900 block mb-0.5">Health Check</span>
+                          Expose a <code className="bg-blue-100 px-1 py-0.5 rounded text-blue-800 text-xs">GET /</code> endpoint that returns a 200 OK status to verify service health.
+                        </div>
+                      </li>
+                      <li className="flex gap-3 text-sm text-blue-900/80">
+                        <div className="bg-blue-100/50 p-1 rounded-md h-fit">
+                          <span className="w-4 h-4 block font-bold text-center leading-4 text-blue-700">4</span>
+                        </div>
+                        <div>
+                          <span className="font-semibold text-blue-900 block mb-0.5">Tests</span>
+                          Paste your test code in the <strong>Test File</strong> field above. Do not rely on tests inside the repository.
+                        </div>
+                      </li>
+                    </ul>
+                  </div>
                 </div>
               </div>
             ))}

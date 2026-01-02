@@ -18,6 +18,11 @@ export const pubSub: RedisClientType = createClient({
   url: process.env.REDIS_URL
 });
 
+export const soortedSetClient: RedisClientType = createClient({
+  url: process.env.REDIS_URL
+});
+
+
 declare global {
   namespace Express {
     interface Request {
@@ -44,8 +49,12 @@ async function main() {
   });
   await redisClient.connect();
   console.log("connected to redis");
+
   await pubSub.connect();
   console.log("connected to pubSub");
+
+  await soortedSetClient.connect();
+  console.log("connected to redis sorted set");
 }
 
 main();

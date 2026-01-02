@@ -56,10 +56,8 @@ userContestRouter.get("/:contestId/challenges", async (req: Request, res: Respon
       },
       select: {
         contestId: true,
-        dockerComposeFile: false,
         id: true,
         notionLink: false,
-        startupScript: false,
         testFile: false,
         title: true,
         totalTestCases: true,
@@ -88,8 +86,7 @@ userContestRouter.get("/challenge/:challengeId", async (req: Request, res: Respo
         title: true,
         notionLink: true,
         testFile: false,
-        dockerComposeFile: false,
-        startupScript: false,
+        baseGithubUrl: true,
         totalTestCases: true,
       }
     });

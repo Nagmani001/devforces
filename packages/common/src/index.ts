@@ -24,8 +24,7 @@ export const challengesSchema = z.object({
   title: z.string(),
   notionLink: z.string(),
   testFile: z.string(),
-  dockerComposeFile: z.string(),
-  startupScript: z.string(),
+  baseGithubUrl: z.string(),
   totalTestCases: z.number(),
 });
 
@@ -42,8 +41,7 @@ export const updateChallengesSchema = z.object({
   title: z.string().optional(),
   notionLink: z.string().optional(),
   testFile: z.string().optional(),
-  dockerComposeFile: z.string().optional(),
-  startupScript: z.string().optional(),
+  baseGithubUrl: z.string().optional(),
   totalTestCases: z.number().optional(),
 });
 
