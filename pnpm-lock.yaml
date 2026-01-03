@@ -227,20 +227,23 @@ importers:
     dependencies:
       '@prisma/client':
         specifier: 6.3.0
-        version: 6.3.0(prisma@6.3.0(typescript@5.9.2))(typescript@5.9.2)
+        version: 6.3.0(prisma@6.3.0(typescript@5.9.3))(typescript@5.9.3)
       '@repo/typescript-config':
         specifier: workspace:*
         version: link:../typescript-config
-      bcrypt:
-        specifier: ^6.0.0
-        version: 6.0.0
     devDependencies:
       '@types/node':
         specifier: ^22.15.3
         version: 22.15.3
       prisma:
         specifier: 6.3.0
-        version: 6.3.0(typescript@5.9.2)
+        version: 6.3.0(typescript@5.9.3)
+      ts-node:
+        specifier: ^10.9.2
+        version: 10.9.2(@types/node@22.15.3)(typescript@5.9.3)
+      typescript:
+        specifier: ^5.9.3
+        version: 5.9.3
 
   packages/email:
     dependencies:
@@ -4932,6 +4935,11 @@ packages:
     resolution: {integrity: sha512-CWBzXQrc/qOkhidw1OzBTQuYRbfyxDXJMVJ1XNwUHGROVmuaeiEm3OslpZ1RV96d7SKKjZKrSJu3+t/xlw3R9A==}
     engines: {node: '>=14.17'}
 
+  typescript@5.9.3:
+    resolution: {integrity: sha512-jl1vZzPDinLr9eUt3J/t7V6FgNEw9QjvBPdysz9KfQDD41fQrC2Y4vKQdiaUpFT4bXlb1RHhLpp8wtm6M5TgSw==}
+    engines: {node: '>=14.17'}
+    hasBin: true
+
   ufo@1.6.1:
     resolution: {integrity: sha512-9a4/uxlTWJ4+a5i0ooc1rU7C7YOw3wT+UGqdeNNHWnOF9qcMBgLRS+4IYUqbczewFx4mLEig6gawh7X6mFlEkA==}
 
@@ -6188,10 +6196,10 @@ snapshots:
 
   '@nolyfill/is-core-module@1.0.39': {}
 
-  '@prisma/client@6.3.0(prisma@6.3.0(typescript@5.9.2))(typescript@5.9.2)':
+  '@prisma/client@6.3.0(prisma@6.3.0(typescript@5.9.3))(typescript@5.9.3)':
     optionalDependencies:
-      prisma: 6.3.0(typescript@5.9.2)
-      typescript: 5.9.2
+      prisma: 6.3.0(typescript@5.9.3)
+      typescript: 5.9.3
 
   '@prisma/debug@6.3.0': {}
 
@@ -9586,12 +9594,12 @@ snapshots:
 
   prettier@3.7.4: {}
 
-  prisma@6.3.0(typescript@5.9.2):
+  prisma@6.3.0(typescript@5.9.3):
     dependencies:
       '@prisma/engines': 6.3.0
     optionalDependencies:
       fsevents: 2.3.3
-      typescript: 5.9.2
+      typescript: 5.9.3
 
   prismjs@1.30.0: {}
 
@@ -10354,6 +10362,24 @@ snapshots:
       v8-compile-cache-lib: 3.0.1
       yn: 3.1.1
 
+  ts-node@10.9.2(@types/node@22.15.3)(typescript@5.9.3):
+    dependencies:
+      '@cspotcode/source-map-support': 0.8.1
+      '@tsconfig/node10': 1.0.12
+      '@tsconfig/node12': 1.0.11
+      '@tsconfig/node14': 1.0.3
+      '@tsconfig/node16': 1.0.4
+      '@types/node': 22.15.3
+      acorn: 8.15.0
+      acorn-walk: 8.3.4
+      arg: 4.1.3
+      create-require: 1.1.1
+      diff: 4.0.2
+      make-error: 1.3.6
+      typescript: 5.9.3
+      v8-compile-cache-lib: 3.0.1
+      yn: 3.1.1
+
   tsconfig-paths@3.15.0:
     dependencies:
       '@types/json5': 0.0.29
@@ -10458,6 +10484,8 @@ snapshots:
       - supports-color
 
   typescript@5.9.2: {}
+
+  typescript@5.9.3: {}
 
   ufo@1.6.1: {}
 

@@ -29,6 +29,7 @@ services:
   backend:
     build:
       context: ../ 
+      no_cache: true
       dockerfile: docker/backend/Dockerfile
     container_name: backend
     environment:
@@ -51,6 +52,7 @@ services:
   worker:
     build:
       context: ../ 
+      no_cache: true
       dockerfile: docker/worker/Dockerfile
     container_name: worker 
 
@@ -64,6 +66,7 @@ services:
   web:
     build:
       context: ../ 
+      no_cache: true
       dockerfile: docker/web/Dockerfile
     container_name: web 
 

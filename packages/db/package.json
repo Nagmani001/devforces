@@ -6,10 +6,12 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
+  "prisma": {
+    "seed": "ts-node prisma/seed.ts"
+  },
   "dependencies": {
     "@prisma/client": "6.3.0",
-    "@repo/typescript-config": "workspace:*",
-    "bcrypt": "^6.0.0"
+    "@repo/typescript-config": "workspace:*"
   },
   "exports": {
     "./client": "./src/index.ts"
