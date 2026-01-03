@@ -40,23 +40,6 @@ services:
       AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID} 
       AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY} 
 
-<<<<<<< HEAD
-=======
-=======
-     ## put envs 
->>>>>>> 360f56a (removed environments)
-=======
-    environment:
-      DATABASE_URL: ${DATABASE_URL} 
-      REDIS_URL: ${REDIS_URL} 
-      RESEND_API_KEY: ${RESEND_API_KEY} 
-      SALT_ROUNDS: ${SALT_ROUNDS} 
-      JWT_SECRET: ${JWT_SECRET} 
-      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID} 
-      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY} 
-
->>>>>>> 6e7470f (leaderboard logic partial)
->>>>>>> d5d9ae8 (removed secretes from docker-file)
     depends_on:
       database:
         condition: service_healthy

@@ -38,6 +38,7 @@ jobs:
 
     env:
       RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+      DATABASE_URL: ${{ secrets.DATABASE_URL_CI}} 
 
     steps:
       - name: Checkout the code 
@@ -57,8 +58,11 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-#      - name: Generate Prisma client 
-#        run: cd packages/db && npx prisma generate 
+      - name: Migrate the database
+        run: cd packages/db && npx prisma migrate deploy 
+
+      - name: Generate Client 
+        run: cd packages/db && npx prisma generate 
 
       - name: Run integration tests
-        run: cd apps/backend && pnpm run test:integration
+        run: cd apps/backend &&  pnpm run test:integration
