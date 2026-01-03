@@ -57,6 +57,9 @@ async function main() {
   await soortedSetClient.connect();
   console.log("connected to redis sorted set");
 
+  //TODO: DRY
+  //INFO : did this since when i was running <docker compose down> in integration test , then backend was throwing error
+  // there should be better way to solve this  since if redis stops i should not take down my backend in production 
   redisClient.on("error", (err: any) => {
     server.close(() => {
       process.exit(1);

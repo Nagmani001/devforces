@@ -22,7 +22,7 @@ echo "Building backend"
 pnpm build
 
 echo '🟡 - Starting backend server...'
-pnpm start &
+DATABASE_URL="postgresql://postgres:nagmani@localhost:5432/postgres" pnpm start &
 BACKEND_PID=$!
 
 echo '🟡 - Waiting for backend to be ready...'
