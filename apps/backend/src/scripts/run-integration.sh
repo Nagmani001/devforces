@@ -2,7 +2,6 @@
 
 # TODO:
 # socket closed unexpectedly
-# after migration step : Error: P1001: Can't reach database server at `localhost:5432` , where is this comming from
 
 cleanup() {
   echo '🔴 - Cleaning up...'

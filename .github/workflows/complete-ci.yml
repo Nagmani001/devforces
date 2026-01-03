@@ -58,11 +58,10 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Migrate the database
-        run: cd packages/db && npx prisma migrate deploy 
-
-      - name: Generate Client 
-        run: cd packages/db && npx prisma generate 
+#      - name: Migrate the database
+#        run: cd packages/db && npx prisma migrate deploy 
+#      - name: Generate Client 
+#        run: cd packages/db && npx prisma generate 
 
       - name: Run integration tests
         run: cd apps/backend &&  pnpm run test:integration
