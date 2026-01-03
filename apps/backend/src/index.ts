@@ -55,6 +55,15 @@ async function main() {
 
   await soortedSetClient.connect();
   console.log("connected to redis sorted set");
+
+  redisClient.on("error", (err: any) => {
+  });
+
+  pubSub.on("error", (err: any) => {
+  });
+
+  soortedSetClient.on("error", (err: any) => {
+  });
 }
 
 main();

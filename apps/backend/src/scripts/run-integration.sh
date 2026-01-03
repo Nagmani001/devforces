@@ -1,19 +1,5 @@
 #!/usr/bin/env bash
 
-# TODO:
-# socket closed unexpectedly
-
-cleanup() {
-  echo '🔴 - Cleaning up...'
-  if [ ! -z "$BACKEND_PID" ]; then
-    kill $BACKEND_PID || true
-  fi
-  sleep 5
-  docker compose -f /"$PROJECT_ROOT/docker/docker-compose-test.yml" down
-}
-
-trap cleanup EXIT
-
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(cd "$SCRIPT_DIR/../../../.." && pwd)"
 
@@ -45,5 +31,5 @@ $PROJECT_ROOT/apps/backend/src/scripts/wait-for-it.sh localhost:3001 -- echo "ba
 echo "Run integration test"
 pnpm run test
 
-echo "take down all services"
-docker compose down
+echo "🔴 - Taking down auxiliary services..."
+docker compose -f "$PROJECT_ROOT/docker/docker-compose-test.yml" down
