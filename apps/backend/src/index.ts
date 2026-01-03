@@ -44,9 +44,10 @@ app.use("/api/submissions", authMiddleware, submitRouter);
 
 
 async function main() {
-  app.listen(3001, () => {
+  let server = app.listen(3001, () => {
     console.log("Server is running on port 3001");
   });
+
   await redisClient.connect();
   console.log("connected to redis");
 
@@ -57,12 +58,22 @@ async function main() {
   console.log("connected to redis sorted set");
 
   redisClient.on("error", (err: any) => {
+    server.close(() => {
+      process.exit(1);
+    })
+
   });
 
   pubSub.on("error", (err: any) => {
+    server.close(() => {
+      process.exit(1);
+    })
   });
 
   soortedSetClient.on("error", (err: any) => {
+    server.close(() => {
+      process.exit(1);
+    })
   });
 }
 
