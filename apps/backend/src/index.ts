@@ -7,9 +7,12 @@ import { userContestRouter } from "./routes/userContestRouter";
 import { authMiddleware } from "./middlewares/authMiddleware";
 import { submitRouter } from "./routes/submitRouter";
 import { createClient, RedisClientType } from "redis";
+import { leaderboardRouter } from "./routes/leaderboardRouter";
+import { notificationRotuer } from "./routes/notificationRouter";
 
 config();
 const app = express();
+
 export const redisClient: RedisClientType = createClient({
   url: process.env.REDIS_URL
 });
@@ -18,9 +21,6 @@ export const pubSub: RedisClientType = createClient({
   url: process.env.REDIS_URL
 });
 
-export const soortedSetClient: RedisClientType = createClient({
-  url: process.env.REDIS_URL
-});
 
 
 declare global {
@@ -41,6 +41,8 @@ app.use("/api/auth", authRouter);
 app.use("/api/admin/contest", authMiddleware, adminContestRouter);
 app.use("/api/user/contest", authMiddleware, userContestRouter);
 app.use("/api/submissions", authMiddleware, submitRouter);
+app.use("/api/leaderboard", leaderboardRouter);
+app.use("/api/notification", authMiddleware, notificationRotuer);
 
 
 async function main() {
@@ -54,8 +56,6 @@ async function main() {
   await pubSub.connect();
   console.log("connected to pubSub");
 
-  await soortedSetClient.connect();
-  console.log("connected to redis sorted set");
 
   //TODO: DRY
   //INFO : did this since when i was running <docker compose down> in integration test , then backend was throwing error
@@ -68,12 +68,6 @@ async function main() {
   });
 
   pubSub.on("error", (err: any) => {
-    server.close(() => {
-      process.exit(1);
-    })
-  });
-
-  soortedSetClient.on("error", (err: any) => {
     server.close(() => {
       process.exit(1);
     })

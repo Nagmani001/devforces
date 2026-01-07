@@ -13,11 +13,10 @@ export default async function UserContestPage({ token, page }: {
   page: string
 }) {
 
-  const total = await axios.get(`${BASE_URL}/api/user/contest/totalPages`, {
+  const total = await axios.get(`${BASE_URL}/api/admin/contest/totalPages`, {
     headers: {
       Authorization: token
     }
-
   });
 
   //@ts-ignore

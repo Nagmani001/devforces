@@ -245,3 +245,155 @@ export const signinInvalidInputs = [
     password: "     ",
   }
 ];
+
+export const createContestInvalidInputs = [
+  {
+    statement: "missing title",
+    subtitle: "Test subtitle",
+    duration: 3600,
+    startsAt: new Date().toISOString(),
+    challenges: []
+  },
+  {
+    statement: "missing duration",
+    title: "Test Contest",
+    subtitle: "Test subtitle",
+    startsAt: new Date().toISOString(),
+    challenges: []
+  },
+  {
+    statement: "missing startsAt",
+    title: "Test Contest",
+    subtitle: "Test subtitle",
+    duration: 3600,
+    challenges: []
+  },
+  {
+    statement: "missing challenges",
+    title: "Test Contest",
+    subtitle: "Test subtitle",
+    duration: 3600,
+    startsAt: new Date().toISOString()
+  },
+  {
+    statement: "title is null",
+    title: null,
+    subtitle: "Test subtitle",
+    duration: 3600,
+    startsAt: new Date().toISOString(),
+    challenges: []
+  },
+  {
+    statement: "title is number",
+    title: 123,
+    subtitle: "Test subtitle",
+    duration: 3600,
+    startsAt: new Date().toISOString(),
+    challenges: []
+  },
+  {
+    statement: "duration is string",
+    title: "Test Contest",
+    subtitle: "Test subtitle",
+    duration: "3600",
+    startsAt: new Date().toISOString(),
+    challenges: []
+  },
+  {
+    statement: "duration is negative",
+    title: "Test Contest",
+    subtitle: "Test subtitle",
+    duration: -3600,
+    startsAt: new Date().toISOString(),
+    challenges: []
+  },
+  {
+    statement: "startsAt is not ISO string",
+    title: "Test Contest",
+    subtitle: "Test subtitle",
+    duration: 3600,
+    startsAt: "not a date",
+    challenges: []
+  },
+  {
+    statement: "challenges is not array",
+    title: "Test Contest",
+    subtitle: "Test subtitle",
+    duration: 3600,
+    startsAt: new Date().toISOString(),
+    challenges: "not an array"
+  },
+  {
+    statement: "challenge missing title",
+    title: "Test Contest",
+    subtitle: "Test subtitle",
+    duration: 3600,
+    startsAt: new Date().toISOString(),
+    challenges: [{
+      notionLink: "https://notion.so/test",
+      testFile: "test",
+      baseGithubUrl: "https://github.com/test/repo",
+      totalTestCases: 5
+    }]
+  },
+  {
+    statement: "challenge missing notionLink",
+    title: "Test Contest",
+    subtitle: "Test subtitle",
+    duration: 3600,
+    startsAt: new Date().toISOString(),
+    challenges: [{
+      title: "Challenge",
+      testFile: "test",
+      baseGithubUrl: "https://github.com/test/repo",
+      totalTestCases: 5
+    }]
+  },
+  {
+    statement: "challenge missing testFile",
+    title: "Test Contest",
+    subtitle: "Test subtitle",
+    duration: 3600,
+    startsAt: new Date().toISOString(),
+    challenges: [{
+      title: "Challenge",
+      notionLink: "https://notion.so/test",
+      baseGithubUrl: "https://github.com/test/repo",
+      totalTestCases: 5
+    }]
+  },
+  {
+    statement: "challenge missing baseGithubUrl",
+    title: "Test Contest",
+    subtitle: "Test subtitle",
+    duration: 3600,
+    startsAt: new Date().toISOString(),
+    challenges: [{
+      title: "Challenge",
+      notionLink: "https://notion.so/test",
+      testFile: "test",
+      totalTestCases: 5
+    }]
+  },
+  {
+    statement: "challenge missing totalTestCases",
+    title: "Test Contest",
+    subtitle: "Test subtitle",
+    duration: 3600,
+    startsAt: new Date().toISOString(),
+    challenges: [{
+      title: "Challenge",
+      notionLink: "https://notion.so/test",
+      testFile: "test",
+      baseGithubUrl: "https://github.com/test/repo"
+    }]
+  },
+  {
+    statement: "empty object",
+  },
+  {
+    statement: "null payload",
+    payload: null
+  }
+];
+

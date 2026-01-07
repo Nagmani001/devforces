@@ -18,6 +18,7 @@ export default async function AdminContestPage({ token, page }: {
       Authorization: token
     }
   });
+  console.log(total.data.total);
 
   //@ts-ignore
   const pageArr = getPageNumbers(parseInt(page), total.data.total);

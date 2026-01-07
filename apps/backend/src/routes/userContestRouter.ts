@@ -45,6 +45,17 @@ userContestRouter.get("/", async (req: Request, res: Response) => {
   }
 });
 
+userContestRouter.get("/:contestId", async (req: Request, res: Response) => {
+  const contestId = req.params.contestId!;
+  const contest = await prisma.contest.findFirst({
+    where: {
+      id: contestId
+    }
+  });
+  res.json({
+    contest
+  });
+})
 
 userContestRouter.get("/:contestId/challenges", async (req: Request, res: Response) => {
   const contestId = req.params.contestId;

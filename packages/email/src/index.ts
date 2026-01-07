@@ -47,3 +47,25 @@ export async function sendEmail(otp: string, sendTo: string, type: string) {
     }
   }
 }
+
+export async function notifyUser(sendTo: string, timeStamp: Date, contestLink: string) {
+  const { data, error } = await resend.emails.send({
+    from: 'Nagmani <nagmani@email.nagmaniupadhyay.com.np>',
+    to: [sendTo],
+    subject: "notification about contest",
+    html: `<strong>The contest will start in 5 minutes , please be ready <a href=${contestLink}>appearn for contest now </a></strong>`,
+    scheduledAt: timeStamp.toString()
+  });
+
+  if (error) {
+    return {
+      success: false,
+      message: "error sending email"
+    };
+  }
+
+  return {
+    success: true,
+    message: "sent scheduled successfully"
+  }
+}

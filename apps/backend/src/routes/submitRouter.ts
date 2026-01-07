@@ -2,8 +2,8 @@ import { Router, Response, Request } from "express";
 import { v4 as uuidv4 } from 'uuid';
 import * as AWS from "@aws-sdk/client-s3";
 import { createPresignedPost } from '@aws-sdk/s3-presigned-post';
-import { checkContestResultOrCreate, unauthorized } from "../lib/utils";
-import { pubSub, redisClient, soortedSetClient } from "..";
+import { calculateScoreAndUpdateDb, checkContestResultOrCreate, unauthorized } from "../lib/utils";
+import { pubSub, redisClient } from "..";
 import { REDIS_QUEUE_NAME } from "@repo/common/consts";
 import { PAYLOAD_TO_PUSH, PAYLOAD_TO_RECEIVE } from "@repo/common/typescript-types";
 import prisma from "@repo/db/client";
@@ -56,10 +56,16 @@ submitRouter.post("/submit/confirm/:contestId/:challengeId", async (req: Request
 
   const { contestResultId } = await checkContestResultOrCreate(contestId!, userId);
 
+  const getContestData = await prisma.contest.findFirst({
+    where: {
+      id: contestId
+    }
+  });
 
   pubSub.subscribe(uniqueId, async (response) => {
     const parsedResponse: PAYLOAD_TO_RECEIVE = JSON.parse(response);
 
+    await calculateScoreAndUpdateDb(parsedResponse, contestResultId, userId, challengeId!, getContestData?.startsAt!);
     const scoreSum = await prisma.challengeResult.aggregate({
       _sum: {
         score: true,
@@ -71,10 +77,16 @@ submitRouter.post("/submit/confirm/:contestId/:challengeId", async (req: Request
       },
     });
 
-    soortedSetClient.zAdd(`contest_leaderboard_${contestId}`, {
+    await redisClient.zAdd(`contest_leaderboard_${contestId}`, {
       score: scoreSum._sum.score! - (scoreSum._sum.penalty!) / 1000,
       value: userId
     });
+
+    await redisClient.hSet(`contest_leaderboard_${contestId}_userId_${userId}`, {
+      penalty: scoreSum._sum.penalty!,
+
+    })
+
 
     res.json(response);
   });

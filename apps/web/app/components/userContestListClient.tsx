@@ -1,11 +1,13 @@
 "use client";
 
 import UserContest from "@repo/ui/components/userContest";
-import { getStatusOfContest, getTimeFromSeconds } from "../config/utils";
+import { BASE_URL, getStatusOfContest, getTimeFromSeconds } from "../config/utils";
 import { useRouter } from "next/navigation";
 import { ENDED, LIVE, NOT_STARTED } from "@repo/common/consts";
 import { useAtomValue } from "jotai";
 import { searchFilter, searchInput } from "../atom";
+import axios from "axios";
+import { toast } from "sonner";
 
 export default function UserContestListClient({ contests }: any) {
   const router = useRouter();
@@ -37,8 +39,16 @@ export default function UserContestListClient({ contests }: any) {
           duration={duration}
           challengeCount={x._count.challenges}
           startTimeLabel={contestStatus.startsAtMessage}
-          onClick={() => {
-            alert("notify them");
+          onClick={async () => {
+            const res = await axios.post(`${BASE_URL}/api/notification/notify/${x.id}`, {}, {
+              headers: {
+                Authorization: localStorage.getItem("token")
+              }
+            });
+
+            if (res.data.success) {
+              toast.success("email will be sent 5 minutes prior to contest start")
+            }
           }}
         />
       } else if (contestStatus.status == LIVE && (filter == LIVE || filter == "ALL")) {

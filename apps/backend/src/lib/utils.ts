@@ -94,61 +94,78 @@ export async function checkContestResultOrCreate(contestId: string, userId: stri
   }
 }
 
-export async function persistInDb(workerResponse: PAYLOAD_TO_RECEIVE, challengeId: string, userId: string, contestId: string, contestResultId: string) {
-  await prisma.$transaction([
-    prisma.challengeResult.upsert({
-      where: {
-        challengeId: challengeId
-      },
-      create: {
-        score: workerResponse.passed,
-        penalty: workerResponse.passed == workerResponse.total ? (23) : (23),
-        duration: 2323,
-        numberOfFailBefore1stAC: workerResponse.passed == workerResponse.total ? 23 : 23,
-        timeOf1stAcSinceContestStart: 23,
-        contestResultId: "asldkfj",
-        userId: userId,
-        challengeId: challengeId!
-      },
-      update: {
-        score: workerResponse.passed,
-        penalty: workerResponse.passed == workerResponse.total ? (23) : (23),
-        duration: 2323,
-        numberOfFailBefore1stAC: workerResponse.passed == workerResponse.total ? 23 : 23,
-        timeOf1stAcSinceContestStart: 23,
-      }
-    }),
-  ])
-}
-
 /*
 INFO: Codeforces style ranking
 total_penalty = sigma(each_penalty(problem_i), for all SOLVED problem_i)
 each_penalty(p) = Number_of_Fail_Before_1st_AC * 20min + time_of_1st_AC_since_contest_start
 */
 
-export async function calculateScore(testResult: PAYLOAD_TO_RECEIVE, contestResultId: string, userId: string, challengeId: string) {
+export async function calculateScoreAndUpdateDb(testResult: PAYLOAD_TO_RECEIVE, contestResultId: string, userId: string, challengeId: string, startsAt: Date) {
+  const challengeResult = await prisma.challengeResult.findFirst({
+    where: {
+      userId,
+      challengeId
+    }
+  });
+
+  const currentTime = new Date();
+  const timeTakenInSecond = Math.floor((currentTime.getTime() - startsAt.getTime()) / 1000);
+  const numberOfFailBefore1stAC = challengeResult?.numberOfFailBefore1stAC || 0;
+  const timeTakenInMinute = Math.floor(timeTakenInSecond / 60);
+
   if (testResult.passed == testResult.total) {
-    // add 
+
+    await prisma.challengeResult.upsert({
+      where: {
+        userId,
+        challengeId
+      },
+      update: {
+        score: testResult.passed,
+        penalty: (numberOfFailBefore1stAC * 20) + timeTakenInMinute,
+        duration: timeTakenInSecond,
+        timeOf1stAcSinceContestStart: timeTakenInSecond,
+        contestResultId,
+        challengeId,
+        userId
+      },
+      create: {
+        score: testResult.passed,
+        penalty: timeTakenInMinute,
+        duration: timeTakenInSecond,
+        numberOfFailBefore1stAC: 0,
+        timeOf1stAcSinceContestStart: timeTakenInSecond,
+        contestResultId,
+        challengeId,
+        userId
+      }
+    })
+
 
   } else {
     await prisma.challengeResult.upsert({
       where: {
-        id: challengeId
+        userId,
+        challengeId
       },
       update: {
+        score: testResult.passed,
+        penalty: ((numberOfFailBefore1stAC + 1) * 20),
+        duration: timeTakenInSecond,
         numberOfFailBefore1stAC: {
           increment: 1
-        }
+        },
+        contestResultId,
+        challengeId,
+        userId
       },
       create: {
-        score: 23,
-        penalty: 23,
-        duration: 23,
-        numberOfFailBefore1stAC: 23,
-        timeOf1stAcSinceContestStart: 23,
-        contestResultId: "23",
-        challengeId: "23",
+        score: testResult.passed,
+        penalty: timeTakenInMinute,
+        duration: timeTakenInSecond,
+        numberOfFailBefore1stAC: 1,
+        contestResultId,
+        challengeId,
         userId
       }
     })

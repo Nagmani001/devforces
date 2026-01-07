@@ -10,7 +10,10 @@ export default async function Page({
 }) {
   const { page } = await params;
   const token = (await cookies()).get("token")?.value;
-  if (!token) return;
+  if (!token) return <div>
+    token not found
+  </div>;
+
 
   const me = await getUserInfo(token);
 
