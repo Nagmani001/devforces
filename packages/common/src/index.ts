@@ -1,4 +1,4 @@
-import { email, z } from "zod";
+import { z } from "zod";
 
 export const signupSchema = z.strictObject({
   username: z.string().trim().min(3).max(25),
@@ -48,6 +48,6 @@ export const updateChallengesSchema = z.object({
 export const updateContestSchema = z.object({
   title: z.string().optional(),
   duration: z.number().optional(), // seconds
-  startsAt: z.date().optional(),
+  startsAt: z.string().optional(), //TODO: make this dateTime and make sure you show the user errors accordingly
   challenges: z.array(challengesSchema).optional()
 });

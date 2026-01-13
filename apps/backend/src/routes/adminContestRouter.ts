@@ -235,7 +235,7 @@ adminContestRouter.put("/update/:id", async (req: Request, res: Response) => {
 
   const { title, duration, startsAt, challenges } = parsedData.data;
   try {
-    const updateContest = await prisma.contest.update({
+    await prisma.contest.update({
       where: {
         id: contestId
       },
@@ -243,11 +243,16 @@ adminContestRouter.put("/update/:id", async (req: Request, res: Response) => {
         title,
         duration,
         startsAt,
-        challenges: {
-          create: challenges
-        }
       }
     });
+
+    for (const challenge of challenges!) {
+      await prisma.challenge.upsert({
+        where: {
+          id: challenge.id ?? ""
+        }
+      })
+    }
 
     res.json({
       message: "updated contest successfully"

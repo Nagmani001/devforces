@@ -1,4 +1,3 @@
-import Leaderboard from "../../leaderboard/[contestId]/leaderboardClient"
 
 export default async function Page({
   params,
@@ -7,6 +6,6 @@ export default async function Page({
 }) {
   const { contestId } = await params
   return <div>
-    <Leaderboard />
+    hi
   </div>
 }

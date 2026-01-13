@@ -2,8 +2,10 @@
 import axios from "axios";
 
 const FormData = require('form-data');
-import { Challenge, getStatusOfContestReturns, S3PresignedPostFields } from "./types";
+import { Challenge } from "@repo/common/typescript-types";
+import { getStatusOfContestReturns, S3PresignedPostFields } from "./types";
 import { ENDED, LIVE, MONTH_NAMES, NOT_STARTED } from "@repo/common/consts";
+import { Contest } from "@repo/common/typescript-types";
 
 export const BASE_URL = "http://localhost:3001";
 export const BASE_FRONTEND_URL = "http://localhost:3000";
@@ -339,3 +341,17 @@ export const dummyLogs = [
   "Running test suite...",
   "Executing tests..."
 ];
+
+export function getHourAndMinutesFromduration(duration: number) {
+  const totalMinutes = duration / 60;
+  const hour = Math.floor(totalMinutes / 60);
+  const minutes = totalMinutes % 60;
+  return {
+    hour,
+    minutes
+  }
+}
+
+export function calculateDiffOfContest(initialContestData: Contest, finalData: Contest) {
+
+}

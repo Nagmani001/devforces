@@ -11,14 +11,6 @@ export interface signinType {
 }
 
 
-export type Challenge = {
-  id: string;
-  title: string;
-  notionLink: string;
-  baseGithubUrl: string;
-  testFile: string;
-  totalTestCases: number | "";
-};
 
 export interface getStatusOfContestReturns {
   status: string,

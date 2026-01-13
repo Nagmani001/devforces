@@ -5,14 +5,16 @@
 //TODO: i don't think there is any next js specific optimizations but consider that as well 
 
 import { DatePicker } from "@repo/ui/components/datePicker";
+import { Challenge } from "@repo/common/typescript-types";
 import { useState } from "react";
 import LabelWithInput from "@repo/ui/components/labbledInput";
 import { Plus, Trash2, FileText, Clock } from "lucide-react";
 import { Button } from "@repo/ui/components/button";
 import TimePicker from "@repo/ui/components/timePicker";
-import { Challenge } from "../config/types";
 import { BASE_URL, buildISTDate, emptyChallenge, getTimeInNumbers } from "../config/utils";
 import axios from "axios";
+import { toast } from "sonner";
+import { useRouter } from "next/navigation";
 
 
 export default function CreateContest() {
@@ -23,6 +25,8 @@ export default function CreateContest() {
   const [challenges, setChallenges] = useState<Challenge[]>([emptyChallenge()]);
   const [date, setDate] = useState<Date | undefined>(undefined)
   const [time, setTime] = useState("");
+
+  const router = useRouter();
 
   const year = date?.getFullYear()!;
   const monthIndex = date?.getMonth()!;
@@ -79,11 +83,10 @@ export default function CreateContest() {
           Authorization: localStorage.getItem("token"),
         }
       });
-      alert("Success");
+      toast.success("Successfully created contest");
+      router.push("/contests/1");
     } catch (err) {
-      alert("something went wrong");
-      console.log(err);
-
+      toast.error("Something went wrong");
     }
   };
 

@@ -5,14 +5,16 @@
 //TODO: i don't think there is any next js specific optimizations but consider that as well 
 
 import { DatePicker } from "@repo/ui/components/datePicker";
+import { Challenge } from "@repo/common/typescript-types";
 import { useEffect, useState } from "react";
 import LabelWithInput from "@repo/ui/components/labbledInput";
 import { Plus, Trash2, FileText, Clock } from "lucide-react";
 import { Button } from "@repo/ui/components/button";
 import TimePicker from "@repo/ui/components/timePicker";
-import { Challenge } from "../config/types";
-import { BASE_URL, buildISTDate, emptyChallenge, getContestForUpdate, getTimeInNumbers } from "../config/utils";
+import { BASE_URL, buildISTDate, calculateDiffOfContest, emptyChallenge, getContestForUpdate, getHourAndMinutesFromduration, getTimeInNumbers } from "../config/utils";
 import axios from "axios";
+import { toast } from "sonner";
+import { useRouter } from "next/navigation";
 
 
 export default function UpdateContest({ contestId }: {
@@ -25,6 +27,7 @@ export default function UpdateContest({ contestId }: {
   const [challenges, setChallenges] = useState<Challenge[]>([emptyChallenge()]);
   const [date, setDate] = useState<Date | undefined>(undefined)
   const [time, setTime] = useState("");
+  const router = useRouter();
 
   const year = date?.getFullYear()!;
   const monthIndex = date?.getMonth()!;
@@ -50,19 +53,29 @@ export default function UpdateContest({ contestId }: {
       //@ts-ignore
       const contests = await getContestForUpdate(contestId, localStorage.getItem("token"));
       const actualContest = contests.contests?.data.contests;
-      //BUG : very ugly state updates , should be better
+
+      const { hour, minutes } = getHourAndMinutesFromduration(actualContest.duration);
       setContestTitle(actualContest.title);
       setContestSubtitle(actualContest.subtitle);
-      /*
-      setChallenges(actualContest.challenges);
-      setTotalTimeHours();
-      setTotalTimeMinutes();
-      setDate();
-      setTime()
-       * */
+      setTotalTimeHours(hour);
+      setTotalTimeMinutes(minutes);
+      setChallenges(actualContest.challenges.map((x: any) => {
+        return {
+          id: x.id,
+          title: x.title,
+          notionLink: x.notionLink,
+          baseGithubUrl: x.baseGithubUrl,
+          testFile: x.testFile,
+          totalTestCases: x.totalTestCases,
+        }
+      }));
+
+      let date = new Date(actualContest.startsAt);
+      setDate(date);
+      setTime(`${date.getHours()}:${date.getMinutes()}:${date.getSeconds()}`)
     }
     fetchContestDetails();
-  });
+  }, []);
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!actualTime?.hour || !actualTime.minute || !actualTime.second) {
@@ -80,7 +93,24 @@ export default function UpdateContest({ contestId }: {
       challenges,
     };
     try {
-      await axios.post(`${BASE_URL}/api/admin/contest/update/${contestId}`, {
+      const data = {
+        title: payload.title,
+        subtitle: payload.subTitle,
+        duration: payload.duration, // seconds
+        startsAt: payload.startsAt,
+        challenges: payload.challenges.map(x => {
+          return {
+            id: x.id,
+            title: x.title,
+            notionLink: x.notionLink,
+            baseGithubUrl: x.baseGithubUrl,
+            testFile: x.testFile,
+            totalTestCases: x.totalTestCases,
+          }
+        })
+      }
+      calculateDiffOfContest(data, data);
+      await axios.put(`${BASE_URL}/api/admin/contest/update/${contestId}`, {
         title: payload.title,
         subtitle: payload.subTitle,
         duration: payload.duration, // seconds
@@ -89,6 +119,7 @@ export default function UpdateContest({ contestId }: {
           return {
             title: x.title,
             notionLink: x.notionLink,
+            baseGithubUrl: x.baseGithubUrl,
             testFile: x.testFile,
             totalTestCases: x.totalTestCases,
           }
@@ -98,11 +129,11 @@ export default function UpdateContest({ contestId }: {
           Authorization: localStorage.getItem("token"),
         }
       });
-      alert("Success");
-    } catch (err) {
-      alert("something went wrong");
-      console.log(err);
+      toast.success("updated Contest successfully");
+      router.push("/contests/1");
 
+    } catch (err) {
+      toast.error("Error while updating contest");
     }
   };
 
@@ -181,9 +212,11 @@ export default function UpdateContest({ contestId }: {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <DatePicker date={date} setDate={setDate} />
-            <TimePicker onChange={(e: any) => {
-              setTime(e.target.value);
-            }} />
+            <TimePicker
+              value={time}
+              onChange={(e: any) => {
+                setTime(e.target.value);
+              }} />
           </div>
         </div>
 
@@ -271,10 +304,60 @@ export default function UpdateContest({ contestId }: {
                       placeholder="0"
                       min={0}
                     />
+
+                    <div className="md:col-span-3">
+                      <LabelWithInput
+                        label="Base Github Url"
+                        value={ch.baseGithubUrl}
+                        onChange={(e) => updateChallenge(ch.id, "baseGithubUrl", e.target.value)}
+                        placeholder="https://github.com/Nagmani001"
+                      />
+                    </div>
+
+                    <div className="md:col-span-3 mt-2 bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-200 rounded-xl p-6 shadow-sm">
+                      <h3 className="flex items-center gap-2 text-blue-900 font-semibold text-base mb-5">
+                        <div className="bg-blue-100 p-1.5 rounded-lg">
+                          <FileText className="w-4 h-4 text-blue-600" />
+                        </div>
+                        Repository Requirements
+                      </h3>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="flex gap-4 bg-white/60 backdrop-blur-sm rounded-lg p-4 border border-blue-100/50">
+                          <div className="bg-blue-500 text-white w-7 h-7 rounded-full flex items-center justify-center text-sm font-bold flex-shrink-0">1</div>
+                          <div>
+                            <span className="font-semibold text-blue-900 block mb-1">Base Repository</span>
+                            <p className="text-sm text-blue-800/70 leading-relaxed">Create a public GitHub repository containing your challenge code.</p>
+                          </div>
+                        </div>
+                        <div className="flex gap-4 bg-white/60 backdrop-blur-sm rounded-lg p-4 border border-blue-100/50">
+                          <div className="bg-blue-500 text-white w-7 h-7 rounded-full flex items-center justify-center text-sm font-bold flex-shrink-0">2</div>
+                          <div>
+                            <span className="font-semibold text-blue-900 block mb-1">Docker Configuration</span>
+                            <p className="text-sm text-blue-800/70 leading-relaxed">Include a <code className="bg-blue-100 px-1.5 py-0.5 rounded text-blue-700 text-xs font-medium">Dockerfile</code> and <code className="bg-blue-100 px-1.5 py-0.5 rounded text-blue-700 text-xs font-medium">docker-compose.yml</code>.</p>
+                          </div>
+                        </div>
+                        <div className="flex gap-4 bg-white/60 backdrop-blur-sm rounded-lg p-4 border border-blue-100/50">
+                          <div className="bg-blue-500 text-white w-7 h-7 rounded-full flex items-center justify-center text-sm font-bold flex-shrink-0">3</div>
+                          <div>
+                            <span className="font-semibold text-blue-900 block mb-1">Health Check</span>
+                            <p className="text-sm text-blue-800/70 leading-relaxed">Expose a <code className="bg-blue-100 px-1.5 py-0.5 rounded text-blue-700 text-xs font-medium">GET /</code> endpoint returning 200 OK.</p>
+                          </div>
+                        </div>
+                        <div className="flex gap-4 bg-white/60 backdrop-blur-sm rounded-lg p-4 border border-blue-100/50">
+                          <div className="bg-blue-500 text-white w-7 h-7 rounded-full flex items-center justify-center text-sm font-bold flex-shrink-0">4</div>
+                          <div>
+                            <span className="font-semibold text-blue-900 block mb-1">Tests</span>
+                            <p className="text-sm text-blue-800/70 leading-relaxed">Paste test code in the <strong className="text-blue-900">Test File</strong> field above.</p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
                   </div>
                 </div>
               </div>
             ))}
+
           </div>
         </div>
 
@@ -296,7 +379,7 @@ export default function UpdateContest({ contestId }: {
             <Button
               type="submit"
             >
-              Create Contest
+              Update Contest
             </Button>
           </div>
         </div>

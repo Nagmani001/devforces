@@ -1,9 +1,9 @@
-import axios from "axios";
 import { BASE_URL, getStatusOfContest } from "@/app/config/utils";
 import { cookies } from "next/headers";
 import { ENDED, LIVE } from "@repo/common/consts";
 import LeaderboardEnded from "./leaderboardEnded";
 import LeaderboardLive from "./leaderboardLive";
+import axios from "axios";
 
 export default async function Page({
   params,

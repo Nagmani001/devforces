@@ -1,14 +1,16 @@
+"use client";
 import { Input } from "./input"
 import { Label } from "./label"
 
 
-const TimePicker = ({ onChange }: any) => {
+const TimePicker = ({ onChange, value }: any) => {
   return (
     <div className='w-full max-w-xs space-y-2'>
       <Label htmlFor='time-picker' className='px-1'>
         Time input
       </Label>
       <Input
+        value={value}
         onChange={onChange}
         type='time'
         id='time-picker'

@@ -41,8 +41,9 @@ app.use("/api/auth", authRouter);
 app.use("/api/admin/contest", authMiddleware, adminContestRouter);
 app.use("/api/user/contest", authMiddleware, userContestRouter);
 app.use("/api/submissions", authMiddleware, submitRouter);
-app.use("/api/leaderboard", leaderboardRouter);
 app.use("/api/notification", authMiddleware, notificationRotuer);
+app.use("/api/leaderboard", leaderboardRouter);
+
 
 
 async function main() {

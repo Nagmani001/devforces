@@ -1,4 +1,5 @@
 import { Router, Response, Request } from "express";
+import { Sandbox } from '@e2b/code-interpreter';
 import { v4 as uuidv4 } from 'uuid';
 import * as AWS from "@aws-sdk/client-s3";
 import { createPresignedPost } from '@aws-sdk/s3-presigned-post';
