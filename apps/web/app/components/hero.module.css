@@ -1,0 +1,39 @@
+.hero-noise {
+  position: relative;
+}
+
+.hero-noise::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: url("https://grainy-gradients.vercel.app/noise.svg");
+  opacity: 0.2;
+  pointer-events: none;
+}
+
+.herogradienttext {
+  background: linear-gradient(180deg, rgba(80, 144, 242, 1) 50%, rgba(31, 73, 171, 1) 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.heroheadinggradient {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 1) 0%, rgb(188, 188, 188) 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* .hero-primary-button {
+  background: linear-gradient(180deg, rgba(80, 144, 242, 1) 0%, rgba(31, 73, 171, 1) 100%);
+} */
+
+@keyframes float {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-10px); }
+      }
+      .animate-float {
+        animation: float 3s ease-in-out infinite;
+      }
+

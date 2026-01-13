@@ -1,0 +1,12 @@
+.heroNoise {
+  position: relative;
+}
+
+.heroNoise::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: url("https://grainy-gradients.vercel.app/noise.svg");
+  opacity: 0.2;
+  pointer-events: none;
+}
