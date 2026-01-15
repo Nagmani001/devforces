@@ -245,14 +245,7 @@ adminContestRouter.put("/update/:id", async (req: Request, res: Response) => {
         startsAt,
       }
     });
-
-    for (const challenge of challenges!) {
-      await prisma.challenge.upsert({
-        where: {
-          id: challenge.id ?? ""
-        }
-      })
-    }
+    // logic missing 
 
     res.json({
       message: "updated contest successfully"

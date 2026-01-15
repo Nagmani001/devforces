@@ -5,8 +5,10 @@ import { cn } from "@repo/ui/lib/utils";
 import styles from './hero.module.css'
 import Link from "next/link";
 import { CodeWindow } from "./codeWindow";
+import { useRouter } from "next/navigation";
 
 export default function Hero() {
+  const router = useRouter();
   return (
     <div
       className={`relative flex h-auto w-auto m-3 mt-0 overflow-hidden rounded-bl-xl rounded-br-xl items-center justify-center bg-white dark:bg-[#0a0b10] ${styles["hero-noise"]}`}
@@ -41,6 +43,9 @@ export default function Hero() {
           <div className="gap-1.5 mt-5.5">
             <Link href="/signup">
               <button
+                onClick={() => {
+                  router.push("/signup")
+                }}
                 className="bg-white text-center w-48 rounded-4xl h-14 relative text-black text-xl font-semibold group"
                 type="button"
               >

@@ -5,10 +5,12 @@ import Link from "next/link";
 import { cn } from "@repo/ui/lib/utils";
 import styles from "./nav.module.css";
 import { motion } from "framer-motion";
+import { useRouter } from "next/navigation";
 
 
 export default function NavHero() {
   const [open, setOpen] = useState(false);
+  const router = useRouter();
 
   return (
     <div>
@@ -54,7 +56,11 @@ export default function NavHero() {
 
           {/* DESKTOP CTA */}
           <div className="hidden md:block">
-            <button className="bg-white h-10 px-8 rounded-md text-[13px] text-black m-1 tracking-tight font-medium">
+            <button
+              onClick={() => {
+                router.push("/signup")
+              }}
+              className="bg-white h-10 px-8 rounded-md text-[13px] text-black m-1 tracking-tight font-medium">
               Signup Now
             </button>
           </div>

@@ -1,7 +1,13 @@
 "use client"
 
-import React, { useState } from 'react';
+import React, { ChangeEvent, useState } from 'react';
 import { Eye, EyeOff } from 'lucide-react';
+import axios from 'axios';
+import { BASE_URL } from '@/app/config/utils';
+import { toast } from 'sonner';
+import { useRouter } from 'next/navigation';
+import { useMutation } from '@tanstack/react-query';
+import { signinType } from '@/app/config/types';
 
 
 // --- HELPER COMPONENTS (ICONS) ---
@@ -76,12 +82,39 @@ export const SignInPage: React.FC<SignInPageProps> = ({
   description = "Keep your online test valid and develop fast ",
   heroImageSrc,
   testimonials = [],
-  onSignIn,
-  onGoogleSignIn,
-  onResetPassword,
   onCreateAccount,
 }) => {
   const [showPassword, setShowPassword] = useState(false);
+
+
+  const [signinData, setSigninData] = useState({
+    email: "",
+    password: ""
+  });
+
+  const router = useRouter();
+
+  const mutation = useMutation({
+    mutationFn: (user: signinType) => {
+      return axios.post(`${BASE_URL}/api/auth/signin`, user, {
+        withCredentials: true
+      });
+    },
+    onError: (error: any) => {
+      console.log(error);
+      toast.error("something went wrong");
+    },
+    onSuccess: (success: any) => {
+      toast.success("successfully sigined in");
+      localStorage.setItem("token", success.data.token);
+      router.push(`/contests/1`);
+    }
+  })
+
+
+  function handleForgotPassword() {
+
+  }
 
   return (
     <div className="h-[100dvh] flex flex-col bg-[#0c0d10] md:flex-row font-geist w-auto">
@@ -92,11 +125,20 @@ export const SignInPage: React.FC<SignInPageProps> = ({
             <h1 className="animate-element animate-delay-100 text-4xl md:text-5xl font-semibold leading-tight">{title}</h1>
             <p className="animate-element animate-delay-200 text-muted-foreground">{description}</p>
 
-            <form className="space-y-5" onSubmit={onSignIn}>
+            <form className="space-y-5">
               <div className="animate-element animate-delay-300">
                 <label className="text-sm font-medium text-muted-foreground">Email Address</label>
                 <GlassInputWrapper>
-                  <input name="email" type="email" placeholder="Enter your email address" className="w-full bg-transparent text-sm p-4 rounded-2xl focus:outline-none" />
+                  <input
+                    onChange={(e: ChangeEvent<HTMLInputElement>) => {
+                      setSigninData((prev) => {
+                        return {
+                          ...prev,
+                          email: e.target.value
+                        }
+                      })
+                    }}
+                    name="email" type="email" placeholder="Enter your email address" className="w-full bg-transparent text-sm p-4 rounded-2xl focus:outline-none" />
                 </GlassInputWrapper>
               </div>
 
@@ -104,7 +146,16 @@ export const SignInPage: React.FC<SignInPageProps> = ({
                 <label className="text-sm font-medium text-muted-foreground">Password</label>
                 <GlassInputWrapper>
                   <div className="relative">
-                    <input name="password" type={showPassword ? 'text' : 'password'} placeholder="Enter your password" className="w-full bg-transparent text-sm p-4 pr-12 rounded-2xl focus:outline-none" />
+                    <input
+                      onChange={(e: ChangeEvent<HTMLInputElement>) => {
+                        setSigninData((prev) => {
+                          return {
+                            ...prev,
+                            password: e.target.value
+                          }
+                        })
+                      }}
+                      name="password" type={showPassword ? 'text' : 'password'} placeholder="Enter your password" className="w-full bg-transparent text-sm p-4 pr-12 rounded-2xl focus:outline-none" />
                     <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute inset-y-0 right-3 flex items-center">
                       {showPassword ? <EyeOff className="w-5 h-5 text-muted-foreground hover:text-foreground transition-colors" /> : <Eye className="w-5 h-5 text-muted-foreground hover:text-foreground transition-colors" />}
                     </button>
@@ -117,10 +168,17 @@ export const SignInPage: React.FC<SignInPageProps> = ({
                   <input type="checkbox" name="rememberMe" className="custom-checkbox" />
                   <span className="text-foreground/90">Keep me signed in</span>
                 </label>
-                <a href="#" onClick={(e) => { e.preventDefault(); onResetPassword?.(); }} className="hover:underline text-blue-500 tracking-tight transition-colors">Reset password</a>
+                <a href="#" onClick={() => {
+                  handleForgotPassword()
+                }} className="hover:underline text-blue-500 tracking-tight transition-colors">Reset password</a>
               </div>
 
-              <button type="submit" className="animate-element animate-delay-600 w-full rounded-2xl bg-primary py-4 font-medium text-primary-foreground hover:bg-primary/90 transition-colors">
+              <button
+                type="button"
+                onClick={() => {
+                  mutation.mutate(signinData)
+                }}
+                className="animate-element animate-delay-600 w-full rounded-2xl bg-primary py-4 font-medium text-primary-foreground hover:bg-primary/90 transition-colors">
                 Sign In
               </button>
             </form>
@@ -128,28 +186,30 @@ export const SignInPage: React.FC<SignInPageProps> = ({
 
 
             <p className="animate-element animate-delay-900 text-center text-sm text-muted-foreground">
-              New to our platform? <a href="#" onClick={(e) => { e.preventDefault(); onCreateAccount?.(); }} className="text-blue-500 hover:underline transition-colors">Create Account</a>
+              New to our platform? <a href="/signup" onClick={(e) => { e.preventDefault(); onCreateAccount?.(); }} className="text-blue-500 hover:underline transition-colors">Create Account</a>
             </p>
           </div>
         </div>
-      </section>
+      </section >
 
       {/* Right column: hero image + testimonials */}
-      {heroImageSrc && (
-        <section className="hidden md:block flex-1 relative p-4 ">
-          <div className="animate-slide-right animate-delay-300 absolute inset-4 rounded-3xl bg-cover bg-center" style={{ backgroundImage: `url(${heroImageSrc})` }}></div>
-          {testimonials.length > 0 && (
-            <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex gap-4 px-8 w-full justify-center">
-              <TestimonialCard testimonial={testimonials[0]} delay="animate-delay-1000" />
-              {testimonials[1] && <div className="hidden xl:flex"><TestimonialCard testimonial={testimonials[1]} delay="animate-delay-1200" /></div>}
-              {testimonials[2] && <div className="hidden 2xl:flex"><TestimonialCard testimonial={testimonials[2]} delay="animate-delay-1400" /></div>}
+      {
+        heroImageSrc && (
+          <section className="hidden md:block flex-1 relative p-4 ">
+            <div className="animate-slide-right animate-delay-300 absolute inset-4 rounded-3xl bg-cover bg-center" style={{ backgroundImage: `url(${heroImageSrc})` }}></div>
+            {testimonials.length > 0 && (
+              <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex gap-4 px-8 w-full justify-center">
+                <TestimonialCard testimonial={testimonials[0]} delay="animate-delay-1000" />
+                {testimonials[1] && <div className="hidden xl:flex"><TestimonialCard testimonial={testimonials[1]} delay="animate-delay-1200" /></div>}
+                {testimonials[2] && <div className="hidden 2xl:flex"><TestimonialCard testimonial={testimonials[2]} delay="animate-delay-1400" /></div>}
 
-            </div>
+              </div>
 
 
-          )}
-        </section>
-      )}
-    </div>
+            )}
+          </section>
+        )
+      }
+    </div >
   );
 };  
