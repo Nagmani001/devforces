@@ -9,6 +9,7 @@ import { submitRouter } from "./routes/submitRouter";
 import { createClient, RedisClientType } from "redis";
 import { leaderboardRouter } from "./routes/leaderboardRouter";
 import { notificationRotuer } from "./routes/notificationRouter";
+import { sseRouter } from "./routes/sseRouter";
 
 config();
 const app = express();
@@ -43,6 +44,7 @@ app.use("/api/user/contest", authMiddleware, userContestRouter);
 app.use("/api/submissions", authMiddleware, submitRouter);
 app.use("/api/notification", authMiddleware, notificationRotuer);
 app.use("/api/leaderboard", leaderboardRouter);
+app.use("/api/live", sseRouter);
 
 
 

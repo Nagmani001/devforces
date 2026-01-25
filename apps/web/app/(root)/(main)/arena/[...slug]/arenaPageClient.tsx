@@ -12,7 +12,7 @@ import { NotionRenderer } from "react-notion-x";
 import { CloudUpload, Play, Loader, GripVertical, CheckCircle, Copy, GitBranch, AlertTriangle, Terminal } from "lucide-react";
 import dynamic from 'next/dynamic'
 import axios from "axios";
-import { BASE_URL, confirmFileSent, dummyLogs, sendZippedFile } from "@/app/config/utils";
+import { BASE_URL, confirmFileSent, sendZippedFile } from "@/app/config/utils";
 import { ArenaDropzoneLoader } from "@/app/components/arenaDropzoneLoader";
 
 const Code = dynamic(() =>
@@ -35,22 +35,7 @@ export default function ArenaPage({ recordMap, challengeId, baseGithubUrl, conte
   });
 
 
-  useEffect(() => {
-    if (isSubmitting) {
-      setLogs([]);
-      let currentIndex = 0;
-      const interval = setInterval(() => {
-        if (currentIndex < dummyLogs.length) {
-          setLogs(prev => [...prev, dummyLogs[currentIndex]]);
-          currentIndex++;
-        } else {
-          clearInterval(interval);
-        }
-      }, 500); // Add a new log line every 500ms
-
-      return () => clearInterval(interval);
-    }
-  }, [isSubmitting]);
+  // SSE connection will be handled in handleSubmit
 
   const onDrop = useCallback((acceptedFiles: File[]) => {
     //@ts-ignore
@@ -77,39 +62,85 @@ export default function ArenaPage({ recordMap, challengeId, baseGithubUrl, conte
     if (files.length < 1) {
       return alert("no files selected");
     }
-    const getPresignedUrl = await axios.get(`${BASE_URL}/api/submissions/preSignedUrl/${challengeId}`, {
-      headers: {
-        Authorization: localStorage.getItem("token")
-      }
-    });
-
-    const { preSignedUrl, fields } = getPresignedUrl.data;
-    //    new Promise(r => setTimeout(r, 1000));
-
-    const zip = new JSZip();
-
-    for (const file of files) {
-      // INFO: can also add name of file here , useful in worker after unzipint
-
-      //@ts-ignore
-      zip.file(file.path, file);
-    }
-
-    const zipFile = await zip.generateAsync({ type: "blob" });
-
+    
     setIsSubmitting(true);
     setLogs([]);
+    setTestResult({ passed: 0, total: 0, failed: 0 });
+
+    let eventSource: EventSource | null = null;
+
     try {
+      // Get pre-signed URL and submission token
+      const getPresignedUrl = await axios.get(`${BASE_URL}/api/submissions/preSignedUrl/${challengeId}?contestId=${contestId}`, {
+        headers: {
+          Authorization: localStorage.getItem("token")
+        }
+      });
+
+      const { preSignedUrl, fields, submissionToken } = getPresignedUrl.data;
+
+      if (!submissionToken) {
+        throw new Error("No submission token received");
+      }
+
+      // Set up SSE connection before submitting
+      eventSource = new EventSource(`${BASE_URL}/api/live/sse/${submissionToken}`);
+      
+      eventSource.onmessage = (event) => {
+        try {
+          const data = JSON.parse(event.data);
+          
+          if (data.type === "log") {
+            // Add log message to logs array
+            setLogs(prev => [...prev, data.data.message]);
+          } else if (data.type === "result") {
+            // Handle result
+            const result = JSON.parse(data.data.message);
+            setTestResult(result);
+            // Close SSE connection when result is received
+            if (eventSource) {
+              eventSource.close();
+            }
+            setIsSubmitting(false);
+          } else if (data.type === "connected") {
+            setLogs(prev => [...prev, data.message]);
+          }
+        } catch (err) {
+          console.error("Error parsing SSE message:", err);
+        }
+      };
+
+      eventSource.onerror = (err) => {
+        console.error("SSE error:", err);
+        setLogs(prev => [...prev, "Connection error occurred"]);
+        if (eventSource) {
+          eventSource.close();
+        }
+        setIsSubmitting(false);
+      };
+
+      // Create and upload zip file
+      const zip = new JSZip();
+
+      for (const file of files) {
+        // INFO: can also add name of file here , useful in worker after unzipping
+        //@ts-ignore
+        zip.file(file.path, file);
+      }
+
+      const zipFile = await zip.generateAsync({ type: "blob" });
       await sendZippedFile(preSignedUrl, fields, zipFile);
 
-      const response = await confirmFileSent(challengeId, contestId);
-      const parsedValue = JSON.parse(response);
-      setTestResult(parsedValue);
+      // Confirm submission (this will trigger the worker to start processing)
+      await confirmFileSent(challengeId, contestId, submissionToken);
       setFiles([]);
+      
     } catch (e) {
       console.error(e);
       alert("Error submitting file");
-    } finally {
+      if (eventSource) {
+        eventSource.close();
+      }
       setIsSubmitting(false);
     }
   };

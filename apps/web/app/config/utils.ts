@@ -289,8 +289,10 @@ export async function sendZippedFile(url: string, conf: S3PresignedPostFields, f
   console.log("uploaded to s3 successfully", response);
 }
 
-export async function confirmFileSent(challengeId: string, contestId: string) {
-  const sendConfirmation = await axios.post(`${BASE_URL}/api/submissions/submit/confirm/${contestId}/${challengeId}`, {}, {
+export async function confirmFileSent(challengeId: string, contestId: string, submissionToken: string) {
+  const sendConfirmation = await axios.post(`${BASE_URL}/api/submissions/submit/confirm/${contestId}/${challengeId}`, {
+    submissionToken
+  }, {
     headers: {
       Authorization: localStorage.getItem("token")
     }

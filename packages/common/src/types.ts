@@ -11,6 +11,17 @@ export interface PAYLOAD_TO_RECEIVE {
   failed: number
 }
 
+export interface LogMessage {
+  type: "log" | "result" | "error";
+  message: string;
+  timestamp: number;
+}
+
+export interface SSEMessage {
+  type: "log" | "result";
+  data: LogMessage;
+}
+
 
 export type Challenge = {
   id: string;
