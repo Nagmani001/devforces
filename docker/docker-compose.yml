@@ -1,18 +1,17 @@
-version: '3.8'
 services:
   database:
     image: postgres
     container_name: postgres
     restart: always
     environment:
-      - POSTGRES_PASSWORD=nagmani
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
     ports:
       - '5432:5432'
     healthcheck:
       test: [ "CMD-SHELL", "pg_isready -U postgres" ]
-      interval: 5s
-      timeout: 5s
-      retries: 5
+      interval: 1s
+      timeout: 10s
+      retries: 10
 
   redis:
     image: redis 
@@ -29,7 +28,6 @@ services:
   backend:
     build:
       context: ../ 
-      no_cache: true
       dockerfile: docker/backend/Dockerfile
     container_name: backend
     environment:
@@ -52,12 +50,10 @@ services:
   worker:
     build:
       context: ../ 
-      no_cache: true
       dockerfile: docker/worker/Dockerfile
     container_name: worker 
-
     environment:
-      REDIS_URL: redis://redis:6379
+      REDIS_URL: ${REDIS_URL} 
       
     depends_on:
       redis:
@@ -66,7 +62,6 @@ services:
   web:
     build:
       context: ../ 
-      no_cache: true
       dockerfile: docker/web/Dockerfile
     container_name: web 
 

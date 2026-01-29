@@ -1,7 +1,7 @@
 "use client";
 
 import UserContest from "@repo/ui/components/userContest";
-import { BASE_URL, getStatusOfContest, getTimeFromSeconds } from "../config/utils";
+import { BASE_URL_CLIENT, getStatusOfContest, getTimeFromSeconds } from "../config/utils";
 import { useRouter } from "next/navigation";
 import { ENDED, LIVE, NOT_STARTED } from "@repo/common/consts";
 import { useAtomValue } from "jotai";
@@ -40,7 +40,7 @@ export default function UserContestListClient({ contests }: any) {
           challengeCount={x._count.challenges}
           startTimeLabel={contestStatus.startsAtMessage}
           onClick={async () => {
-            const res = await axios.post(`${BASE_URL}/api/notification/notify/${x.id}`, {}, {
+            const res = await axios.post(`${BASE_URL_CLIENT}/api/notification/notify/${x.id}`, {}, {
               headers: {
                 Authorization: localStorage.getItem("token")
               }

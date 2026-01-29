@@ -2,7 +2,7 @@
 import React from "react";
 
 const Faq = () => {
-  const [openIndex, setOpenIndex] = React.useState(null);
+  const [openIndex, setOpenIndex] = React.useState<null | number>(null);
 
   const faqs = [
     {

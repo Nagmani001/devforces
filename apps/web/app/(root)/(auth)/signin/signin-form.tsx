@@ -4,7 +4,7 @@ import { useRouter } from 'next/navigation';
 import { Button } from '@repo/ui/components/button';
 import { useMutation } from '@tanstack/react-query';
 import axios from 'axios';
-import { BASE_URL } from '@/app/config/utils';
+import { BASE_URL_CLIENT } from '@/app/config/utils';
 import { toast } from 'sonner';
 import { signinType } from '@/app/config/types';
 import LabbledInput from '@repo/ui/components/labbledInput';
@@ -20,7 +20,7 @@ export default function SigninForm() {
 
   const mutation = useMutation({
     mutationFn: (user: signinType) => {
-      return axios.post(`${BASE_URL}/api/auth/signin`, user, {
+      return axios.post(`${BASE_URL_CLIENT}/api/auth/signin`, user, {
         withCredentials: true
       });
     },

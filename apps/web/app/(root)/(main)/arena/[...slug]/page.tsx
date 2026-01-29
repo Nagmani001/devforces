@@ -15,6 +15,9 @@ export default async function Page({
   const token = (await cookies()).get("token")?.value;
   if (!token) return;
 
+
+
+
   const notion = new NotionAPI()
   const challenge = await getChallengeDetails(challengeId, token);
 

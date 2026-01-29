@@ -16,6 +16,7 @@ export default async function Page({
 
 
   const me = await getUserInfo(token);
+  console.log("ouput of me ", me);
 
   if (me.data.isAdmin) {
     return <AdminContestPage token={token} page={page} />

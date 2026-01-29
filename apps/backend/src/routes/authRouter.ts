@@ -150,29 +150,39 @@ authRouter.post("/verify-otp/:userId", async (req: Request, res: Response) => {
 });
 
 authRouter.get("/me", authMiddleware, async (req: Request, res: Response) => {
+  console.log("main request request handler");
   const userId = req.userId;
+  console.log("userId", userId);
   if (!userId) {
     return res.status(403).json({
       message: "invalid auth"
     });
   };
 
-  const user = await prisma.user.findFirst({
-    where: {
-      id: userId
-    }
-  });
-  if (!user) {
-    return res.status(404).json({
-      message: "user not found"
+  try {
+    console.log("before db request");
+    const user = await prisma.user.findFirst({
+      where: {
+        id: userId
+      }
     });
+
+    console.log("after db request", user);
+    if (!user) {
+      return res.status(404).json({
+        message: "user not found"
+      });
+    }
+    res.json({
+      isAdmin: user.isAdmin,
+      username: user.username,
+      email: user.email,
+      imageUrl: user.imageUrl
+    });
+  } catch (err) {
+    console.log("db request failed");
+
   }
-  res.json({
-    isAdmin: user.isAdmin,
-    username: user.username,
-    email: user.email,
-    imageUrl: user.imageUrl
-  });
 });
 
 /*

@@ -48,6 +48,9 @@ sseRouter.get("/sse/:token", async (req: Request, res: Response) => {
     }
   };
 
+
+
+
   // Set up message listener before subscribing
   //  pubSub.on('message', messageHandler);
   await pubSub.subscribe(token!, messageHandler);

@@ -16,9 +16,6 @@ export class LogsManager {
     this.channel = channel;
   }
 
-  /**
-   * Add a log message to the buffer and immediately publish it
-   */
   async addLog(message: string, type: "log" | "error" = "log"): Promise<void> {
     const logMessage: LogMessage = {
       type,
@@ -28,16 +25,12 @@ export class LogsManager {
 
     this.logs.push(logMessage);
 
-    // Publish immediately to Redis
     await this.pubSub.publish(this.channel, JSON.stringify({
       type: "log",
       data: logMessage
     }));
   }
 
-  /**
-   * Publish test results
-   */
   async publishResult(result: {
     passed: number;
     total: number;
@@ -55,16 +48,10 @@ export class LogsManager {
     }));
   }
 
-  /**
-   * Get all accumulated logs
-   */
   getLogs(): LogMessage[] {
     return this.logs;
   }
 
-  /**
-   * Clear all logs
-   */
   clearLogs(): void {
     this.logs = [];
   }

@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback } from "react";
 // @ts-ignore
 import { ResizableBox } from "react-resizable";
 import JSZip from "jszip";
@@ -12,7 +12,7 @@ import { NotionRenderer } from "react-notion-x";
 import { CloudUpload, Play, Loader, GripVertical, CheckCircle, Copy, GitBranch, AlertTriangle, Terminal } from "lucide-react";
 import dynamic from 'next/dynamic'
 import axios from "axios";
-import { BASE_URL, confirmFileSent, sendZippedFile } from "@/app/config/utils";
+import { BASE_URL_CLIENT, confirmFileSent, sendZippedFile } from "@/app/config/utils";
 import { ArenaDropzoneLoader } from "@/app/components/arenaDropzoneLoader";
 
 const Code = dynamic(() =>
@@ -62,7 +62,7 @@ export default function ArenaPage({ recordMap, challengeId, baseGithubUrl, conte
     if (files.length < 1) {
       return alert("no files selected");
     }
-    
+
     setIsSubmitting(true);
     setLogs([]);
     setTestResult({ passed: 0, total: 0, failed: 0 });
@@ -71,7 +71,7 @@ export default function ArenaPage({ recordMap, challengeId, baseGithubUrl, conte
 
     try {
       // Get pre-signed URL and submission token
-      const getPresignedUrl = await axios.get(`${BASE_URL}/api/submissions/preSignedUrl/${challengeId}?contestId=${contestId}`, {
+      const getPresignedUrl = await axios.get(`${BASE_URL_CLIENT}/api/submissions/preSignedUrl/${challengeId}?contestId=${contestId}`, {
         headers: {
           Authorization: localStorage.getItem("token")
         }
@@ -84,12 +84,12 @@ export default function ArenaPage({ recordMap, challengeId, baseGithubUrl, conte
       }
 
       // Set up SSE connection before submitting
-      eventSource = new EventSource(`${BASE_URL}/api/live/sse/${submissionToken}`);
-      
+      eventSource = new EventSource(`${BASE_URL_CLIENT}/api/live/sse/${submissionToken}`);
+
       eventSource.onmessage = (event) => {
         try {
           const data = JSON.parse(event.data);
-          
+
           if (data.type === "log") {
             // Add log message to logs array
             setLogs(prev => [...prev, data.data.message]);
@@ -105,6 +105,9 @@ export default function ArenaPage({ recordMap, challengeId, baseGithubUrl, conte
           } else if (data.type === "connected") {
             setLogs(prev => [...prev, data.message]);
           }
+
+
+
         } catch (err) {
           console.error("Error parsing SSE message:", err);
         }
@@ -134,7 +137,7 @@ export default function ArenaPage({ recordMap, challengeId, baseGithubUrl, conte
       // Confirm submission (this will trigger the worker to start processing)
       await confirmFileSent(challengeId, contestId, submissionToken);
       setFiles([]);
-      
+
     } catch (e) {
       console.error(e);
       alert("Error submitting file");

@@ -10,6 +10,9 @@ notificationRotuer.post("/notify/:contestId", async (req, res) => {
   const userId = req.userId;
   if (!userId) return unauthorized(res);
 
+
+
+
   const email = await prisma.user.findFirst({
     where: {
       id: userId

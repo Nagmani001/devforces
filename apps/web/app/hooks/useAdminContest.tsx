@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import axios from "axios";
-import { BASE_URL } from "../config/utils";
+import { BASE_URL_CLIENT } from "../config/utils";
 
 
 export default function useAdminContest() {

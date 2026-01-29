@@ -3,7 +3,7 @@
 import React, { ChangeEvent, useState } from 'react';
 import { Eye, EyeOff } from 'lucide-react';
 import axios from 'axios';
-import { BASE_URL } from '@/app/config/utils';
+import { BASE_URL_CLIENT } from '@/app/config/utils';
 import { toast } from 'sonner';
 import { useRouter } from 'next/navigation';
 import { useMutation } from '@tanstack/react-query';
@@ -96,7 +96,7 @@ export const SignInPage: React.FC<SignInPageProps> = ({
 
   const mutation = useMutation({
     mutationFn: (user: signinType) => {
-      return axios.post(`${BASE_URL}/api/auth/signin`, user, {
+      return axios.post(`${BASE_URL_CLIENT}/api/auth/signin`, user, {
         withCredentials: true
       });
     },

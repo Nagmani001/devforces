@@ -1,5 +1,5 @@
 "use client";
-import { BASE_URL } from "@/app/config/utils";
+import { BASE_URL_CLIENT } from "@/app/config/utils";
 import { Button } from "@repo/ui/components/button";
 import OtpArea from "@repo/ui/components/otpPage";
 import { useMutation } from "@tanstack/react-query";
@@ -45,7 +45,7 @@ export default function OtpClient({ userId }: any) {
 
   const mutation = useMutation({
     mutationFn: (value: otp) => {
-      return axios.post(`${BASE_URL}/api/auth/verify-otp/${userId}`, value, {
+      return axios.post(`${BASE_URL_CLIENT}/api/auth/verify-otp/${userId}`, value, {
         withCredentials: true,
         headers: {
           'Content-Type': 'application/json'

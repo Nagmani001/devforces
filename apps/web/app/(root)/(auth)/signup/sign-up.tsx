@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation';
 import { useMutation } from '@tanstack/react-query';
 import { signupType } from '@/app/config/types';
 import axios from 'axios';
-import { BASE_URL } from '@/app/config/utils';
+import { BASE_URL_CLIENT } from '@/app/config/utils';
 import { toast } from 'sonner';
 import { signupSchema } from '@repo/common/zodTypes';
 
@@ -101,7 +101,7 @@ export const SignUpPage: React.FC<SignInPageProps> = ({
 
   const mutation = useMutation({
     mutationFn: (user: signupType) => {
-      return axios.post(`${BASE_URL}/api/auth/signup`, user);
+      return axios.post(`${BASE_URL_CLIENT}/api/auth/signup`, user);
     },
 
     onError: (error: any) => {

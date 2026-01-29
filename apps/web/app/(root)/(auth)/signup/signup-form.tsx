@@ -6,7 +6,7 @@ import { Button } from '@repo/ui/components/button';
 import LableWithInput from "@repo/ui/components/labbledInput";
 import { useMutation } from '@tanstack/react-query';
 import { useRouter } from "next/navigation";
-import { BASE_URL } from "@/app/config/utils";
+import { BASE_URL_CLIENT } from "@/app/config/utils";
 import { signupSchema } from "@repo/common/zodTypes";
 import { signupType } from "@/app/config/types";
 
@@ -21,7 +21,7 @@ export default function SignupForm() {
 
   const mutation = useMutation({
     mutationFn: (user: signupType) => {
-      return axios.post(`${BASE_URL}/api/auth/signup`, user);
+      return axios.post(`${BASE_URL_CLIENT}/api/auth/signup`, user);
     },
 
     onError: (error: any) => {

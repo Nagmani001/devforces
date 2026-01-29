@@ -4,7 +4,7 @@ import { Suspense } from "react";
 import CardListSkeleton from "@/app/components/cardListSkeleton";
 import UserContestList from "@/app/components/userContestList";
 import axios from "axios";
-import { BASE_URL, getPageNumbers } from "@/app/config/utils";
+import { BASE_URL_SERVER, getPageNumbers } from "@/app/config/utils";
 
 import UserContestHeader from "@/app/components/userContestHeader";
 
@@ -13,7 +13,7 @@ export default async function UserContestPage({ token, page }: {
   page: string
 }) {
 
-  const total = await axios.get(`${BASE_URL}/api/admin/contest/totalPages`, {
+  const total = await axios.get(`${BASE_URL_SERVER}/api/admin/contest/totalPages`, {
     headers: {
       Authorization: token
     }

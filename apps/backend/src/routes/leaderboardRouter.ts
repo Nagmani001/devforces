@@ -12,6 +12,11 @@ leaderboardRouter.get("/live/:contestId", async (req: Request, res: Response) =>
 });
 
 
+
+
+
+
+
 leaderboardRouter.get("/stale/:contestId", (req: Request, res: Response) => {
   const contestId = req.params.contestId;
 

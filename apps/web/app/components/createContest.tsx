@@ -11,7 +11,7 @@ import LabelWithInput from "@repo/ui/components/labbledInput";
 import { Plus, Trash2, FileText, Clock } from "lucide-react";
 import { Button } from "@repo/ui/components/button";
 import TimePicker from "@repo/ui/components/timePicker";
-import { BASE_URL, buildISTDate, emptyChallenge, getTimeInNumbers } from "../config/utils";
+import { BASE_URL_CLIENT, buildISTDate, emptyChallenge, getTimeInNumbers } from "../config/utils";
 import axios from "axios";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
@@ -64,7 +64,7 @@ export default function CreateContest() {
       challenges,
     };
     try {
-      await axios.post(`${BASE_URL}/api/admin/contest/create`, {
+      await axios.post(`${BASE_URL_CLIENT}/api/admin/contest/create`, {
         title: payload.title,
         subtitle: payload.subTitle,
         duration: payload.duration, // seconds

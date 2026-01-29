@@ -11,7 +11,7 @@ import LabelWithInput from "@repo/ui/components/labbledInput";
 import { Plus, Trash2, FileText, Clock } from "lucide-react";
 import { Button } from "@repo/ui/components/button";
 import TimePicker from "@repo/ui/components/timePicker";
-import { BASE_URL, buildISTDate, calculateDiffOfContest, emptyChallenge, getContestForUpdate, getHourAndMinutesFromduration, getTimeInNumbers } from "../config/utils";
+import { BASE_URL_CLIENT, buildISTDate, calculateDiffOfContest, emptyChallenge, getContestForUpdate, getHourAndMinutesFromduration, getTimeInNumbers } from "../config/utils";
 import axios from "axios";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
@@ -110,7 +110,7 @@ export default function UpdateContest({ contestId }: {
         })
       }
       calculateDiffOfContest(data, data);
-      await axios.put(`${BASE_URL}/api/admin/contest/update/${contestId}`, {
+      await axios.put(`${BASE_URL_CLIENT}/api/admin/contest/update/${contestId}`, {
         title: payload.title,
         subtitle: payload.subTitle,
         duration: payload.duration, // seconds

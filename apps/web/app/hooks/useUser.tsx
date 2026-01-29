@@ -1,9 +1,9 @@
 import { useQuery } from "@tanstack/react-query";
 import axios from "axios";
-import { BASE_URL } from "../config/utils";
+import { BASE_URL_CLIENT } from "../config/utils";
 
 async function fetchUserInfo() {
-  const userInfo = await axios.get(`${BASE_URL}/api/auth/me`, {
+  const userInfo = await axios.get(`${BASE_URL_CLIENT}/api/auth/me`, {
     headers: {
       Authorization: localStorage.getItem("token")
     }
