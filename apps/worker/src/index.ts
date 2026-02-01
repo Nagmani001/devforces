@@ -4,8 +4,9 @@ import { writeFile } from 'fs/promises';
 import { createClient, RedisClientType } from "redis";
 import util from "util";
 const exec = util.promisify(require('child_process').exec);
+import path from "path";
 import prisma from "@repo/db/client";
-import { downloadAndUnzipFile } from "./lib/utils";
+import { downloadAndUnzipFile, WORK_DIR } from "./lib/utils";
 import { LogsManager } from "./lib/logsManager";
 import axios from "axios";
 config();
@@ -36,14 +37,14 @@ async function main() {
     await logsManager.addLog(` Challenge ID: ${challengeId}`);
     await logsManager.addLog(` Downloading submission from: ${url}`);
 
-    const nameOfProject = await downloadAndUnzipFile(url, id, logsManager);
-    await logsManager.addLog(` Project extracted successfully: ${nameOfProject}`);
+    const projectPath = await downloadAndUnzipFile(url, id, logsManager);
+    await logsManager.addLog(` Project extracted successfully: ${projectPath}`);
 
     await logsManager.addLog(" Building Docker container (this may take a few minutes)...");
 
     // Build Docker container
     await logsManager.addLog(" Step 1/2: Building Docker image...");
-    const buildResult = await exec(`cd src/${nameOfProject} && docker compose build --no-cache`);
+    const buildResult = await exec(`cd "${projectPath}" && docker compose build --no-cache`);
 
     // Log full build output
     const buildOutput = buildResult.stdout || buildResult.stderr || '';
@@ -59,7 +60,7 @@ async function main() {
     await logsManager.addLog(" Docker image built successfully");
     await logsManager.addLog(" Step 2/2: Starting Docker containers...");
 
-    const upResult = await exec(`cd src/${nameOfProject} && docker compose up -d`);
+    const upResult = await exec(`cd "${projectPath}" && docker compose up -d`);
     const upOutput = upResult.stdout || upResult.stderr || '';
 
     // Log full container startup output
@@ -90,8 +91,9 @@ async function main() {
       throw new Error("Test file not found");
     }
 
+    const testFilePath = path.join(WORK_DIR, "index.test.ts");
     await logsManager.addLog(` Preparing test suite (${testFile.totalTestCases} test cases expected)`);
-    await writeFile("src/index.test.ts", testFile.testFile);
+    await writeFile(testFilePath, testFile.testFile);
     await logsManager.addLog(" Test file written successfully");
     await logsManager.addLog(" Waiting for service to be ready (health check)...");
 
@@ -134,7 +136,7 @@ async function main() {
 
     try {
       await logsManager.addLog(` Executing ${testFile.totalTestCases} test cases...`);
-      const { stdout, stderr } = await exec(`pnpm test`);
+      const { stdout, stderr } = await exec(`npx vitest "${testFilePath}" --run`);
 
       const outputString = stdout.replace(/\\n/g, "\n").replace(/\\s/g, " ") || stderr.replace(/\\n/g, "\n").replace(/\\s/g, " ");
       const clean = outputString.replace(/\u001b\[[0-9;]*m/g, "");
@@ -226,7 +228,7 @@ async function main() {
       await logsManager.addLog("   Stopping Docker containers...");
 
       try {
-        await exec(`cd src/${nameOfProject} && docker compose down --rmi all`);
+        await exec(`cd "${projectPath}" && docker compose down --rmi all`);
         await logsManager.addLog("   Docker containers stopped and removed");
       } catch (cleanupErr) {
         await logsManager.addLog("     Warning: Some Docker cleanup steps may have failed", "error");
@@ -234,7 +236,9 @@ async function main() {
 
       await logsManager.addLog("   Removing temporary files...");
       try {
-        await exec(`cd src/ && rm -rf extracted && rm -rf ${id}.zip && rm -rf index.test.ts`);
+        const extractedDir = path.join(WORK_DIR, 'extracted');
+        const zipFile = path.join(WORK_DIR, `${id}.zip`);
+        await exec(`rm -rf "${extractedDir}" "${zipFile}" "${testFilePath}"`);
         await logsManager.addLog("    Temporary files cleaned up");
       } catch (cleanupErr) {
         await logsManager.addLog("     Warning: Some file cleanup steps may have failed", "error");

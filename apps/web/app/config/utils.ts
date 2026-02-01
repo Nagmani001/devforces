@@ -7,12 +7,8 @@ import { getStatusOfContestReturns, S3PresignedPostFields } from "./types";
 import { ENDED, LIVE, MONTH_NAMES, NOT_STARTED } from "@repo/common/consts";
 import { Contest } from "@repo/common/typescript-types";
 
-// when running locally 
-//export const BASE_URL = "http://localhost:3001";
-
-// when running with docker
-export const BASE_URL_SERVER = "http://backend:3001";
-export const BASE_URL_CLIENT = "http://localhost:3001";
+export const BASE_URL_SERVER = process.env.API_URL || "http://localhost:3001";
+export const BASE_URL_CLIENT = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
 export const BASE_FRONTEND_URL = "http://localhost:3000";
 
 export async function getUserInfo(token: string) {

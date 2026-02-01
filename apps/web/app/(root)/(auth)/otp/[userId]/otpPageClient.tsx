@@ -65,17 +65,17 @@ export default function OtpClient({ userId }: any) {
 
 
   return (
-    <div className="min-h-screen bg-white flex items-center justify-center px-4">
+    <div className="min-h-screen bg-background flex items-center justify-center px-4">
       <div className="w-full max-w-md">
         {/* Header Section */}
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-slate-100 rounded-full mb-4">
-            <ShieldCheck className="w-8 h-8 text-slate-700" />
+          <div className="inline-flex items-center justify-center w-16 h-16 bg-primary/10 rounded-full mb-4">
+            <ShieldCheck className="w-8 h-8 text-primary" />
           </div>
-          <h1 className="text-2xl font-semibold text-slate-900 mb-2">
+          <h1 className="text-2xl font-semibold text-foreground mb-2">
             Verify Your Email
           </h1>
-          <p className="text-sm text-slate-600 leading-relaxed">
+          <p className="text-sm text-muted-foreground leading-relaxed">
             We've sent a 6-digit verification code to your email address.
             <br />
             Please enter it below to continue.
@@ -84,14 +84,14 @@ export default function OtpClient({ userId }: any) {
 
         {/* Timer Section */}
         <div className="flex items-center justify-center gap-2 mb-6">
-          <Clock className={`w-4 h-4 ${isExpired ? 'text-red-600' : 'text-slate-500'}`} />
-          <span className={`text-sm font-medium ${isExpired ? 'text-red-600' : 'text-slate-700'}`}>
+          <Clock className={`w-4 h-4 ${isExpired ? 'text-destructive' : 'text-muted-foreground'}`} />
+          <span className={`text-sm font-medium ${isExpired ? 'text-destructive' : 'text-foreground'}`}>
             {isExpired ? 'Code Expired' : `Time remaining: ${formatTime(timeLeft)}`}
           </span>
         </div>
 
         {/* OTP Input Section */}
-        <div className="bg-slate-50 border border-slate-200 rounded-xl p-8 mb-6">
+        <div className="bg-card border border-border rounded-xl p-8 mb-6">
           <div className="flex justify-center mb-6">
             <OtpArea onChange={(e: any) => {
               setOtp({
@@ -106,7 +106,7 @@ export default function OtpClient({ userId }: any) {
               mutation.mutate(otp);
             }}
             disabled={mutation.isPending || isExpired}
-            className="w-full py-3 bg-slate-900 text-white rounded-lg font-medium hover:bg-slate-800 disabled:bg-slate-300 disabled:cursor-not-allowed transition-colors"
+            className="w-full py-3 bg-primary text-primary-foreground rounded-lg font-medium hover:bg-primary/90 disabled:bg-muted disabled:text-muted-foreground disabled:cursor-not-allowed transition-colors"
           >
             {mutation.isPending ? 'Verifying...' : 'Verify OTP'}
           </Button>
@@ -114,7 +114,7 @@ export default function OtpClient({ userId }: any) {
 
         {/* Footer Info */}
         <div className="text-center space-y-3">
-          <p className="text-xs text-slate-500">
+          <p className="text-xs text-muted-foreground">
             Didn't receive the code? Check your spam folder or request a new one.
           </p>
           <Button
@@ -123,7 +123,7 @@ export default function OtpClient({ userId }: any) {
               // TODO: Implement resend OTP logic
               toast.info("Resend OTP feature coming soon");
             }}
-            className="text-sm text-slate-700 hover:text-slate-900 font-medium underline-offset-4"
+            className="text-sm text-primary hover:text-primary/80 font-medium underline-offset-4"
           >
             Resend Code
           </Button>

@@ -2,14 +2,23 @@ import axios from "axios";
 import util from "util";
 const exec = util.promisify(require('child_process').exec);
 import fs from "fs";
+import path from "path";
 import StreamZip from "node-stream-zip";
 import { LogsManager } from "./logsManager";
-import path from "path";
+
+export const WORKER_ROOT = path.resolve(__dirname, '..', '..');
+
+export const WORK_DIR = path.join(WORKER_ROOT, 'work');
 
 export async function downloadAndUnzipFile(url: string, id: string, logsManager?: LogsManager) {
-  const pathToMain = path.join(__dirname, "..", "..");
-
   try {
+    if (!fs.existsSync(WORK_DIR)) {
+      fs.mkdirSync(WORK_DIR, { recursive: true });
+    }
+
+    const zipFilePath = path.join(WORK_DIR, `${id}.zip`);
+    const extractedDir = path.join(WORK_DIR, 'extracted');
+
     if (logsManager) {
       await logsManager.addLog(`Initiating download from S3: ${url}`);
     }
@@ -28,8 +37,7 @@ export async function downloadAndUnzipFile(url: string, id: string, logsManager?
       await logsManager.addLog("Downloading submission archive...");
     }
 
-    console.log("path before writer", `${pathToMain}/src/${id}.zip`);
-    const writer = fs.createWriteStream(`${pathToMain}/src/${id}.zip`);
+    const writer = fs.createWriteStream(zipFilePath);
 
     let downloadedBytes = 0;
     let lastLoggedProgress = -1;
@@ -58,8 +66,8 @@ export async function downloadAndUnzipFile(url: string, id: string, logsManager?
     }
 
     // Check if extracted directory exists, create if not
-    if (!fs.existsSync(`${pathToMain}/src/extracted`)) {
-      fs.mkdirSync(`${pathToMain}/src/extracted`, { recursive: true });
+    if (!fs.existsSync(extractedDir)) {
+      fs.mkdirSync(extractedDir, { recursive: true });
       if (logsManager) {
         await logsManager.addLog(" Created extraction directory");
       }
@@ -69,7 +77,7 @@ export async function downloadAndUnzipFile(url: string, id: string, logsManager?
       }
     }
 
-    const zip = new StreamZip.async({ file: `${pathToMain}/src/${id}.zip`, skipEntryNameValidation: true });
+    const zip = new StreamZip.async({ file: zipFilePath, skipEntryNameValidation: true });
 
     if (logsManager) {
       await logsManager.addLog(" Extracting files from archive...");
@@ -82,20 +90,22 @@ export async function downloadAndUnzipFile(url: string, id: string, logsManager?
       await logsManager.addLog(`   Found ${totalEntries} files/directories in archive`);
     }
 
-    const count = await zip.extract(null, `${pathToMain}/src/extracted`);
+    const count = await zip.extract(null, extractedDir);
     await zip.close();
 
     if (logsManager) {
       await logsManager.addLog(` Successfully extracted ${count} files`);
     }
 
-    const folder = await exec(`${pathToMain}/src/extracted && ls -d */ 2>/dev/null | head -1 || ls -1 | head -1`);
+    const folder = await exec(`cd "${extractedDir}" && ls -d */ 2>/dev/null | head -1 || ls -1 | head -1`);
     const projectName = folder.stdout.trim().replace(/\//g, '');
 
     if (logsManager && projectName) {
       await logsManager.addLog(` Project identified: ${projectName}`);
     }
-    return `${pathToMain}/src/extracted/${projectName}`;
+
+    // Return the full absolute path to the project
+    return path.join(extractedDir, projectName);
 
   } catch (err: any) {
     const errorMessage = err?.message || "Unknown error occurred";

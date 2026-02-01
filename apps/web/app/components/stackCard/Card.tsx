@@ -63,23 +63,23 @@ const Card: React.FC<CardProps> = ({ card, index, totalCards, progress }) => {
       className="absolute left-0 right-0 flex items-center justify-center px-4"
     >
       <div style={{ backgroundColor: card.color }}
-        className={`relative h-[300px] w-full max-w-[860px] rounded-[32px] p-10 md:p-12 flex flex-col justify-center shadow-[0_10px_40px_rgba(0,0,0,0.08)] border border-white/40 overflow-hidden   transition-shadow duration-500 hover:shadow-xl`}
+        className={`relative h-[300px] w-full max-w-[860px] rounded-[32px] p-10 md:p-12 flex flex-col justify-center shadow-[0_10px_40px_rgba(0,0,0,0.08)] dark:shadow-[0_10px_40px_rgba(0,0,0,0.25)] border border-black/5 overflow-hidden transition-shadow duration-500 hover:shadow-xl`}
       >
         <div className="z-10 relative">
           <div className="flex items-center gap-3 mb-4">
             <div className="w-10 h-10 rounded-xl bg-black/5 flex items-center justify-center">
-                 <div className="w-3 h-3 bg-black rounded-sm rotate-45" />
+                 <div className="w-3 h-3 bg-black/70 rounded-sm rotate-45" />
             </div>
-            <span className="text-xs font-medium font-mono  uppercase text-black  tracking-widest opacity-20">Why Not us 0{index + 1} ??</span>
+            <span className="text-xs font-medium font-mono uppercase text-black tracking-widest opacity-30">Why Not us 0{index + 1} ??</span>
           </div>
-          
+
           <h3 className="text-3xl md:text-4xl font-medium text-gray-900 tracking-tighter mb-4 leading-tight max-w-xl">
             {card.title}
           </h3>
-          <p className="text-base md:text-lg text-gray-600 max-w-lg leading-relaxed tracking-tight font-medium">
+          <p className="text-base md:text-lg text-gray-700 max-w-lg leading-relaxed tracking-tight font-medium">
             {card.subtitle}
           </p>
-          
+
           <div className="mt-8">
             <button className="group flex items-center gap-2 text-sm font-bold text-black/80 hover:text-black transition-colors">
                 Explore
@@ -90,19 +90,19 @@ const Card: React.FC<CardProps> = ({ card, index, totalCards, progress }) => {
 
         {/* Dynamic Abstract Background elements - Adjusted for horizontal long shape */}
         <div className="absolute inset-0 pointer-events-none">
-            <motion.div 
-                animate={{ 
+            <motion.div
+                animate={{
                     rotate: [0, -5, 0],
                     scale: [1, 1.02, 1]
                 }}
                 transition={{ duration: 12, repeat: Infinity, ease: "linear" }}
-                className="absolute -right-10 -bottom-10 w-[400px] h-[400px] border-[50px] border-black/[0.02] rounded-full" 
+                className="absolute -right-10 -bottom-10 w-[400px] h-[400px] border-[50px] border-black/[0.03] rounded-full"
             />
-            <div className="absolute top-0 right-0 w-1/2 h-full bg-gradient-to-l from-white/10 to-transparent" />
+            <div className="absolute top-0 right-0 w-1/2 h-full bg-gradient-to-l from-white/20 to-transparent" />
         </div>
-        
+
         {/* Subtle Index - Positioned for the new aspect ratio */}
-        <div style={{color: "black", opacity: 0.09}} className="absolute top-10 right-12 font-black text-[120px] leading-none pointer-events-none select-none">
+        <div className="absolute top-10 right-12 font-black text-[120px] leading-none pointer-events-none select-none text-black/[0.06]">
           {index + 1}
         </div>
       </div>

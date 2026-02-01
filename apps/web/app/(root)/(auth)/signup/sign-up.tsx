@@ -45,7 +45,7 @@ interface SignInPageProps {
 // --- SUB-COMPONENTS ---
 
 const GlassInputWrapper = ({ children }: { children: React.ReactNode }) => (
-  <div className="rounded-2xl border border-border bg-foreground/5 backdrop-blur-sm transition-colors focus-within:border-blue-400/70 focus-within:bg-blue-500/10">
+  <div className="mt-2 rounded-xl border border-border bg-muted/50 backdrop-blur-sm transition-colors focus-within:border-primary focus-within:bg-primary/5">
     {children}
   </div>
 );
@@ -124,7 +124,7 @@ export const SignUpPage: React.FC<SignInPageProps> = ({
   }
 
   return (
-    <div className="h-[100dvh] flex flex-col bg-[#0c0d10] md:flex-row font-geist w-auto">
+    <div className="h-[100dvh] flex flex-col bg-background md:flex-row font-geist w-auto">
       {/* Left column: sign-in form */}
       <section className="flex-1 flex items-center justify-center p-8 tracking-tight">
         <div className="w-full max-w-md">
@@ -132,9 +132,9 @@ export const SignUpPage: React.FC<SignInPageProps> = ({
             <h1 className="animate-element animate-delay-100 text-4xl md:text-5xl font-semibold leading-tight">{title}</h1>
             <p className="animate-element animate-delay-200 text-muted-foreground">{description}</p>
 
-            <form className="space-y-5" >
+            <form className="space-y-5">
               <div className="animate-element animate-delay-250">
-                <label className="text-sm font-medium text-muted-foreground">Username</label>
+                <label className="text-sm font-medium text-foreground">Username</label>
                 <GlassInputWrapper>
                   <input
                     onChange={(e: ChangeEvent<HTMLInputElement>) => {
@@ -148,13 +148,13 @@ export const SignUpPage: React.FC<SignInPageProps> = ({
                     name="username"
                     type="text"
                     placeholder="Choose a username"
-                    className="w-full bg-transparent text-sm p-4 rounded-2xl focus:outline-none"
+                    className="w-full bg-transparent text-foreground placeholder:text-muted-foreground text-sm px-4 py-3 rounded-xl focus:outline-none"
                   />
                 </GlassInputWrapper>
               </div>
 
               <div className="animate-element animate-delay-300">
-                <label className="text-sm font-medium text-muted-foreground">Email Address</label>
+                <label className="text-sm font-medium text-foreground">Email Address</label>
                 <GlassInputWrapper>
                   <input
                     onChange={(e: ChangeEvent<HTMLInputElement>) => {
@@ -168,14 +168,14 @@ export const SignUpPage: React.FC<SignInPageProps> = ({
                     name="email"
                     type="email"
                     placeholder="Enter your email address"
-                    className="w-full bg-transparent text-sm p-4 rounded-2xl focus:outline-none"
+                    className="w-full bg-transparent text-foreground placeholder:text-muted-foreground text-sm px-4 py-3 rounded-xl focus:outline-none"
                   />
                 </GlassInputWrapper>
               </div>
 
 
-              <div className="animate-element  animate-delay-400" >
-                <label className="text-sm font-medium text-muted-foreground">Password</label>
+              <div className="animate-element animate-delay-400">
+                <label className="text-sm font-medium text-foreground">Password</label>
                 <GlassInputWrapper>
                   <div className="relative">
                     <input
@@ -187,7 +187,7 @@ export const SignUpPage: React.FC<SignInPageProps> = ({
                           }
                         });
                       }}
-                      name="password" type={showPassword ? 'text' : 'password'} placeholder="Enter your password" className="w-full bg-transparent text-sm p-4 pr-12 rounded-2xl focus:outline-none" />
+                      name="password" type={showPassword ? 'text' : 'password'} placeholder="Enter your password" className="w-full bg-transparent text-foreground placeholder:text-muted-foreground text-sm px-4 py-3 pr-12 rounded-xl focus:outline-none" />
                     <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute inset-y-0 right-3 flex items-center">
                       {showPassword ? <EyeOff className="w-5 h-5 text-muted-foreground hover:text-foreground transition-colors" /> : <Eye className="w-5 h-5 text-muted-foreground hover:text-foreground transition-colors" />}
                     </button>
@@ -197,10 +197,10 @@ export const SignUpPage: React.FC<SignInPageProps> = ({
 
               <div className="animate-element animate-delay-500 flex items-center justify-between text-sm">
                 <label className="flex items-center gap-3 cursor-pointer">
-                  <input type="checkbox" name="rememberMe" className="custom-checkbox" />
-                  <span className="text-foreground/90">Keep me signed in</span>
+                  <input type="checkbox" name="rememberMe" className="h-4 w-4 rounded border-border text-primary focus:ring-primary" />
+                  <span className="text-foreground">Keep me signed in</span>
                 </label>
-                <a href="#" onClick={(e) => { e.preventDefault(); onResetPassword?.(); }} className="hover:underline text-blue-500 tracking-tight transition-colors">Reset password</a>
+                <a href="#" onClick={(e) => { e.preventDefault(); onResetPassword?.(); }} className="hover:underline text-primary tracking-tight transition-colors">Reset password</a>
               </div>
 
               <button
@@ -211,7 +211,7 @@ export const SignUpPage: React.FC<SignInPageProps> = ({
                   }
                   mutation.mutate(signupData);
                 }}
-                type="button" className="animate-element animate-delay-600 w-full rounded-2xl bg-primary py-4 font-medium text-primary-foreground hover:bg-primary/90 transition-colors">
+                type="button" className="animate-element animate-delay-600 w-full rounded-xl bg-primary py-3 font-medium text-primary-foreground hover:bg-primary/90 transition-colors">
                 Sign Up
               </button>
             </form>
@@ -219,7 +219,7 @@ export const SignUpPage: React.FC<SignInPageProps> = ({
 
 
             <p className="animate-element animate-delay-900 text-center text-sm text-muted-foreground">
-              Already a user? <a href="#" onClick={(e) => { e.preventDefault(); onCreateAccount?.(); }} className="text-blue-500 hover:underline transition-colors">Signin Now</a>
+              Already a user? <a href="/signin" className="text-primary hover:underline transition-colors">Sign in Now</a>
             </p>
           </div>
         </div>

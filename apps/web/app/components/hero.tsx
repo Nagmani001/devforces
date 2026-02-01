@@ -11,7 +11,7 @@ export default function Hero() {
   const router = useRouter();
   return (
     <div
-      className={`relative flex h-auto w-auto m-3 mt-0 overflow-hidden rounded-bl-xl rounded-br-xl items-center justify-center bg-white dark:bg-[#0a0b10] ${styles["hero-noise"]}`}
+      className={`relative flex h-auto w-auto m-3 mt-0 overflow-hidden rounded-bl-xl rounded-br-xl items-center justify-center bg-card dark:bg-[#0a0b10] ${styles["hero-noise"]}`}
     >
 
       {/* Grid Background */}
@@ -25,7 +25,7 @@ export default function Hero() {
       />
 
       {/* Radial gradient for faded look */}
-      <div className="pointer-events-none absolute inset-0 flex items-center justify-center bg-white [mask-image:radial-gradient(ellipse_at_center,transparent_20%,black)] dark:bg-black" />
+      <div className="pointer-events-none absolute inset-0 flex items-center justify-center bg-background [mask-image:radial-gradient(ellipse_at_center,transparent_20%,black)]" />
 
       <div className="relative flex items-center flex-col justify-center p-5 h-full w-full min-h-[100vh] z-10">
 
@@ -39,14 +39,14 @@ export default function Hero() {
             Level Up Your Dev  <br />
             Game with <span className={styles.herogradienttext}>Devforces</span>
           </motion.div>
-          <div className="text-[18px] tracking-tight text-gray-300 mt-5">Transform your ideas into reality with our cutting-edge platform. <br />Join thousands of innovators who are building the future today</div>
+          <div className="text-[18px] tracking-tight text-muted-foreground mt-5">Transform your ideas into reality with our cutting-edge platform. <br />Join thousands of innovators who are building the future today</div>
           <div className="gap-1.5 mt-5.5">
             <Link href="/signup">
               <button
                 onClick={() => {
                   router.push("/signup")
                 }}
-                className="bg-white text-center w-48 rounded-4xl h-14 relative text-black text-xl font-semibold group"
+                className="bg-primary text-center w-48 rounded-4xl h-14 relative text-primary-foreground text-xl font-semibold group"
                 type="button"
               >
                 <div
@@ -57,7 +57,7 @@ export default function Hero() {
                     viewBox="0 0 32 32"
                     height="25px"
                     width="25px"
-                    className=" text-white"
+                    className="text-white"
 
                   >
                     <path fill="currentColor" d="m31.71 15.29-10-10-1.42 1.42 8.3 8.29H0v2h28.59l-8.29 8.29 1.41 1.41 10-10a1 1 0 0 0 0-1.41z" data-name="3-Arrow Right" />

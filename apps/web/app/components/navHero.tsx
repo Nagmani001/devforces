@@ -6,6 +6,7 @@ import { cn } from "@repo/ui/lib/utils";
 import styles from "./nav.module.css";
 import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
+import ThemeToggle from "./themeToggle";
 
 
 export default function NavHero() {
@@ -16,7 +17,7 @@ export default function NavHero() {
     <div>
       {/* NAV */}
       <div
-        className={`relative bg-[#0a0b10] flex items-center justify-between mx-3 rounded-tl-xl rounded-tr-xl px-4 md:px-8 py-3 ${styles.heroNoise}`}
+        className={`relative bg-card dark:bg-[#0a0b10] flex items-center justify-between mx-3 rounded-tl-xl rounded-tr-xl px-4 md:px-8 py-3 ${styles.heroNoise}`}
       >
         {/* BACKGROUND GRID */}
         <div
@@ -29,7 +30,7 @@ export default function NavHero() {
         />
 
         {/* MASK */}
-        <div className="pointer-events-none absolute inset-0 rounded-tl-xl rounded-tr-xl bg-white [mask-image:radial-gradient(ellipse_at_center,transparent_1%,black)] dark:bg-black" />
+        <div className="pointer-events-none absolute inset-0 rounded-tl-xl rounded-tr-xl bg-background [mask-image:radial-gradient(ellipse_at_center,transparent_1%,black)]" />
 
         {/* CONTENT */}
         <div className="relative z-10 flex w-full items-center justify-between gap-1.5 pt-2">
@@ -40,13 +41,13 @@ export default function NavHero() {
               className="w-11 h-11 rounded-full"
               alt="Devforces Logo"
             />
-            <span className="text-3xl font-semibold text-white">
+            <span className="text-3xl font-semibold text-foreground">
               Devforces
             </span>
           </Link>
 
           {/* DESKTOP LINKS (UNCHANGED) */}
-          <div className="hidden md:flex h-full items-end justify-end gap-6 font-medium text-base text-gray-300 tracking-tight">
+          <div className="hidden md:flex h-full items-end justify-end gap-6 font-medium text-base text-muted-foreground tracking-tight">
             <span>Home</span>
             <span>Products</span>
             <span>Docs</span>
@@ -55,40 +56,44 @@ export default function NavHero() {
           </div>
 
           {/* DESKTOP CTA */}
-          <div className="hidden md:block">
+          <div className="hidden md:flex items-center gap-3">
+            <ThemeToggle />
             <button
               onClick={() => {
                 router.push("/signup")
               }}
-              className="bg-white h-10 px-8 rounded-md text-[13px] text-black m-1 tracking-tight font-medium">
+              className="bg-primary text-primary-foreground h-10 px-8 rounded-md text-[13px] tracking-tight font-medium hover:bg-primary/90 transition-colors">
               Signup Now
             </button>
           </div>
 
-          {/* HAMBURGER — ONLY ADDITION */}
-          <motion.button
-            whileTap={{ scale: 0.95 }}
-            onClick={() => setOpen(!open)}
-            className="md:hidden flex flex-col gap-1.5"
-          >
-            <span className="w-6 h-[2px] bg-white" />
-            <span className="w-6 h-[2px] bg-white" />
-            <span className="w-6 h-[2px] bg-white" />
-          </motion.button>
+          {/* MOBILE CONTROLS */}
+          <div className="md:hidden flex items-center gap-3">
+            <ThemeToggle />
+            <motion.button
+              whileTap={{ scale: 0.95 }}
+              onClick={() => setOpen(!open)}
+              className="flex flex-col gap-1.5"
+            >
+              <span className="w-6 h-[2px] bg-foreground" />
+              <span className="w-6 h-[2px] bg-foreground" />
+              <span className="w-6 h-[2px] bg-foreground" />
+            </motion.button>
+          </div>
 
         </div>
       </div>
 
       {/* MOBILE MENU (SEPARATE, NO RADIUS CHANGE ABOVE) */}
       {open && (
-        <div className="md:hidden mx-3 bg-[#0a0b10] border-t border-white/10 px-4 py-4 text-gray-300 space-y-4">
+        <div className="md:hidden mx-3 bg-card dark:bg-[#0a0b10] border-t border-border px-4 py-4 text-muted-foreground space-y-4">
           <span className="block">Home</span>
           <span className="block">Products</span>
           <span className="block">Docs</span>
           <span className="block">FAQ</span>
           <span className="block">Pricing</span>
 
-          <button className="w-full bg-white h-10 rounded-md text-sm text-black font-medium">
+          <button className="w-full bg-primary text-primary-foreground h-10 rounded-md text-sm font-medium hover:bg-primary/90 transition-colors">
             Signup Now
           </button>
         </div>

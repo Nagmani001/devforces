@@ -156,27 +156,28 @@ export default function ArenaPage({ recordMap, challengeId, baseGithubUrl, conte
   });
 
   return (
-    <div className="h-[calc(100vh-4rem)] bg-background text-foreground flex flex-col p-4 w-full overflow-hidden">
-      {/* Header */}
-      <header className="flex items-center justify-between mb-4 border-b pb-4">
-        <h1 className="text-2xl font-bold tracking-tight">Arena Playground</h1>
+    <div className="h-[calc(100vh-3.5rem)] bg-background text-foreground flex flex-col w-full overflow-hidden">
+      {/* Action Bar - integrated with content */}
+      <div className="flex items-center justify-between px-4 py-2 bg-muted/30 border-b border-border">
+        <div className="flex items-center gap-3">
+          <h1 className="text-sm font-medium text-muted-foreground">Challenge</h1>
+          <span className="text-xs bg-primary/10 text-primary px-2 py-0.5 rounded-full">
+            {testResult.total > 0 ? `${testResult.passed}/${testResult.total} passed` : "Ready"}
+          </span>
+        </div>
 
         <div className="flex items-center gap-2">
-          <Button onClick={handleSubmit} variant="secondary" className="rounded-md">
+          <Button onClick={handleSubmit} variant="secondary" size="sm" className="rounded-md h-8">
             Submit
           </Button>
-          <Button className="rounded-md gap-2">
-            <Play size={16} /> Run Code
+          <Button size="sm" className="rounded-md gap-1.5 h-8">
+            <Play size={14} /> Run
           </Button>
         </div>
-
-        <div className="text-sm text-muted-foreground">
-          Test Cases: <span className="font-medium text-foreground">30</span>
-        </div>
-      </header>
+      </div>
 
       {/* Main content area */}
-      <main className="flex-1 flex gap-4 overflow-hidden h-full pb-2">
+      <main className="flex-1 flex gap-4 overflow-hidden h-full p-4 pb-2">
         {/* Left resizable column: Notion content */}
         <ResizableBox
           className="relative shadow-sm rounded-lg overflow-hidden border bg-card"
@@ -245,13 +246,13 @@ export default function ArenaPage({ recordMap, challengeId, baseGithubUrl, conte
           >
 
             <div className="h-full flex flex-col gap-2 p-1">
-              <div className="shrink-0 p-3 border rounded-lg bg-blue-50/50 text-xs">
+              <div className="shrink-0 p-3 border border-border rounded-lg bg-muted/50 text-xs">
                 <div className="flex items-center gap-4 mb-2">
                   <div className="flex items-center gap-1.5 text-primary font-semibold shrink-0">
                     <GitBranch className="w-4 h-4" />
                     <span>Starter Code</span>
                   </div>
-                  <div className="flex-1 flex items-center gap-2 bg-background border px-3 py-1.5 rounded-md text-muted-foreground font-mono min-w-0">
+                  <div className="flex-1 flex items-center gap-2 bg-background border border-border px-3 py-1.5 rounded-md text-muted-foreground font-mono min-w-0">
                     <Terminal className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
                     <span className="truncate text-xs flex-1">git clone {baseGithubUrl}</span>
                     <Button variant="ghost" size="icon" className="h-6 w-6 ml-1 shrink-0" onClick={() => navigator.clipboard.writeText(`git clone ${baseGithubUrl}`)}>
@@ -260,9 +261,9 @@ export default function ArenaPage({ recordMap, challengeId, baseGithubUrl, conte
                   </div>
                 </div>
 
-                <div className="flex gap-2 items-center text-amber-600">
+                <div className="flex gap-2 items-center text-amber-600 dark:text-amber-400">
                   <AlertTriangle className="w-3 h-3 shrink-0" />
-                  <span className="truncate">Do <span className="font-bold">NOT</span> modify <code>Dockerfile</code>, <code>docker-compose.yml</code>, or health check.</span>
+                  <span className="truncate">Do <span className="font-bold">NOT</span> modify <code className="bg-muted px-1 rounded">Dockerfile</code>, <code className="bg-muted px-1 rounded">docker-compose.yml</code>, or health check.</span>
                 </div>
               </div>
 

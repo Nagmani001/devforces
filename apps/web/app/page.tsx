@@ -7,8 +7,8 @@ import StackingSection from './components/stackCard/StackingSection';
 
 export default function Home() {
   return (
-    <div className="min-h-screen bg-white ">
-      <div className='h-3 bg-white'></div>
+    <div className="min-h-screen bg-background">
+      <div className='h-3 bg-background'></div>
       <NavHero />
       <main className="">
         <Hero />

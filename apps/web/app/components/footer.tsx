@@ -7,7 +7,7 @@ import Link from "next/link";
 export default function Footer() {
   return (
     <div
-      className={`relative flex h-90 w-auto m-3 mt-24  overflow-hidden rounded-xl items-center justify-center bg-white dark:bg-[#0a0b10] ${styles["hero-noise"]}`}
+      className={`relative flex h-90 w-auto m-3 mt-24 overflow-hidden rounded-xl items-center justify-center bg-card dark:bg-[#0a0b10] ${styles["hero-noise"]}`}
     >
 
       {/* Grid Background */}
@@ -21,15 +21,15 @@ export default function Footer() {
       />
 
       {/* Radial gradient for faded look */}
-      <div className="pointer-events-none absolute inset-0 flex items-center justify-center bg-white [mask-image:radial-gradient(ellipse_at_center,transparent_20%,black)] dark:bg-black" />
+      <div className="pointer-events-none absolute inset-0 flex items-center justify-center bg-background [mask-image:radial-gradient(ellipse_at_center,transparent_20%,black)]" />
 
       <div className="z-99 flex flex-col justify-center items-center gap-3">
 
-        <h2 className="z-0 font-semibold tracking-tight text-4xl text-center">Standardize Skill Evaluation at Scale</h2>
-        <div className="text-white text-center">Run secure, real-world development challenges across teams, cohorts, or institutions.</div>
+        <h2 className="z-0 font-semibold tracking-tight text-4xl text-center text-foreground">Standardize Skill Evaluation at Scale</h2>
+        <div className="text-muted-foreground text-center">Run secure, real-world development challenges across teams, cohorts, or institutions.</div>
 
         <Link href="/signup">
-          <button className="bg-white h-10 px-8 rounded-md text-[14px] text-black m-1 tracking-tight font-medium">
+          <button className="bg-primary text-primary-foreground h-10 px-8 rounded-md text-[14px] m-1 tracking-tight font-medium hover:bg-primary/90 transition-colors">
             Get started
           </button>
         </Link>

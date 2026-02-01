@@ -64,6 +64,9 @@ services:
       context: ../ 
       dockerfile: docker/web/Dockerfile
     container_name: web 
+    environment:
+      NEXT_PUBLIC_API_URL: "http://localhost:3001" 
+      API_URL: "http://backend:3001" 
 
     ports:
       - "3000:3000"

@@ -138,17 +138,17 @@ export default function UpdateContest({ contestId }: {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 py-8 px-4">
+    <div className="min-h-screen bg-background py-8 px-4">
       <form onSubmit={handleSubmit} className="space-y-6 max-w-5xl mx-auto">
 
         {/* Header */}
-        <div className="bg-white border border-slate-200 rounded-lg p-6">
-          <h1 className="text-2xl font-semibold text-slate-900 mb-1">Update Contest</h1>
-          <p className="text-sm text-slate-600">Set up a new coding contest with challenges and configurations</p>
+        <div className="bg-card border border-border rounded-lg p-6">
+          <h1 className="text-2xl font-semibold text-foreground mb-1">Update Contest</h1>
+          <p className="text-sm text-muted-foreground">Set up a new coding contest with challenges and configurations</p>
         </div>
 
         {/* Basic Info Card */}
-        <div className="bg-white border border-slate-200 rounded-lg p-6 space-y-6">
+        <div className="bg-card border border-border rounded-lg p-6 space-y-6">
           <div className="flex items-start gap-6">
             <LabelWithInput
               label="Contest Title"
@@ -162,7 +162,7 @@ export default function UpdateContest({ contestId }: {
 
             {/* Total time box */}
             <div className="w-52 flex-shrink-0">
-              <label className="block text-sm font-medium text-slate-700 mb-2">
+              <label className="block text-sm font-medium text-foreground mb-2">
                 <div className="flex items-center gap-2">
                   <Clock className="w-4 h-4" />
                   Total Duration
@@ -179,10 +179,10 @@ export default function UpdateContest({ contestId }: {
                       Number(e.target.value)
                     )
                   }
-                  className="w-20 text-center rounded-lg border border-slate-300 px-2 py-2.5 focus:outline-none focus:ring-2 focus:ring-slate-900 transition-all bg-white"
+                  className="w-20 text-center rounded-lg border border-input px-2 py-2.5 focus:outline-none focus:ring-2 focus:ring-ring transition-all bg-background text-foreground"
                   placeholder="0"
                 />
-                <span className="text-sm text-slate-600">h</span>
+                <span className="text-sm text-muted-foreground">h</span>
                 <input
                   type="number"
                   min={0}
@@ -193,10 +193,10 @@ export default function UpdateContest({ contestId }: {
                       Number(e.target.value)
                     )
                   }
-                  className="w-20 text-center rounded-lg border border-slate-300 px-2 py-2.5 focus:outline-none focus:ring-2 focus:ring-slate-900 transition-all bg-white"
+                  className="w-20 text-center rounded-lg border border-input px-2 py-2.5 focus:outline-none focus:ring-2 focus:ring-ring transition-all bg-background text-foreground"
                   placeholder="0"
                 />
-                <span className="text-sm text-slate-600">m</span>
+                <span className="text-sm text-muted-foreground">m</span>
               </div>
             </div>
           </div>
@@ -221,16 +221,16 @@ export default function UpdateContest({ contestId }: {
         </div>
 
         {/* Challenges Section */}
-        <div className="bg-white border border-slate-200 rounded-lg p-6">
+        <div className="bg-card border border-border rounded-lg p-6">
           <div className="flex items-center justify-between mb-6">
             <div>
-              <h2 className="text-lg font-semibold text-slate-900">Challenges</h2>
-              <p className="text-sm text-slate-600 mt-0.5">{challenges.length} challenge{challenges.length !== 1 ? 's' : ''} configured</p>
+              <h2 className="text-lg font-semibold text-foreground">Challenges</h2>
+              <p className="text-sm text-muted-foreground mt-0.5">{challenges.length} challenge{challenges.length !== 1 ? 's' : ''} configured</p>
             </div>
             <button
               type="button"
               onClick={addChallenge}
-              className="inline-flex items-center gap-2 rounded-lg bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-800 transition-colors"
+              className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 transition-colors"
             >
               <Plus className="w-4 h-4" />
               Add Challenge
@@ -241,14 +241,14 @@ export default function UpdateContest({ contestId }: {
             {challenges.map((ch, idx) => (
               <div
                 key={ch.id}
-                className="relative border border-slate-200 rounded-lg p-6 bg-slate-50"
+                className="relative border border-border rounded-lg p-6 bg-muted/50"
               >
                 {/* Remove button */}
                 {challenges.length > 1 && (
                   <button
                     type="button"
                     onClick={() => removeChallenge(ch.id)}
-                    className="absolute cursor-pointer right-4 top-4 text-slate-400 hover:text-red-600 transition-colors"
+                    className="absolute cursor-pointer right-4 top-4 text-muted-foreground hover:text-destructive transition-colors"
                     title="Remove challenge"
                   >
                     <Trash2 className="w-5 h-5" />
@@ -257,7 +257,7 @@ export default function UpdateContest({ contestId }: {
 
                 {/* Challenge number badge */}
                 <div className="mb-5">
-                  <span className="inline-block bg-slate-900 text-white px-3 py-1 rounded-md text-sm font-medium">
+                  <span className="inline-block bg-primary text-primary-foreground px-3 py-1 rounded-md text-sm font-medium">
                     Challenge {idx + 1}
                   </span>
                 </div>
@@ -314,40 +314,40 @@ export default function UpdateContest({ contestId }: {
                       />
                     </div>
 
-                    <div className="md:col-span-3 mt-2 bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-200 rounded-xl p-6 shadow-sm">
-                      <h3 className="flex items-center gap-2 text-blue-900 font-semibold text-base mb-5">
-                        <div className="bg-blue-100 p-1.5 rounded-lg">
-                          <FileText className="w-4 h-4 text-blue-600" />
+                    <div className="md:col-span-3 mt-2 bg-primary/5 border border-primary/20 rounded-xl p-6">
+                      <h3 className="flex items-center gap-2 text-primary font-semibold text-base mb-5">
+                        <div className="bg-primary/10 p-1.5 rounded-lg">
+                          <FileText className="w-4 h-4 text-primary" />
                         </div>
                         Repository Requirements
                       </h3>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div className="flex gap-4 bg-white/60 backdrop-blur-sm rounded-lg p-4 border border-blue-100/50">
-                          <div className="bg-blue-500 text-white w-7 h-7 rounded-full flex items-center justify-center text-sm font-bold flex-shrink-0">1</div>
+                        <div className="flex gap-4 bg-background/60 backdrop-blur-sm rounded-lg p-4 border border-border">
+                          <div className="bg-primary text-primary-foreground w-7 h-7 rounded-full flex items-center justify-center text-sm font-bold flex-shrink-0">1</div>
                           <div>
-                            <span className="font-semibold text-blue-900 block mb-1">Base Repository</span>
-                            <p className="text-sm text-blue-800/70 leading-relaxed">Create a public GitHub repository containing your challenge code.</p>
+                            <span className="font-semibold text-foreground block mb-1">Base Repository</span>
+                            <p className="text-sm text-muted-foreground leading-relaxed">Create a public GitHub repository containing your challenge code.</p>
                           </div>
                         </div>
-                        <div className="flex gap-4 bg-white/60 backdrop-blur-sm rounded-lg p-4 border border-blue-100/50">
-                          <div className="bg-blue-500 text-white w-7 h-7 rounded-full flex items-center justify-center text-sm font-bold flex-shrink-0">2</div>
+                        <div className="flex gap-4 bg-background/60 backdrop-blur-sm rounded-lg p-4 border border-border">
+                          <div className="bg-primary text-primary-foreground w-7 h-7 rounded-full flex items-center justify-center text-sm font-bold flex-shrink-0">2</div>
                           <div>
-                            <span className="font-semibold text-blue-900 block mb-1">Docker Configuration</span>
-                            <p className="text-sm text-blue-800/70 leading-relaxed">Include a <code className="bg-blue-100 px-1.5 py-0.5 rounded text-blue-700 text-xs font-medium">Dockerfile</code> and <code className="bg-blue-100 px-1.5 py-0.5 rounded text-blue-700 text-xs font-medium">docker-compose.yml</code>.</p>
+                            <span className="font-semibold text-foreground block mb-1">Docker Configuration</span>
+                            <p className="text-sm text-muted-foreground leading-relaxed">Include a <code className="bg-muted px-1.5 py-0.5 rounded text-foreground text-xs font-medium">Dockerfile</code> and <code className="bg-muted px-1.5 py-0.5 rounded text-foreground text-xs font-medium">docker-compose.yml</code>.</p>
                           </div>
                         </div>
-                        <div className="flex gap-4 bg-white/60 backdrop-blur-sm rounded-lg p-4 border border-blue-100/50">
-                          <div className="bg-blue-500 text-white w-7 h-7 rounded-full flex items-center justify-center text-sm font-bold flex-shrink-0">3</div>
+                        <div className="flex gap-4 bg-background/60 backdrop-blur-sm rounded-lg p-4 border border-border">
+                          <div className="bg-primary text-primary-foreground w-7 h-7 rounded-full flex items-center justify-center text-sm font-bold flex-shrink-0">3</div>
                           <div>
-                            <span className="font-semibold text-blue-900 block mb-1">Health Check</span>
-                            <p className="text-sm text-blue-800/70 leading-relaxed">Expose a <code className="bg-blue-100 px-1.5 py-0.5 rounded text-blue-700 text-xs font-medium">GET /</code> endpoint returning 200 OK.</p>
+                            <span className="font-semibold text-foreground block mb-1">Health Check</span>
+                            <p className="text-sm text-muted-foreground leading-relaxed">Expose a <code className="bg-muted px-1.5 py-0.5 rounded text-foreground text-xs font-medium">GET /</code> endpoint returning 200 OK.</p>
                           </div>
                         </div>
-                        <div className="flex gap-4 bg-white/60 backdrop-blur-sm rounded-lg p-4 border border-blue-100/50">
-                          <div className="bg-blue-500 text-white w-7 h-7 rounded-full flex items-center justify-center text-sm font-bold flex-shrink-0">4</div>
+                        <div className="flex gap-4 bg-background/60 backdrop-blur-sm rounded-lg p-4 border border-border">
+                          <div className="bg-primary text-primary-foreground w-7 h-7 rounded-full flex items-center justify-center text-sm font-bold flex-shrink-0">4</div>
                           <div>
-                            <span className="font-semibold text-blue-900 block mb-1">Tests</span>
-                            <p className="text-sm text-blue-800/70 leading-relaxed">Paste test code in the <strong className="text-blue-900">Test File</strong> field above.</p>
+                            <span className="font-semibold text-foreground block mb-1">Tests</span>
+                            <p className="text-sm text-muted-foreground leading-relaxed">Paste test code in the <strong className="text-foreground">Test File</strong> field above.</p>
                           </div>
                         </div>
                       </div>
@@ -362,16 +362,15 @@ export default function UpdateContest({ contestId }: {
         </div>
 
         {/* Footer Actions */}
-        <div className="bg-white border border-slate-200 rounded-lg p-6 flex items-center justify-between">
-          <div className="text-sm text-slate-600">
-            Ready to create <strong className="text-slate-900">{challenges.length}</strong> challenge{challenges.length !== 1 ? 's' : ''}
+        <div className="bg-card border border-border rounded-lg p-6 flex items-center justify-between">
+          <div className="text-sm text-muted-foreground">
+            Ready to update <strong className="text-foreground">{challenges.length}</strong> challenge{challenges.length !== 1 ? 's' : ''}
           </div>
 
           <div className="flex gap-3">
             <Button variant="secondary"
               type="button"
               onClick={addChallenge}
-              className="rounded-lg border border-slate-300 px-5 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50 transition-colors"
             >
               Add Another Challenge
             </Button>

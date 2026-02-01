@@ -23,11 +23,11 @@ const BentoGrid: React.FC = () => {
       <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-stretch tracking-tight">
 
         {/* Grid 1: Automated Grading - 7 columns */}
-        <div className="md:col-span-7 glass rounded-[2.5rem] p-10 bento-card border border-slate-200 flex flex-col justify-between overflow-hidden group min-h-[500px] ">
+        <div className="md:col-span-7 glass rounded-[2.5rem] p-10 bento-card border border-border bg-card flex flex-col justify-between overflow-hidden group min-h-[500px]">
           <div className="flex-1 flex items-center justify-center py-4">
-            <div className="w-full max-w-[520px] bg-white rounded-[2.5rem]  p-10 transform transition-transform group-hover:scale-[1.02] duration-500">
+            <div className="w-full max-w-[520px] bg-background rounded-[2.5rem] p-10 transform transition-transform group-hover:scale-[1.02] duration-500 border border-border">
               <div className="flex items-center justify-between mb-8">
-                <h4 className="text-xl font-bold text-slate-800 tracking-tight">Analyzing code structure...</h4>
+                <h4 className="text-xl font-bold text-foreground tracking-tight">Analyzing code structure...</h4>
                 <div className="flex items-center gap-2">
                   <span className="w-2.5 h-2.5 bg-sky-500 rounded-full animate-pulse"></span>
                   <span className="text-[10px] font-bold text-sky-600 uppercase tracking-widest">Active</span>
@@ -36,10 +36,10 @@ const BentoGrid: React.FC = () => {
 
               <div className="mb-10">
                 <div className="flex justify-between items-end mb-3">
-                  <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">Assessment Status</span>
-                  <span className="text-2xl font-black text-slate-900">{Math.round(progress)}%</span>
+                  <span className="text-xs font-bold text-muted-foreground uppercase tracking-widest">Assessment Status</span>
+                  <span className="text-2xl font-black text-foreground">{Math.round(progress)}%</span>
                 </div>
-                <div className="w-full h-3 bg-slate-100 rounded-full overflow-hidden">
+                <div className="w-full h-3 bg-muted rounded-full overflow-hidden">
                   <div
                     className="h-full bg-sky-500 rounded-full transition-all duration-75 linear"
                     style={{ width: `${progress}%` }}
@@ -56,18 +56,18 @@ const BentoGrid: React.FC = () => {
                 ].map((item, idx) => {
                   const isDone = progress >= item.threshold;
                   return (
-                    <div key={idx} className="flex items-center justify-between pb-1 border-b border-slate-50 last:border-0">
+                    <div key={idx} className="flex items-center justify-between pb-1 border-b border-border/50 last:border-0">
                       <div className="flex items-center gap-4">
                         <div className="w-6 h-6 rounded-full flex items-center justify-center">
                           {!isDone ? (
-                            <div className="w-5 h-5 border-2 border-slate-100 rounded-full"></div>
+                            <div className="w-5 h-5 border-2 border-muted rounded-full"></div>
                           ) : (
-                            <div className="bg-emerald-50 p-1 rounded-full"><CheckIcon /></div>
+                            <div className="bg-emerald-50 dark:bg-emerald-950 p-1 rounded-full"><CheckIcon /></div>
                           )}
                         </div>
-                        <span className={`text-base ${!isDone ? 'text-slate-300' : 'text-slate-700 font-medium'}`}>{item.label}</span>
+                        <span className={`text-base ${!isDone ? 'text-muted-foreground/50' : 'text-foreground font-medium'}`}>{item.label}</span>
                       </div>
-                      <span className={`text-sm font-bold ${!isDone ? 'text-slate-100' : 'text-emerald-500'}`}>
+                      <span className={`text-sm font-bold ${!isDone ? 'text-muted-foreground/30' : 'text-emerald-500'}`}>
                         {!isDone ? 'Pending' : item.status}
                       </span>
                     </div>
@@ -78,8 +78,8 @@ const BentoGrid: React.FC = () => {
           </div>
 
           <div className="mt-4">
-            <h3 className="text-3xl font-bold text-gray-800 mb-2">Automated Grading</h3>
-            <p className="text-slate-500 text-lg leading-relaxed max-w-xl">
+            <h3 className="text-3xl font-bold text-foreground mb-2">Automated Grading</h3>
+            <p className="text-muted-foreground text-lg leading-relaxed max-w-xl">
               From code analysis to plagiarism detection, get instant feedback on every submission.
             </p>
           </div>
@@ -89,10 +89,10 @@ const BentoGrid: React.FC = () => {
         <div className="md:col-span-5 flex flex-col gap-4">
 
           {/* Box A: Upload Folder - Premium Design with Hand Interaction */}
-          <div className="flex-1 glass rounded-[2.5rem] p-8 bento-card border border-slate-200 flex flex-col justify-between overflow-hidden group min-h-[350px] ">
-            <div className="flex-1 flex items-center justify-center relative pt-4 ">
+          <div className="flex-1 glass rounded-[2.5rem] p-8 bento-card border border-border bg-card flex flex-col justify-between overflow-hidden group min-h-[350px]">
+            <div className="flex-1 flex items-center justify-center relative pt-4">
               {/* Dotted Container Area */}
-              <div className="w-64 h-64 border-2 border-dashed border-slate-200 rounded-[2.5rem] flex items-center justify-center  relative overflow-hidden bg-slate-50/30">
+              <div className="w-64 h-64 border-2 border-dashed border-border rounded-[2.5rem] flex items-center justify-center relative overflow-hidden bg-muted/30">
 
                 {/* Background Dotted Shape */}
                 <div className="absolute opacity-[0.05] pointer-events-none select-none scale-150">
@@ -152,20 +152,20 @@ const BentoGrid: React.FC = () => {
               </div>
             </div>
             <div className="mt-4">
-              <h3 className="text-xl font-bold text-slate-900 mb-1">Batch Upload</h3>
-              <p className="text-slate-500 text-sm leading-relaxed">
+              <h3 className="text-xl font-bold text-foreground mb-1">Batch Upload</h3>
+              <p className="text-muted-foreground text-sm leading-relaxed">
                 Seamlessly upload entire project folders with a single drag-and-drop.
               </p>
             </div>
           </div>
 
           {/* Box B: Instant Delivery */}
-          <div className="flex-1 glass rounded-[2.5rem] p-8 bento-card border border-slate-200 flex flex-col justify-between overflow-hidden group min-h-[340px]">
+          <div className="flex-1 glass rounded-[2.5rem] p-8 bento-card border border-border bg-card flex flex-col justify-between overflow-hidden group min-h-[340px]">
             <div className="flex-1 flex items-center justify-center pt-2">
-              <div className="flex items-center justify-between w-full max-w-[280px] relative px-1 scale-120   ">
+              <div className="flex items-center justify-between w-full max-w-[280px] relative px-1 scale-120">
                 <FolderIcon label="Server" active={true} />
 
-                <div className="flex-1 h-[2px] bg-slate-100 mx-0 relative overflow-hidden self-center mt-4">
+                <div className="flex-1 h-[2px] bg-muted mx-0 relative overflow-hidden self-center mt-4">
                   <svg className="absolute inset-0 w-full h-full" preserveAspectRatio="none">
                     <line
                       x1="0" y1="1" x2="100%" y2="1"
@@ -182,8 +182,8 @@ const BentoGrid: React.FC = () => {
               </div>
             </div>
             <div>
-              <h3 className="text-xl font-bold text-slate-900 mb-1">Instant Delivery</h3>
-              <p className="text-slate-500 text-sm leading-relaxed">
+              <h3 className="text-xl font-bold text-foreground mb-1">Instant Delivery</h3>
+              <p className="text-muted-foreground text-sm leading-relaxed">
                 Automated student distribution with file previews.
               </p>
             </div>

@@ -16,18 +16,18 @@ const StackingSection: React.FC = () => {
   });
 
   return (
-    <section 
-      ref={containerRef} 
-      className="relative h-[500vh] bg-[#fdfdfd]"
+    <section
+      ref={containerRef}
+      className="relative h-[500vh] bg-background"
     >
-      {/* 
-          Sticky Wrapper: This stays pinned to the top while we scroll 
+      {/*
+          Sticky Wrapper: This stays pinned to the top while we scroll
           through the 500vh height of the parent.
       */}
-      <div className="sticky top-0 h-screen w-full flex overflow-hidden ">
-        
+      <div className="sticky top-0 h-screen w-full flex overflow-hidden">
+
         {/* Left Section (30% Width) - Sticky Content */}
-        <div className="hidden bg-[#fcfcfc] md:flex w-[35%] h-full flex-col justify-center px-10 lg:px-20 border-r border-gray-100 bg-white shadow-[10px_0_30px_rgba(0,0,0,0.01)] z-20">
+        <div className="hidden md:flex w-[35%] h-full flex-col justify-center px-10 lg:px-20 border-r border-border bg-card shadow-[10px_0_30px_rgba(0,0,0,0.01)] dark:shadow-[10px_0_30px_rgba(0,0,0,0.1)] z-20">
           <motion.div
             initial={{ opacity: 0, x: -50 }}
             whileInView={{ opacity: 1, x: 0 }}
@@ -37,14 +37,14 @@ const StackingSection: React.FC = () => {
             <span className="text-[10px] font-medium tracking-[0.3em] text-[#5090f2] uppercase mb-6 block">
               WHY US ??
             </span>
-            <h2 className='text-5xl text-gray-800 font-semibold tracking-tight mb-6'>Because some Skills deserve real testing.</h2>
-            <div className='text-base text-gray-500'>Backend development can’t be judged by MCQs or toy problems. <br/>
+            <h2 className='text-5xl text-foreground font-semibold tracking-tight mb-6'>Because some Skills deserve real testing.</h2>
+            <div className='text-base text-muted-foreground'>Backend development can't be judged by MCQs or toy problems. <br/>
 We test real server side code using real test files.</div>
           </motion.div>
         </div>
 
         {/* Right Section (70% Width) - Stacking Cards Area */}
-        <div className="w-full md:w-[70%] h-full relative  border-slate-200 bg-white">
+        <div className="w-full md:w-[70%] h-full relative bg-muted/30 dark:bg-background">
            <div className="h-full w-full relative ">
              {CARDS_DATA.map((card, i) => {
                return (

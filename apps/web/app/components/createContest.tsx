@@ -91,18 +91,18 @@ export default function CreateContest() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 py-8 px-4">
+    <div className="min-h-screen bg-background py-8 px-4">
       <form onSubmit={handleSubmit} className="space-y-6 max-w-5xl mx-auto">
 
         {/* Header */}
-        <div className="bg-white border border-slate-200 rounded-lg p-6">
-          <h1 className="text-2xl font-semibold text-slate-900 mb-1">Create Contest</h1>
-          <p className="text-sm text-slate-600">Set up a new coding contest with challenges and configurations</p>
+        <div className="bg-card border border-border rounded-lg p-6">
+          <h1 className="text-2xl font-semibold text-foreground mb-1">Create Contest</h1>
+          <p className="text-sm text-muted-foreground">Set up a new coding contest with challenges and configurations</p>
         </div>
 
 
         {/* Basic Info Card */}
-        <div className="bg-white border border-slate-200 rounded-lg p-6 space-y-6">
+        <div className="bg-card border border-border rounded-lg p-6 space-y-6">
           <div className="flex items-start gap-6">
             <LabelWithInput
               label="Contest Title"
@@ -116,7 +116,7 @@ export default function CreateContest() {
 
             {/* Total time box */}
             <div className="w-52 flex-shrink-0">
-              <label className="block text-sm font-medium text-slate-700 mb-2">
+              <label className="block text-sm font-medium text-foreground mb-2">
                 <div className="flex items-center gap-2">
                   <Clock className="w-4 h-4" />
                   Total Duration
@@ -133,10 +133,10 @@ export default function CreateContest() {
                       Number(e.target.value)
                     )
                   }
-                  className="w-20 text-center rounded-lg border border-slate-300 px-2 py-2.5 focus:outline-none focus:ring-2 focus:ring-slate-900 transition-all bg-white"
+                  className="w-20 text-center rounded-lg border border-input px-2 py-2.5 focus:outline-none focus:ring-2 focus:ring-ring transition-all bg-background text-foreground"
                   placeholder="0"
                 />
-                <span className="text-sm text-slate-600">h</span>
+                <span className="text-sm text-muted-foreground">h</span>
                 <input
                   type="number"
                   min={0}
@@ -147,10 +147,10 @@ export default function CreateContest() {
                       Number(e.target.value)
                     )
                   }
-                  className="w-20 text-center rounded-lg border border-slate-300 px-2 py-2.5 focus:outline-none focus:ring-2 focus:ring-slate-900 transition-all bg-white"
+                  className="w-20 text-center rounded-lg border border-input px-2 py-2.5 focus:outline-none focus:ring-2 focus:ring-ring transition-all bg-background text-foreground"
                   placeholder="0"
                 />
-                <span className="text-sm text-slate-600">m</span>
+                <span className="text-sm text-muted-foreground">m</span>
               </div>
             </div>
           </div>
@@ -173,16 +173,16 @@ export default function CreateContest() {
         </div>
 
         {/* Challenges Section */}
-        <div className="bg-white border border-slate-200 rounded-lg p-6">
+        <div className="bg-card border border-border rounded-lg p-6">
           <div className="flex items-center justify-between mb-6">
             <div>
-              <h2 className="text-lg font-semibold text-slate-900">Challenges</h2>
-              <p className="text-sm text-slate-600 mt-0.5">{challenges.length} challenge{challenges.length !== 1 ? 's' : ''} configured</p>
+              <h2 className="text-lg font-semibold text-foreground">Challenges</h2>
+              <p className="text-sm text-muted-foreground mt-0.5">{challenges.length} challenge{challenges.length !== 1 ? 's' : ''} configured</p>
             </div>
             <button
               type="button"
               onClick={addChallenge}
-              className="inline-flex items-center gap-2 rounded-lg bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-800 transition-colors"
+              className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 transition-colors"
             >
               <Plus className="w-4 h-4" />
               Add Challenge
@@ -193,14 +193,14 @@ export default function CreateContest() {
             {challenges.map((ch, idx) => (
               <div
                 key={ch.id}
-                className="relative border border-slate-200 rounded-lg p-6 bg-slate-50"
+                className="relative border border-border rounded-lg p-6 bg-muted/50"
               >
                 {/* Remove button */}
                 {challenges.length > 1 && (
                   <button
                     type="button"
                     onClick={() => removeChallenge(ch.id)}
-                    className="absolute cursor-pointer right-4 top-4 text-slate-400 hover:text-red-600 transition-colors"
+                    className="absolute cursor-pointer right-4 top-4 text-muted-foreground hover:text-destructive transition-colors"
                     title="Remove challenge"
                   >
                     <Trash2 className="w-5 h-5" />
@@ -209,7 +209,7 @@ export default function CreateContest() {
 
                 {/* Challenge number badge */}
                 <div className="mb-5">
-                  <span className="inline-block bg-slate-900 text-white px-3 py-1 rounded-md text-sm font-medium">
+                  <span className="inline-block bg-primary text-primary-foreground px-3 py-1 rounded-md text-sm font-medium">
                     Challenge {idx + 1}
                   </span>
                 </div>
@@ -265,45 +265,45 @@ export default function CreateContest() {
                     placeholder="https://github.com/Nagmani001"
                   />
 
-                  <div className="mt-6 bg-blue-50 border border-blue-100 rounded-lg p-5">
-                    <h3 className="flex items-center gap-2 text-blue-900 font-semibold text-sm mb-4">
+                  <div className="mt-6 bg-primary/5 border border-primary/20 rounded-lg p-5">
+                    <h3 className="flex items-center gap-2 text-primary font-semibold text-sm mb-4">
                       <FileText className="w-4 h-4" />
                       Repository Requirements
                     </h3>
                     <ul className="space-y-3">
-                      <li className="flex gap-3 text-sm text-blue-900/80">
-                        <div className="bg-blue-100/50 p-1 rounded-md h-fit">
-                          <span className="w-4 h-4 block font-bold text-center leading-4 text-blue-700">1</span>
+                      <li className="flex gap-3 text-sm text-foreground/80">
+                        <div className="bg-primary/10 p-1 rounded-md h-fit">
+                          <span className="w-4 h-4 block font-bold text-center leading-4 text-primary">1</span>
                         </div>
                         <div>
-                          <span className="font-semibold text-blue-900 block mb-0.5">Base Repository</span>
+                          <span className="font-semibold text-foreground block mb-0.5">Base Repository</span>
                           Create a public GitHub repository containing your challenge code.
                         </div>
                       </li>
-                      <li className="flex gap-3 text-sm text-blue-900/80">
-                        <div className="bg-blue-100/50 p-1 rounded-md h-fit">
-                          <span className="w-4 h-4 block font-bold text-center leading-4 text-blue-700">2</span>
+                      <li className="flex gap-3 text-sm text-foreground/80">
+                        <div className="bg-primary/10 p-1 rounded-md h-fit">
+                          <span className="w-4 h-4 block font-bold text-center leading-4 text-primary">2</span>
                         </div>
                         <div>
-                          <span className="font-semibold text-blue-900 block mb-0.5">Docker Configuration</span>
-                          Include a <code className="bg-blue-100 px-1 py-0.5 rounded text-blue-800 text-xs">Dockerfile</code> for your service and a <code className="bg-blue-100 px-1 py-0.5 rounded text-blue-800 text-xs">docker-compose.yml</code> that defines the service and any dependencies.
+                          <span className="font-semibold text-foreground block mb-0.5">Docker Configuration</span>
+                          Include a <code className="bg-muted px-1 py-0.5 rounded text-foreground text-xs">Dockerfile</code> for your service and a <code className="bg-muted px-1 py-0.5 rounded text-foreground text-xs">docker-compose.yml</code> that defines the service and any dependencies.
                         </div>
                       </li>
-                      <li className="flex gap-3 text-sm text-blue-900/80">
-                        <div className="bg-blue-100/50 p-1 rounded-md h-fit">
-                          <span className="w-4 h-4 block font-bold text-center leading-4 text-blue-700">3</span>
+                      <li className="flex gap-3 text-sm text-foreground/80">
+                        <div className="bg-primary/10 p-1 rounded-md h-fit">
+                          <span className="w-4 h-4 block font-bold text-center leading-4 text-primary">3</span>
                         </div>
                         <div>
-                          <span className="font-semibold text-blue-900 block mb-0.5">Health Check</span>
-                          Expose a <code className="bg-blue-100 px-1 py-0.5 rounded text-blue-800 text-xs">GET /</code> endpoint that returns a 200 OK status to verify service health.
+                          <span className="font-semibold text-foreground block mb-0.5">Health Check</span>
+                          Expose a <code className="bg-muted px-1 py-0.5 rounded text-foreground text-xs">GET /</code> endpoint that returns a 200 OK status to verify service health.
                         </div>
                       </li>
-                      <li className="flex gap-3 text-sm text-blue-900/80">
-                        <div className="bg-blue-100/50 p-1 rounded-md h-fit">
-                          <span className="w-4 h-4 block font-bold text-center leading-4 text-blue-700">4</span>
+                      <li className="flex gap-3 text-sm text-foreground/80">
+                        <div className="bg-primary/10 p-1 rounded-md h-fit">
+                          <span className="w-4 h-4 block font-bold text-center leading-4 text-primary">4</span>
                         </div>
                         <div>
-                          <span className="font-semibold text-blue-900 block mb-0.5">Tests</span>
+                          <span className="font-semibold text-foreground block mb-0.5">Tests</span>
                           Paste your test code in the <strong>Test File</strong> field above. Do not rely on tests inside the repository.
                         </div>
                       </li>
@@ -316,16 +316,15 @@ export default function CreateContest() {
         </div>
 
         {/* Footer Actions */}
-        <div className="bg-white border border-slate-200 rounded-lg p-6 flex items-center justify-between">
-          <div className="text-sm text-slate-600">
-            Ready to create <strong className="text-slate-900">{challenges.length}</strong> challenge{challenges.length !== 1 ? 's' : ''}
+        <div className="bg-card border border-border rounded-lg p-6 flex items-center justify-between">
+          <div className="text-sm text-muted-foreground">
+            Ready to create <strong className="text-foreground">{challenges.length}</strong> challenge{challenges.length !== 1 ? 's' : ''}
           </div>
 
           <div className="flex gap-3">
             <Button variant="secondary"
               type="button"
               onClick={addChallenge}
-              className="rounded-lg border border-slate-300 px-5 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50 transition-colors"
             >
               Add Another Challenge
             </Button>
