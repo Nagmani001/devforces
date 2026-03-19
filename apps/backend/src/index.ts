@@ -1,4 +1,4 @@
-import express from "express";
+import express, { Request, Response } from "express";
 import { config } from "dotenv";
 import cors from "cors";
 import { authRouter } from "./routes/authRouter";
@@ -10,6 +10,7 @@ import { createClient, RedisClientType } from "redis";
 import { leaderboardRouter } from "./routes/leaderboardRouter";
 import { notificationRotuer } from "./routes/notificationRouter";
 import { sseRouter } from "./routes/sseRouter";
+import prisma from "@repo/db/client";
 
 config();
 const app = express();
@@ -36,6 +37,22 @@ app.use(cors({
   origin: ["http://localhost:3000", "https://devforces.nagmaniupadhyay.com.np"],
   credentials: true
 }));
+
+app.get("/api/me", authMiddleware, async (req: Request, res: Response) => {
+  const user = await prisma.user.findFirst({
+    where: {
+      id: req.userId!
+    },
+    select: {
+      id: true,
+      email: true,
+      username: true,
+      imageUrl: true,
+      isAdmin: true,
+    }
+  });
+  res.json(user);
+});
 
 
 app.use("/api/auth", authRouter);
