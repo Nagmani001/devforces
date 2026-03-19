@@ -33,7 +33,7 @@ declare global {
 }
 app.use(express.json());
 app.use(cors({
-  origin: "http://localhost:3000",
+  origin: ["http://localhost:3000", "https://devforces.nagmaniupadhyay.com.np"],
   credentials: true
 }));
 

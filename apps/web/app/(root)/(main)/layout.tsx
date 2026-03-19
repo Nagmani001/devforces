@@ -1,12 +1,13 @@
-import NavBar from "@/app/components/navBar";
+import NavBarShell from "@/app/components/navBarShell";
 
 export default function Layout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  return <>
-    <NavBar />
-    {children}
-  </>
+  return (
+    <NavBarShell>
+      {children}
+    </NavBarShell>
+  );
 }

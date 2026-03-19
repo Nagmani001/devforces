@@ -1,6 +1,7 @@
 "use client"
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect, useMemo } from "react";
+import { useTheme } from "next-themes";
 // @ts-ignore
 import { ResizableBox } from "react-resizable";
 import JSZip from "jszip";
@@ -14,6 +15,7 @@ import dynamic from 'next/dynamic'
 import axios from "axios";
 import { BASE_URL_CLIENT, confirmFileSent, sendZippedFile } from "@/app/config/utils";
 import { ArenaDropzoneLoader } from "@/app/components/arenaDropzoneLoader";
+import { useNavBarActions } from "@/app/components/navBarActions";
 
 const Code = dynamic(() =>
   import('react-notion-x/build/third-party/code').then((m) => m.Code)
@@ -33,6 +35,9 @@ export default function ArenaPage({ recordMap, challengeId, baseGithubUrl, conte
     total: 0,
     failed: 0
   });
+  const { resolvedTheme } = useTheme();
+  const isDarkMode = resolvedTheme === "dark";
+  const { setActions } = useNavBarActions();
 
 
   // SSE connection will be handled in handleSubmit
@@ -58,7 +63,7 @@ export default function ArenaPage({ recordMap, challengeId, baseGithubUrl, conte
     setFiles((prev) => [...prev, ...actualFiles]);
   }, []);
 
-  const handleSubmit = async () => {
+  const handleSubmit = useCallback(async () => {
     if (files.length < 1) {
       return alert("no files selected");
     }
@@ -146,7 +151,7 @@ export default function ArenaPage({ recordMap, challengeId, baseGithubUrl, conte
       }
       setIsSubmitting(false);
     }
-  };
+  }, [challengeId, contestId, files]);
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
@@ -155,27 +160,27 @@ export default function ArenaPage({ recordMap, challengeId, baseGithubUrl, conte
     multiple: true,
   });
 
+  const navActions = useMemo(
+    () => (
+      <div className="flex items-center gap-2">
+        <Button onClick={handleSubmit} variant="secondary" size="sm" className="rounded-md h-8">
+          Submit
+        </Button>
+        <Button size="sm" className="rounded-md gap-1.5 h-8">
+          <Play size={14} /> Run
+        </Button>
+      </div>
+    ),
+    [handleSubmit]
+  );
+
+  useEffect(() => {
+    setActions(navActions);
+    return () => setActions(null);
+  }, [navActions, setActions]);
+
   return (
     <div className="h-[calc(100vh-3.5rem)] bg-background text-foreground flex flex-col w-full overflow-hidden">
-      {/* Action Bar - integrated with content */}
-      <div className="flex items-center justify-between px-4 py-2 bg-muted/30 border-b border-border">
-        <div className="flex items-center gap-3">
-          <h1 className="text-sm font-medium text-muted-foreground">Challenge</h1>
-          <span className="text-xs bg-primary/10 text-primary px-2 py-0.5 rounded-full">
-            {testResult.total > 0 ? `${testResult.passed}/${testResult.total} passed` : "Ready"}
-          </span>
-        </div>
-
-        <div className="flex items-center gap-2">
-          <Button onClick={handleSubmit} variant="secondary" size="sm" className="rounded-md h-8">
-            Submit
-          </Button>
-          <Button size="sm" className="rounded-md gap-1.5 h-8">
-            <Play size={14} /> Run
-          </Button>
-        </div>
-      </div>
-
       {/* Main content area */}
       <main className="flex-1 flex gap-4 overflow-hidden h-full p-4 pb-2">
         {/* Left resizable column: Notion content */}
@@ -195,20 +200,35 @@ export default function ArenaPage({ recordMap, challengeId, baseGithubUrl, conte
           onResizeStop={(e: any, data: any) => setLeftWidth(data.size.width)}
         >
           <Card className="h-full">
-            <CardContent className="h-[640px] overflow-auto p-1">
+            <CardContent className="h-full min-h-0 overflow-auto p-2">
+              <style jsx global>{`
+                .arena-notion .notion {
+                  width: 100%;
+                }
+                .arena-notion .notion-page {
+                  max-width: none;
+                  width: 100%;
+                  padding: 16px;
+                }
+              `}</style>
               {loadingNotion ? (
                 <div className="flex items-center gap-3">
                   <Loader className="animate-spin" />
                   <span>Loading notion page...</span>
                 </div>
               ) : recordMap ? (
-                <NotionRenderer recordMap={recordMap}
-                  fullPage={false}
-                  components={{
-                    Code,
-                    Equation,
-                  }}
-                />
+                <div className="arena-notion">
+                  <NotionRenderer
+                    recordMap={recordMap}
+                    darkMode={isDarkMode}
+                    className={isDarkMode ? "notion notion-dark" : "notion"}
+                    fullPage={false}
+                    components={{
+                      Code,
+                      Equation,
+                    }}
+                  />
+                </div>
               ) : (
                 <div className="prose prose-invert">
                   <h2>Question title (placeholder)</h2>

@@ -26,7 +26,7 @@ export default function SigninPage() {
   return (
     <div className="bg-background text-foreground overflow-hidden scroll-m-7">
       <SignInPage
-        heroImageSrc="https://school.100xdevs.com/_next/image?url=%2F_next%2Fstatic%2Fmedia%2Fsuperlabs-3.cf62a668.jpeg&w=3840&q=75"
+        heroImageSrc="/founders.png"
         testimonials={sampleTestimonials}
         onSignIn={handleSignIn}
         onGoogleSignIn={handleGoogleSignIn}
