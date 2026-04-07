@@ -43,6 +43,12 @@ app.use(cors({
   credentials: true
 }));
 
+app.get("/health", (req: Request, res: Response) => {
+  res.json({
+    message: "healthy",
+  });
+});
+
 app.get("/api/me", authMiddleware, async (req: Request, res: Response) => {
   const user = await prisma.user.findFirst({
     where: {

@@ -1,0 +1,173 @@
+name: CD
+
+on:
+  push:
+    branches: [main]
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_PREFIX: ghcr.io/nagmani001/devforces
+
+jobs:
+  changes:
+    runs-on: ubuntu-latest
+    outputs:
+      backend: ${{ steps.filter.outputs.backend }}
+      web: ${{ steps.filter.outputs.web }}
+      worker: ${{ steps.filter.outputs.worker }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            backend:
+              - 'apps/backend/**'
+              - 'packages/db/**'
+              - 'packages/common/**'
+              - 'packages/email/**'
+              - 'docker/backend/**'
+            web:
+              - 'apps/web/**'
+              - 'packages/ui/**'
+              - 'packages/common/**'
+              - 'docker/web/**'
+            worker:
+              - 'apps/worker/**'
+              - 'packages/db/**'
+              - 'packages/common/**'
+              - 'docker/worker/**'
+
+  build-backend:
+    needs: changes
+    if: needs.changes.outputs.backend == 'true'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push backend
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: docker/backend/Dockerfile
+          push: true
+          tags: |
+            ${{ env.IMAGE_PREFIX }}/backend:${{ github.sha }}
+            ${{ env.IMAGE_PREFIX }}/backend:latest
+
+  build-web:
+    needs: changes
+    if: needs.changes.outputs.web == 'true'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push web
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: docker/web/Dockerfile
+          push: true
+          build-args: |
+            NEXT_PUBLIC_API_URL=${{ secrets.NEXT_PUBLIC_API_URL }}
+          tags: |
+            ${{ env.IMAGE_PREFIX }}/web:${{ github.sha }}
+            ${{ env.IMAGE_PREFIX }}/web:latest
+
+  build-worker:
+    needs: changes
+    if: needs.changes.outputs.worker == 'true'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push worker
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: docker/worker/Dockerfile
+          push: true
+          tags: |
+            ${{ env.IMAGE_PREFIX }}/worker:${{ github.sha }}
+            ${{ env.IMAGE_PREFIX }}/worker:latest
+
+  deploy:
+    needs: [build-backend, build-web, build-worker]
+    if: always() && !failure() && !cancelled()
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Copy compose file to VM
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USERNAME }}
+          key: ${{ secrets.SSH_KEY }}
+          source: docker/docker-compose-deploy.yml
+          target: /home/${{ secrets.SSH_USERNAME }}/devforces/
+          strip_components: 1
+
+      - name: Deploy to VM
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USERNAME }}
+          key: ${{ secrets.SSH_KEY }}
+          script: |
+            cd /home/${{ secrets.SSH_USERNAME }}/devforces
+
+            # Log in to GHCR
+            echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+
+            # Pull latest images
+            docker compose -f docker-compose-deploy.yml pull
+
+            # Run database migrations
+            docker compose -f docker-compose-deploy.yml run --rm backend sh -c "cd packages/db && npx prisma@6.3.0 migrate deploy"
+
+            # Restart services, assuming deps are already running
+            docker compose -f docker-compose-deploy.yml up -d --no-deps backend
+            docker compose -f docker-compose-deploy.yml up -d --no-deps web
+            docker compose -f docker-compose-deploy.yml up -d --no-deps worker
+
+            # Ensure worker work directory exists on host
+            mkdir -p /tmp/devforces-work
+
+            # Health checks
+            sleep 10
+            curl -f --retry 3 --retry-delay 2 http://localhost:3001/health || exit 1
+            curl -f --retry 3 --retry-delay 2 http://localhost:3000/api/health || exit 1
+
+            # Clean up old images
+            docker image prune -f

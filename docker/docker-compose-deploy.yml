@@ -1,0 +1,68 @@
+services:
+  database:
+    image: postgres
+    container_name: devforces-database
+    restart: always
+    environment:
+      - POSTGRES_PASSWORD=nagmani
+    ports:
+      - '5432:5432'
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres" ]
+      interval: 1s
+      timeout: 10s
+      retries: 10
+
+  redis:
+    image: redis
+    container_name: devforces-redis
+    restart: always
+    ports:
+      - '6379:6379'
+    healthcheck:
+      test: [ "CMD", "redis-cli", "ping" ]
+      interval: 1s
+      timeout: 10s
+      retries: 10
+
+  backend:
+    image: ghcr.io/nagmani001/devforces/backend:latest
+    container_name: devforces-backend
+    restart: always
+    ports:
+      - "3001:3001"
+    env_file:
+      - .env.backend
+    depends_on:
+      database:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  worker:
+    image: ghcr.io/nagmani001/devforces/worker:latest
+    container_name: devforces-worker
+    restart: always
+    network_mode: host
+    env_file:
+      - .env.worker
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /tmp/devforces-work:/tmp/devforces-work
+    depends_on:
+      redis:
+        condition: service_healthy
+
+  web:
+    image: ghcr.io/nagmani001/devforces/web:latest
+    container_name: devforces-web
+    restart: always
+    env_file:
+      - .env.web
+    ports:
+      - "3000:3000"
+
+volumes:
+  pgdata:
