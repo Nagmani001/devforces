@@ -1,6 +1,7 @@
 import { REDIS_QUEUE_NAME } from "@repo/common/consts";
 import { config } from "dotenv";
 import { readFile, writeFile } from 'fs/promises';
+
 import { createClient, RedisClientType } from "redis";
 import util from "util";
 const exec = util.promisify(require('child_process').exec);
@@ -33,6 +34,7 @@ async function main() {
     const logsManager = new LogsManager(pubSub, id);
 
     await logsManager.addLog(" Starting submission processing...");
+
     await logsManager.addLog(` Submission ID: ${id}`);
     await logsManager.addLog(` Challenge ID: ${challengeId}`);
     await logsManager.addLog(` Downloading submission from: ${url}`);

@@ -13,7 +13,7 @@ import { NotionRenderer } from "react-notion-x";
 import { CloudUpload, Play, Loader, GripVertical, CheckCircle, Copy, GitBranch, AlertTriangle, Terminal } from "lucide-react";
 import dynamic from 'next/dynamic'
 import axios from "axios";
-import { BASE_URL_CLIENT, confirmFileSent, sendZippedFile } from "@/app/config/utils";
+import { BASE_URL, confirmFileSent, sendZippedFile } from "@/app/config/utils";
 import { ArenaDropzoneLoader } from "@/app/components/arenaDropzoneLoader";
 import { useNavBarActions } from "@/app/components/navBarActions";
 
@@ -78,7 +78,7 @@ export default function ArenaPage({ recordMap, challengeId, baseGithubUrl, conte
 
     try {
       // Get pre-signed URL and submission token
-      const getPresignedUrl = await axios.get(`${BASE_URL_CLIENT}/api/submissions/preSignedUrl/${challengeId}?contestId=${contestId}`, {
+      const getPresignedUrl = await axios.get(`${BASE_URL}/api/submissions/preSignedUrl/${challengeId}?contestId=${contestId}`, {
         headers: {
           Authorization: localStorage.getItem("token")
         }
@@ -91,7 +91,7 @@ export default function ArenaPage({ recordMap, challengeId, baseGithubUrl, conte
       }
 
       // Set up SSE connection before submitting
-      eventSource = new EventSource(`${BASE_URL_CLIENT}/api/live/sse/${submissionToken}`);
+      eventSource = new EventSource(`${BASE_URL}/api/live/sse/${submissionToken}`);
 
       eventSource.onmessage = (event) => {
         try {

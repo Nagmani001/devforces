@@ -7,13 +7,12 @@ import { getStatusOfContestReturns, S3PresignedPostFields } from "./types";
 import { ENDED, LIVE, MONTH_NAMES, NOT_STARTED } from "@repo/common/consts";
 import { Contest } from "@repo/common/typescript-types";
 
-export const BASE_URL_SERVER = process.env.API_URL || "http://localhost:3001";
-export const BASE_URL_CLIENT = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
+export const BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
 export const BASE_FRONTEND_URL = "http://localhost:3000";
 
 export async function getUserInfo(token: string) {
   try {
-    const me = await axios.get(`${BASE_URL_SERVER}/api/auth/me`, {
+    const me = await axios.get(`${BASE_URL}/api/auth/me`, {
       headers: {
         Authorization: token
       }
@@ -33,7 +32,7 @@ export async function getUserInfo(token: string) {
 
 export async function getContest(token: string, page: string) {
   try {
-    const me = await axios.get(`${BASE_URL_SERVER}/api/auth/me`, {
+    const me = await axios.get(`${BASE_URL}/api/auth/me`, {
       headers: {
         Authorization: token
       }
@@ -43,7 +42,7 @@ export async function getContest(token: string, page: string) {
     if (me.data.isAdmin) {
       isAdmin = true;
       try {
-        const response = await axios.get(`${BASE_URL_SERVER}/api/admin/contest?page=${page}`, {
+        const response = await axios.get(`${BASE_URL}/api/admin/contest?page=${page}`, {
           headers: {
             Authorization: token
           }
@@ -59,7 +58,7 @@ export async function getContest(token: string, page: string) {
     } else {
       isAdmin = false;
       try {
-        const response = await axios.get(`${BASE_URL_SERVER}/api/user/contest?page=${page}`, {
+        const response = await axios.get(`${BASE_URL}/api/user/contest?page=${page}`, {
           headers: {
             Authorization: token
           }
@@ -205,7 +204,7 @@ export function getStatusOfContest(startsAt: Date, duration: number): getStatusO
 }
 
 export async function getChallengesForContest(contestId: string, token: string) {
-  const response = await axios.get(`${BASE_URL_SERVER}/api/user/contest/${contestId}/challenges`, {
+  const response = await axios.get(`${BASE_URL}/api/user/contest/${contestId}/challenges`, {
     headers: {
       Authorization: token
     }
@@ -217,7 +216,7 @@ export async function getChallengesForContest(contestId: string, token: string) 
 
 export async function deleteContest(contestId: string, token: string) {
   try {
-    await axios.delete(`${BASE_URL_CLIENT}/api/admin/contest/delete/${contestId}`, {
+    await axios.delete(`${BASE_URL}/api/admin/contest/delete/${contestId}`, {
       headers: {
         Authorization: token
       }
@@ -234,7 +233,7 @@ export async function deleteContest(contestId: string, token: string) {
 export async function getContestForUpdate(contestId: string, token: string) {
   try {
 
-    const contests = await axios.get(`${BASE_URL_CLIENT}/api/admin/contest/update/${contestId}`, {
+    const contests = await axios.get(`${BASE_URL}/api/admin/contest/update/${contestId}`, {
       headers: {
         Authorization: token
       }
@@ -254,7 +253,7 @@ export async function getContestForUpdate(contestId: string, token: string) {
 
 export async function getChallengeDetails(challengeId: string, token: string) {
   try {
-    const challenge = await axios.get(`${BASE_URL_SERVER}/api/user/contest/challenge/${challengeId}`, {
+    const challenge = await axios.get(`${BASE_URL}/api/user/contest/challenge/${challengeId}`, {
       headers: {
         Authorization: token
       }
@@ -293,7 +292,7 @@ export async function sendZippedFile(url: string, conf: S3PresignedPostFields, f
 }
 
 export async function confirmFileSent(challengeId: string, contestId: string, submissionToken: string) {
-  const sendConfirmation = await axios.post(`${BASE_URL_CLIENT}/api/submissions/submit/confirm/${contestId}/${challengeId}`, {
+  const sendConfirmation = await axios.post(`${BASE_URL}/api/submissions/submit/confirm/${contestId}/${challengeId}`, {
     submissionToken
   }, {
     headers: {
