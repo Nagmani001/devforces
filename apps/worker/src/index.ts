@@ -1,6 +1,6 @@
 import { REDIS_QUEUE_NAME } from "@repo/common/consts";
 import { config } from "dotenv";
-import { writeFile } from 'fs/promises';
+import { readFile, writeFile } from 'fs/promises';
 import { createClient, RedisClientType } from "redis";
 import util from "util";
 const exec = util.promisify(require('child_process').exec);
@@ -40,11 +40,21 @@ async function main() {
     const projectPath = await downloadAndUnzipFile(url, id, logsManager);
     await logsManager.addLog(` Project extracted successfully: ${projectPath}`);
 
+    // Remove hardcoded container_name from docker-compose to avoid conflicts
+    const composePath = path.join(projectPath, 'docker-compose.yml');
+    const composeContent = await readFile(composePath, 'utf-8');
+    const sanitizedCompose = composeContent
+      .replace(/^\s*container_name:.*$/gm, '')
+      .replace(/^\s*version:.*$/gm, '');
+    await writeFile(composePath, sanitizedCompose);
+
+    const projectName = `devforces-${id}`;
+
     await logsManager.addLog(" Building Docker container (this may take a few minutes)...");
 
     // Build Docker container
     await logsManager.addLog(" Step 1/2: Building Docker image...");
-    const buildResult = await exec(`cd "${projectPath}" && docker compose build --no-cache`);
+    const buildResult = await exec(`cd "${projectPath}" && docker compose -p "${projectName}" build --no-cache`);
 
     // Log full build output
     const buildOutput = buildResult.stdout || buildResult.stderr || '';
@@ -60,7 +70,7 @@ async function main() {
     await logsManager.addLog(" Docker image built successfully");
     await logsManager.addLog(" Step 2/2: Starting Docker containers...");
 
-    const upResult = await exec(`cd "${projectPath}" && docker compose up -d`);
+    const upResult = await exec(`cd "${projectPath}" && docker compose -p "${projectName}" up -d`);
     const upOutput = upResult.stdout || upResult.stderr || '';
 
     // Log full container startup output
@@ -228,7 +238,7 @@ async function main() {
       await logsManager.addLog("   Stopping Docker containers...");
 
       try {
-        await exec(`cd "${projectPath}" && docker compose down --rmi all`);
+        await exec(`cd "${projectPath}" && docker compose -p "${projectName}" down --rmi all`);
         await logsManager.addLog("   Docker containers stopped and removed");
       } catch (cleanupErr) {
         await logsManager.addLog("     Warning: Some Docker cleanup steps may have failed", "error");
