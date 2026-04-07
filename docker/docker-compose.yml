@@ -27,18 +27,14 @@ services:
 
   backend:
     build:
-      context: ../ 
+      context: ../
       dockerfile: docker/backend/Dockerfile
     container_name: backend
+    env_file: ../apps/backend/.env
     environment:
-      DATABASE_URL: ${DATABASE_URL} 
-      REDIS_URL: ${REDIS_URL} 
-      RESEND_API_KEY: ${RESEND_API_KEY} 
-      SALT_ROUNDS: ${SALT_ROUNDS} 
-      JWT_SECRET: ${JWT_SECRET} 
-      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID} 
-      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY} 
-
+      # Override localhost URLs with Docker service names
+      DATABASE_URL: postgresql://postgres:nagmani@database:5432/postgres
+      REDIS_URL: redis://redis:6379
     depends_on:
       database:
         condition: service_healthy
@@ -49,24 +45,30 @@ services:
 
   worker:
     build:
-      context: ../ 
+      context: ../
       dockerfile: docker/worker/Dockerfile
-    container_name: worker 
+    container_name: worker
+    network_mode: host
+    env_file: ../apps/worker/.env
     environment:
-      REDIS_URL: ${REDIS_URL} 
-      
+      # With host networking, localhost works since worker shares host network
+      DATABASE_URL: postgresql://postgres:nagmani@localhost:5432/postgres
+      # Shared path between container and host so Docker daemon can access build contexts
+      WORK_DIR: /tmp/devforces-work
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /tmp/devforces-work:/tmp/devforces-work
     depends_on:
       redis:
         condition: service_healthy
 
   web:
     build:
-      context: ../ 
+      context: ../
       dockerfile: docker/web/Dockerfile
-    container_name: web 
-    environment:
-      NEXT_PUBLIC_API_URL: "http://localhost:3001" 
-      API_URL: "http://backend:3001" 
-
+      args:
+        NEXT_PUBLIC_API_URL: "http://localhost:3001"
+    container_name: web
+    env_file: ../apps/web/.env
     ports:
       - "3000:3000"

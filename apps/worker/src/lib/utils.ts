@@ -8,7 +8,9 @@ import { LogsManager } from "./logsManager";
 
 export const WORKER_ROOT = path.resolve(__dirname, '..', '..');
 
-export const WORK_DIR = path.join(WORKER_ROOT, 'work');
+// In Docker, WORK_DIR must be a bind-mounted path matching the host so the
+// host Docker daemon can access build contexts. Falls back to local path for dev.
+export const WORK_DIR = process.env.WORK_DIR || path.join(WORKER_ROOT, 'work');
 
 export async function downloadAndUnzipFile(url: string, id: string, logsManager?: LogsManager) {
   try {

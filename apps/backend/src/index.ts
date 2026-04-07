@@ -11,8 +11,13 @@ import { leaderboardRouter } from "./routes/leaderboardRouter";
 import { notificationRotuer } from "./routes/notificationRouter";
 import { sseRouter } from "./routes/sseRouter";
 import prisma from "@repo/db/client";
+import { initEmail } from "@repo/email/email";
 
 config();
+
+if (process.env.RESEND_API_KEY) {
+  initEmail(process.env.RESEND_API_KEY);
+}
 const app = express();
 
 export const redisClient: RedisClientType = createClient({

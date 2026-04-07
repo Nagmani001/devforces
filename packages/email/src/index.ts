@@ -1,13 +1,23 @@
 import { Resend } from "resend";
-import { config } from "dotenv";
 
-config({ path: "/home/nagmani/root/projects/devforces/packages/email/.env" });
+let resend: Resend | null = null;
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+export function initEmail(resendApiKey: string) {
+  resend = new Resend(resendApiKey);
+}
+
+function getResend(): Resend {
+  if (!resend) {
+    throw new Error("Email not initialized. Call initEmail() from backend first.");
+  }
+  return resend;
+}
 
 export async function sendEmail(otp: string, sendTo: string, type: string) {
+  const client = getResend();
+
   if (type == "OTP") {
-    const { data, error } = await resend.emails.send({
+    const { data, error } = await client.emails.send({
       from: 'Nagmani <nagmani@email.nagmaniupadhyay.com.np>',
       to: [sendTo],
       subject: "signup OTP",
@@ -27,7 +37,7 @@ export async function sendEmail(otp: string, sendTo: string, type: string) {
     }
   } else if (type == "FORGOT_PASSWORD") {
 
-    const { data, error } = await resend.emails.send({
+    const { data, error } = await client.emails.send({
       from: 'Nagmani <nagmani@email.nagmaniupadhyay.com.np>',
       to: [sendTo],
       subject: "forgot password OTP",
@@ -49,7 +59,9 @@ export async function sendEmail(otp: string, sendTo: string, type: string) {
 }
 
 export async function notifyUser(sendTo: string, timeStamp: Date, contestLink: string) {
-  const { data, error } = await resend.emails.send({
+  const client = getResend();
+
+  const { data, error } = await client.emails.send({
     from: 'Nagmani <nagmani@email.nagmaniupadhyay.com.np>',
     to: [sendTo],
     subject: "notification about contest",
