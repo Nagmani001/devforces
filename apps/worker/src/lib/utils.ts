@@ -114,7 +114,6 @@ export async function downloadAndUnzipFile(url: string, id: string, logsManager?
     if (logsManager) {
       await logsManager.addLog(`Error during download/extraction: ${errorMessage}`, "error");
     }
-    console.log("error occurred in downloadAndUnzipFile", err);
     throw err;
   }
 }

@@ -4,14 +4,10 @@ import { SignInPage } from './sign-in';
 
 const handleSignIn = (event: React.FormEvent<HTMLFormElement>) => {
   event.preventDefault();
-  const formData = new FormData(event.currentTarget);
-  const data = Object.fromEntries(formData.entries());
-  console.log("Sign In submitted:", data);
   alert(`Sign In Submitted! Check the browser console for form data.`);
 };
 
 const handleGoogleSignIn = () => {
-  console.log("Continue with Google clicked");
   alert("Continue with Google clicked");
 };
 

@@ -164,9 +164,7 @@ authRouter.post("/verify-otp/:userId", async (req: Request, res: Response) => {
 });
 
 authRouter.get("/me", authMiddleware, async (req: Request, res: Response) => {
-  console.log("main request request handler");
   const userId = req.userId;
-  console.log("userId", userId);
   if (!userId) {
     return res.status(403).json({
       message: "invalid auth"
@@ -174,14 +172,12 @@ authRouter.get("/me", authMiddleware, async (req: Request, res: Response) => {
   };
 
   try {
-    console.log("before db request");
     const user = await prisma.user.findFirst({
       where: {
         id: userId
       }
     });
 
-    console.log("after db request", user);
     if (!user) {
       return res.status(404).json({
         message: "user not found"
@@ -194,8 +190,7 @@ authRouter.get("/me", authMiddleware, async (req: Request, res: Response) => {
       imageUrl: user.imageUrl
     });
   } catch (err) {
-    console.log("db request failed");
-
+    res.status(500).json({ message: "internal error" });
   }
 });
 

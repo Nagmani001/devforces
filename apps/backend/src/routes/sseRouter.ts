@@ -57,7 +57,6 @@ sseRouter.get("/sse/:token", async (req: Request, res: Response) => {
 
   // Handle client disconnect
   req.on('close', async () => {
-    console.log('Client closed SSE connection for token:', token);
     pubSub.off('message', messageHandler);
     await pubSub.unsubscribe(token);
     res.end();

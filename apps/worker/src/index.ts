@@ -193,9 +193,6 @@ async function main() {
       }
 
       await logsManager.publishResult(result);
-
-      console.log("number of passed test cases = ", numberOfPassedTestCases);
-      console.log("total Test cases", testFile.totalTestCases)
     } catch (err: any) {
       await logsManager.addLog(" Test execution encountered errors", "error");
 
@@ -232,9 +229,6 @@ async function main() {
 
       await logsManager.addLog(`  Test results: ${result.passed} passed, ${result.failed} failed (${testFile.totalTestCases} total)`, "error");
       await logsManager.publishResult(result);
-
-      console.log("number of passed failedcases = ", numberOfFailedTestCases);
-      console.log("total Test cases", testFile.totalTestCases)
     } finally {
       await logsManager.addLog(" Cleaning up resources...");
       await logsManager.addLog("   Stopping Docker containers...");
@@ -272,9 +266,6 @@ async function main() {
       }
 
       await logsManager.addLog(" Submission processing completed");
-
-      console.log("total time taken", totalTime, "seconds");
-      console.log("total number of errors it throwed = ", numberOfErrors);
 
       // add entry in the database
       // respond to user 

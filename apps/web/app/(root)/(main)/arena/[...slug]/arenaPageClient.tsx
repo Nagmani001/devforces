@@ -25,8 +25,6 @@ const Equation = dynamic(() =>
 )
 
 export default function ArenaPage({ recordMap, challengeId, baseGithubUrl, contestId }: any) {
-  console.log('blocks with missing id:',
-    Object.entries(recordMap.block || {}));
   const [leftWidth, setLeftWidth] = useState<number>(760);
   const [loadingNotion, setLoadingNotion] = useState<boolean>(false);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
@@ -56,11 +54,6 @@ export default function ArenaPage({ recordMap, challengeId, baseGithubUrl, conte
       }
     });
 
-
-    actualFiles.forEach(x => {
-      //@ts-ignore
-      console.log(x.path)
-    });
 
     setFiles((prev) => [...prev, ...actualFiles]);
   }, []);

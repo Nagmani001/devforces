@@ -8,7 +8,6 @@ import { signupType } from '@/app/config/types';
 import axios from 'axios';
 import { BASE_URL } from '@/app/config/utils';
 import { toast } from 'sonner';
-import { signupSchema } from '@repo/common/zodTypes';
 
 // --- HELPER COMPONENTS (ICONS) ---
 
@@ -104,8 +103,7 @@ export const SignUpPage: React.FC<SignInPageProps> = ({
       return axios.post(`${BASE_URL}/api/auth/signup`, user);
     },
 
-    onError: (error: any) => {
-      console.log(error);
+    onError: () => {
       toast.error("error while completing the requst");
     },
     onSuccess: (success: any) => {
@@ -116,10 +114,6 @@ export const SignUpPage: React.FC<SignInPageProps> = ({
 
   function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    const parsedData = signupSchema.safeParse(signupData);
-    if (!parsedData.success) {
-      console.log(parsedData.error.issues);
-    }
     mutation.mutate(signupData);
   }
 
@@ -205,10 +199,6 @@ export const SignUpPage: React.FC<SignInPageProps> = ({
 
               <button
                 onClick={() => {
-                  const parsedData = signupSchema.safeParse(signupData);
-                  if (!parsedData.success) {
-                    console.log(parsedData.error.issues);
-                  }
                   mutation.mutate(signupData);
                 }}
                 type="button" className="animate-element animate-delay-600 w-full rounded-xl bg-primary py-3 font-medium text-primary-foreground hover:bg-primary/90 transition-colors">

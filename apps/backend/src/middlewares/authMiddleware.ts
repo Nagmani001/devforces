@@ -3,7 +3,6 @@ import jwt from "jsonwebtoken";
 
 export async function authMiddleware(req: Request, res: Response, next: NextFunction) {
   const token = req.headers["authorization"] || req.cookies?.token;
-  console.log("token", token);
   if (!token) {
     return res.status(403).json({
       message: "token missing"
@@ -13,14 +12,12 @@ export async function authMiddleware(req: Request, res: Response, next: NextFunc
   try {
     //@ts-ignore
     const decoded = jwt.verify(token, process.env.JWT_SECRET || "");
-    console.log("decoded");
 
     //@ts-ignore
     req.userId = decoded.userId;
     next();
 
   } catch (err) {
-    console.log("catch err at authMiddleware");
     return res.status(403).json({
       message: "invalid token"
     })

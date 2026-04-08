@@ -17,13 +17,11 @@ export async function getUserInfo(token: string) {
         Authorization: token
       }
     });
-    console.log("didn't reach catch block", me);
     return {
       success: true,
       data: me.data
     }
   } catch (err) {
-    console.log("error occured", err);
     return {
       success: false,
     }
@@ -287,8 +285,7 @@ export async function sendZippedFile(url: string, conf: S3PresignedPostFields, f
     data: data
   };
 
-  const response = await axios.request(config);
-  console.log("uploaded to s3 successfully", response);
+  await axios.request(config);
 }
 
 export async function confirmFileSent(challengeId: string, contestId: string, submissionToken: string) {

@@ -7,7 +7,6 @@ import LableWithInput from "@repo/ui/components/labbledInput";
 import { useMutation } from '@tanstack/react-query';
 import { useRouter } from "next/navigation";
 import { BASE_URL } from "@/app/config/utils";
-import { signupSchema } from "@repo/common/zodTypes";
 import { signupType } from "@/app/config/types";
 
 export default function SignupForm() {
@@ -24,8 +23,7 @@ export default function SignupForm() {
       return axios.post(`${BASE_URL}/api/auth/signup`, user);
     },
 
-    onError: (error: any) => {
-      console.log(error);
+    onError: () => {
       toast.error("error while completing the requst");
     },
     onSuccess: (success: any) => {
@@ -36,10 +34,6 @@ export default function SignupForm() {
 
   function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    const parsedData = signupSchema.safeParse(signupData);
-    if (!parsedData.success) {
-      console.log(parsedData.error.issues);
-    }
     mutation.mutate(signupData);
   }
 

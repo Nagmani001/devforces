@@ -24,8 +24,7 @@ export default function SigninForm() {
         withCredentials: true
       });
     },
-    onError: (error: any) => {
-      console.log(error);
+    onError: () => {
       toast.error("something went wrong");
     },
     onSuccess: (success: any) => {
