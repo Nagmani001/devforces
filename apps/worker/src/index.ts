@@ -42,12 +42,17 @@ async function main() {
     const projectPath = await downloadAndUnzipFile(url, id, logsManager);
     await logsManager.addLog(` Project extracted successfully: ${projectPath}`);
 
-    // Remove hardcoded container_name from docker-compose to avoid conflicts
+    // Sanitize the user's docker-compose.yml so concurrent submissions don't collide:
+    //  - strip container_name (forces fixed names)
+    //  - strip obsolete version field
+    //  - rewrite "HOST:CONTAINER" port mappings to just "CONTAINER" so Docker
+    //    auto-assigns a free host port (looked up later via `docker compose port`)
     const composePath = path.join(projectPath, 'docker-compose.yml');
     const composeContent = await readFile(composePath, 'utf-8');
     const sanitizedCompose = composeContent
       .replace(/^\s*container_name:.*$/gm, '')
-      .replace(/^\s*version:.*$/gm, '');
+      .replace(/^\s*version:.*$/gm, '')
+      .replace(/(-\s*["']?)(\d+):(\d+)(["']?)/g, '$1$3$4');
     await writeFile(composePath, sanitizedCompose);
 
     const projectName = `devforces-${id}`;
@@ -85,6 +90,15 @@ async function main() {
 
     await logsManager.addLog(" Docker containers started successfully");
 
+    // Look up the auto-assigned host port for the backend service
+    const portLookup = await exec(`cd "${projectPath}" && docker compose -p "${projectName}" port backend 8000`);
+    const portMatch = (portLookup.stdout || '').trim().match(/:(\d+)$/);
+    if (!portMatch) {
+      throw new Error(`Could not determine host port for backend service. Got: ${portLookup.stdout}`);
+    }
+    const backendHostPort = portMatch[1];
+    await logsManager.addLog(` Backend exposed on host port ${backendHostPort}`);
+
     let numberOfErrors = 0;
 
 
@@ -105,7 +119,12 @@ async function main() {
 
     const testFilePath = path.join(WORK_DIR, "index.test.ts");
     await logsManager.addLog(` Preparing test suite (${testFile.totalTestCases} test cases expected)`);
-    await writeFile(testFilePath, testFile.testFile);
+    // Rewrite hardcoded localhost:8000 in the test file to use the dynamic host port
+    const rewrittenTestFile = testFile.testFile.replace(
+      /(localhost|127\.0\.0\.1):8000/g,
+      `localhost:${backendHostPort}`
+    );
+    await writeFile(testFilePath, rewrittenTestFile);
     await logsManager.addLog(" Test file written successfully");
     await logsManager.addLog(" Waiting for service to be ready (health check)...");
 
@@ -114,7 +133,7 @@ async function main() {
 
     while (true) {
       try {
-        const healthResponse = await axios.get("http://localhost:8000/health", { timeout: 2000 });
+        const healthResponse = await axios.get(`http://localhost:${backendHostPort}/health`, { timeout: 2000 });
         if (healthCheckAttempts > 0) {
           await logsManager.addLog(` Service is healthy (after ${healthCheckAttempts} attempt${healthCheckAttempts > 1 ? 's' : ''})`);
         } else {
