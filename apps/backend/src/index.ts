@@ -1,6 +1,7 @@
 import express, { Request, Response } from "express";
 import { config } from "dotenv";
 import cors from "cors";
+import cookieParser from "cookie-parser";
 import { authRouter } from "./routes/authRouter";
 import { adminContestRouter } from "./routes/adminContestRouter";
 import { userContestRouter } from "./routes/userContestRouter";
@@ -38,6 +39,7 @@ declare global {
   }
 }
 app.use(express.json());
+app.use(cookieParser());
 app.use(cors({
   origin: ["http://localhost:3000", "https://devforces.nagmani.site"],
   credentials: true

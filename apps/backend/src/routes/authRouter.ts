@@ -98,7 +98,14 @@ authRouter.post("/signin", async (req: Request, res: Response) => {
     });
   }
   const token = jwt.sign({ userId: user.id }, process.env.JWT_SECRET || "nagmani", { expiresIn: "15d" });
-  res.cookie("token", token);
+  res.cookie("token", token, {
+    domain: process.env.COOKIE_DOMAIN,
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+    maxAge: 15 * 24 * 60 * 60 * 1000,
+    path: "/",
+  });
   res.json({
     message: "signin successful",
     token
@@ -142,7 +149,14 @@ authRouter.post("/verify-otp/:userId", async (req: Request, res: Response) => {
   });
 
   const token = jwt.sign({ userId: user.id }, process.env.JWT_SECRET || "nagmani", { expiresIn: "15d" });
-  res.cookie("token", token);
+  res.cookie("token", token, {
+    domain: process.env.COOKIE_DOMAIN,
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+    maxAge: 15 * 24 * 60 * 60 * 1000,
+    path: "/",
+  });
   res.json({
     message: "correct otp",
     token

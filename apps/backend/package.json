@@ -28,6 +28,7 @@
     "@types/redis": "^4.0.11",
     "axios": "^1.13.2",
     "bcrypt": "^6.0.0",
+    "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
     "dotenv": "^17.2.3",
     "express": "^5.2.1",
@@ -36,5 +37,8 @@
     "uuid": "^13.0.0",
     "vitest": "^4.0.15",
     "zod": "^4.1.13"
+  },
+  "devDependencies": {
+    "@types/cookie-parser": "^1.4.10"
   }
 }
