@@ -173,6 +173,36 @@ async function main() {
 
     try {
       await logsManager.addLog(` Executing ${testFile.totalTestCases} test cases...`);
+
+      // ---- DIAGNOSTIC LOGS (compare dev vs prod container) ----
+      console.log('[DIAG] process.cwd', process.cwd());
+      console.log('[DIAG] __dirname', __dirname);
+      console.log('[DIAG] node version', process.version);
+      console.log('[DIAG] platform', process.platform, process.arch);
+      console.log('[DIAG] testFilePath', testFilePath);
+      console.log('[DIAG] resultsJsonPath', resultsJsonPath);
+      console.log('[DIAG] WORK_DIR', WORK_DIR);
+      console.log('[DIAG] PATH', process.env.PATH);
+      try {
+        const stat = await import('fs/promises').then(m => m.stat(testFilePath));
+        console.log('[DIAG] testFile size', stat.size);
+      } catch (e: any) {
+        console.log('[DIAG] testFile stat ERROR', e?.message);
+      }
+      try {
+        const which = await exec('which npx && which vitest 2>/dev/null; npx --version; node --version');
+        console.log('[DIAG] which', which.stdout, which.stderr);
+      } catch (e: any) {
+        console.log('[DIAG] which ERROR', e?.message);
+      }
+      try {
+        const ls = await exec('ls -la node_modules/.bin/vitest 2>&1; ls -la /app/node_modules/.bin/vitest 2>&1');
+        console.log('[DIAG] vitest bin', ls.stdout);
+      } catch (e: any) {
+        console.log('[DIAG] vitest bin ERROR', e?.message);
+      }
+      // --------------------------------------------------------
+
       // Use vitest JSON reporter — text-scraping the human summary is unreliable
       // (e.g. "1 failed" from "Test Files 1 failed" gets matched instead of the
       // real assertion count, and a missing summary made fallback math claim
@@ -180,6 +210,7 @@ async function main() {
       // Run vitest with two reporters: default (pretty UI streamed live to the
       // user) + json (written to file for reliable pass/fail counts).
       const vitestExitCode: number = await new Promise<number>((resolve) => {
+        console.log('[DIAG] spawning vitest...');
         const child = spawn(
           'npx',
           [
@@ -192,23 +223,47 @@ async function main() {
           ],
           { env: { ...process.env, FORCE_COLOR: '0', CI: 'true' } }
         );
+        console.log('[DIAG] spawn pid', child.pid);
 
-        const stream = (buf: Buffer) => {
-          const text = buf.toString('utf-8').replace(/\[[0-9;]*[A-Za-z]/g, '');
-          for (const line of text.split('\n')) {
-            if (line.length > 0) {
-              // Fire and forget — preserve order via the queue inside logsManager
-              logsManager.addLog(line);
-            }
+        let buffer = '';
+        const collect = (buf: Buffer) => {
+          const chunk = buf.toString('utf-8');
+          process.stdout.write('[VITEST RAW] ' + chunk);
+          buffer += chunk.replace(/\[[0-9;]*[A-Za-z]/g, '');
+        };
+        child.stdout.on('data', collect);
+        child.stderr.on('data', collect);
+
+        const emitSummary = async () => {
+          // Match the vitest default-reporter summary block (leading whitespace + keyword).
+          const summaryRe = /^\s*(Test Files|Tests|Start at|Duration|Snapshots)\s/;
+          // Per-test status lines that appear above the summary.
+          const testLineRe = /^\s*(✓|✗|×|PASS|FAIL)\s/;
+          const lines = buffer.split('\n');
+          for (const l of lines) {
+            if (testLineRe.test(l)) await logsManager.addLog(l.trim());
+          }
+          for (const l of lines) {
+            if (summaryRe.test(l)) await logsManager.addLog(l.trim());
           }
         };
-        child.stdout.on('data', stream);
-        child.stderr.on('data', stream);
-        child.on('close', (code: number | null) => resolve(code ?? 1));
-        child.on('error', () => resolve(1));
+        child.on('close', async (code: number | null) => {
+          await emitSummary();
+          resolve(code ?? 1);
+        });
+        child.on('error', async () => {
+          await emitSummary();
+          resolve(1);
+        });
       });
 
-      console.log('vitest exit code', vitestExitCode);
+      console.log('[DIAG] vitest exit code', vitestExitCode);
+      try {
+        const jstat = await import('fs/promises').then(m => m.stat(resultsJsonPath));
+        console.log('[DIAG] json file size', jstat.size);
+      } catch (e: any) {
+        console.log('[DIAG] json file MISSING', e?.message);
+      }
       if (vitestExitCode !== 0) {
         executionExitedNonZero = true;
       }
