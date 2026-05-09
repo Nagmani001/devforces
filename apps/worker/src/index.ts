@@ -118,7 +118,17 @@ async function main() {
       throw new Error("Test file not found");
     }
 
-    const testFilePath = path.join(WORK_DIR, "index.test.ts");
+    // Test file MUST live inside the worker package dir so vitest:
+    //   (a) finds its own install (node_modules/.bin/vitest, vitest config)
+    //   (b) resolves test imports (axios etc.) from worker's node_modules
+    //   (c) the file is under cwd so the default `**/*.test.ts` include matches.
+    // WORK_DIR can be overridden to /tmp/... in prod for Docker bind-mounting,
+    // which breaks all three. Keep WORK_DIR for downloads + docker compose, but
+    // write the test file to a path tied to the worker package itself.
+    const WORKER_PKG_DIR = path.resolve(__dirname, '..');
+    const TEST_DIR = path.join(WORKER_PKG_DIR, 'work');
+    await import('fs/promises').then(m => m.mkdir(TEST_DIR, { recursive: true }));
+    const testFilePath = path.join(TEST_DIR, `${id}.test.ts`);
     await logsManager.addLog(` Preparing test suite (${testFile.totalTestCases} test cases expected)`);
     // Rewrite hardcoded localhost:8000 in the test file to use the dynamic host port
     const rewrittenTestFile = testFile.testFile.replace(
@@ -209,20 +219,48 @@ async function main() {
       // every test passed). JSON file is written even on assertion failures.
       // Run vitest with two reporters: default (pretty UI streamed live to the
       // user) + json (written to file for reliable pass/fail counts).
+      // Resolve vitest binary directly. `npx` falls back to a network install
+      // when vitest isn't on PATH (which is the case in the prod container —
+      // the Dockerfile doesn't add /app/node_modules/.bin or the worker's bin
+      // dir to PATH). That fallback installs a different vitest version and
+      // also runs vitest with cwd=/app, which can't find the test file.
+      const fs = await import('fs/promises');
+      const vitestCandidates = [
+        path.join(WORKER_PKG_DIR, 'node_modules', '.bin', 'vitest'),
+        path.resolve(WORKER_PKG_DIR, '..', '..', 'node_modules', '.bin', 'vitest'),
+        '/app/node_modules/.bin/vitest',
+      ];
+      let vitestBin: string | null = null;
+      for (const c of vitestCandidates) {
+        try { await fs.access(c); vitestBin = c; break; } catch {}
+      }
+      console.log('[DIAG] resolved vitest bin', vitestBin);
       const vitestExitCode: number = await new Promise<number>((resolve) => {
         console.log('[DIAG] spawning vitest...');
-        const child = spawn(
-          'npx',
-          [
-            'vitest',
-            'run',
-            testFilePath,
-            '--reporter=default',
-            '--reporter=json',
-            `--outputFile.json=${resultsJsonPath}`,
-          ],
-          { env: { ...process.env, FORCE_COLOR: '0', CI: 'true' } }
-        );
+        const child = vitestBin
+          ? spawn(
+              vitestBin,
+              [
+                'run',
+                testFilePath,
+                '--reporter=default',
+                '--reporter=json',
+                `--outputFile.json=${resultsJsonPath}`,
+              ],
+              { cwd: WORKER_PKG_DIR, env: { ...process.env, FORCE_COLOR: '0', CI: 'true' } }
+            )
+          : spawn(
+              'npx',
+              [
+                'vitest',
+                'run',
+                testFilePath,
+                '--reporter=default',
+                '--reporter=json',
+                `--outputFile.json=${resultsJsonPath}`,
+              ],
+              { cwd: WORKER_PKG_DIR, env: { ...process.env, FORCE_COLOR: '0', CI: 'true' } }
+            );
         console.log('[DIAG] spawn pid', child.pid);
 
         let buffer = '';
