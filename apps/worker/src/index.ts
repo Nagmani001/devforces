@@ -6,6 +6,7 @@ import { readFile, writeFile } from 'fs/promises';
 import { createClient, RedisClientType } from "redis";
 import util from "util";
 const exec = util.promisify(require('child_process').exec);
+const { spawn } = require('child_process');
 import path from "path";
 import prisma from "@repo/db/client";
 import { downloadAndUnzipFile, WORK_DIR } from "./lib/utils";
@@ -176,13 +177,39 @@ async function main() {
       // (e.g. "1 failed" from "Test Files 1 failed" gets matched instead of the
       // real assertion count, and a missing summary made fallback math claim
       // every test passed). JSON file is written even on assertion failures.
-      try {
-        const { stdout, stderr } = await exec(`npx vitest "${testFilePath}" --run --reporter=json --outputFile="${resultsJsonPath}"`);
-        console.log("vitest stdout", stdout);
-        console.log("vitest stderr", stderr);
-      } catch (execErr: any) {
-        // Non-zero exit on any failed assertion is expected; JSON still written.
-        console.log("vitest non-zero exit", execErr?.message);
+      // Run vitest with two reporters: default (pretty UI streamed live to the
+      // user) + json (written to file for reliable pass/fail counts).
+      const vitestExitCode: number = await new Promise<number>((resolve) => {
+        const child = spawn(
+          'npx',
+          [
+            'vitest',
+            'run',
+            testFilePath,
+            '--reporter=default',
+            '--reporter=json',
+            `--outputFile.json=${resultsJsonPath}`,
+          ],
+          { env: { ...process.env, FORCE_COLOR: '0', CI: 'true' } }
+        );
+
+        const stream = (buf: Buffer) => {
+          const text = buf.toString('utf-8').replace(/\[[0-9;]*[A-Za-z]/g, '');
+          for (const line of text.split('\n')) {
+            if (line.length > 0) {
+              // Fire and forget — preserve order via the queue inside logsManager
+              logsManager.addLog(line);
+            }
+          }
+        };
+        child.stdout.on('data', stream);
+        child.stderr.on('data', stream);
+        child.on('close', (code: number | null) => resolve(code ?? 1));
+        child.on('error', () => resolve(1));
+      });
+
+      console.log('vitest exit code', vitestExitCode);
+      if (vitestExitCode !== 0) {
         executionExitedNonZero = true;
       }
 
