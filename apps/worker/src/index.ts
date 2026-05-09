@@ -165,89 +165,74 @@ async function main() {
     each_penalty(p) = Number_of_Fail_Before_1st_AC * 20min + time_of_1st_AC_since_contest_start
     */
 
+    let numberOfPassedTestCases = 0;
+    let numberOfFailedTestCases = testFile.totalTestCases;
+    const resultsJsonPath = path.join(WORK_DIR, `vitest-${id}.json`);
+    let executionExitedNonZero = false;
+
     try {
       await logsManager.addLog(` Executing ${testFile.totalTestCases} test cases...`);
-      const { stdout, stderr } = await exec(`npx vitest "${testFilePath}" --run`);
-
-      const outputString = stdout.replace(/\\n/g, "\n").replace(/\\s/g, " ") || stderr.replace(/\\n/g, "\n").replace(/\\s/g, " ");
-      const clean = outputString.replace(/\u001b\[[0-9;]*m/g, "");
-
-      const testLines = clean.split('\n').filter((line: string) => line.trim());
-
-      const passedMatch = clean.match(/Tests\s+(\d+)\s+passed/i);
-      const failedMatch = clean.match(/(\d+)\s+failed/i);
-      const testMatch = clean.match(/(\d+)\s+test/i);
-
-      if (testMatch) {
-        await logsManager.addLog(`   Running ${testMatch[1]} test(s)...`);
+      // Use vitest JSON reporter — text-scraping the human summary is unreliable
+      // (e.g. "1 failed" from "Test Files 1 failed" gets matched instead of the
+      // real assertion count, and a missing summary made fallback math claim
+      // every test passed). JSON file is written even on assertion failures.
+      try {
+        const { stdout, stderr } = await exec(`npx vitest "${testFilePath}" --run --reporter=json --outputFile="${resultsJsonPath}"`);
+        console.log("vitest stdout", stdout);
+        console.log("vitest stderr", stderr);
+      } catch (execErr: any) {
+        // Non-zero exit on any failed assertion is expected; JSON still written.
+        console.log("vitest non-zero exit", execErr?.message);
+        executionExitedNonZero = true;
       }
 
-      const importantLines = testLines.filter((line: string) =>
-        line.includes('PASS') ||
-        line.includes('FAIL') ||
-        line.includes('✓') ||
-        line.includes('✗') ||
-        (line.includes('test') && (line.includes('passed') || line.includes('failed')))
-      ).slice(0, 5);
+      let parsed: any = null;
+      try {
+        parsed = JSON.parse(await readFile(resultsJsonPath, 'utf-8'));
+      } catch {
+        await logsManager.addLog(" Could not read vitest results — test file failed to load (server crash, import error, syntax error)", "error");
+      }
 
-      for (const line of importantLines) {
-        if (line.trim() && line.length < 200) {
-          await logsManager.addLog(`   ${line.trim()}`);
+      if (parsed && typeof parsed.numPassedTests === 'number') {
+        numberOfPassedTestCases = parsed.numPassedTests;
+        numberOfFailedTestCases = (parsed.numFailedTests || 0) + (parsed.numPendingTests || 0);
+        const failNames: string[] = [];
+        for (const tr of parsed.testResults || []) {
+          for (const a of tr.assertionResults || []) {
+            if (a.status === 'failed' && failNames.length < 5) {
+              failNames.push(a.fullName || a.title);
+            }
+          }
         }
+        for (const n of failNames) await logsManager.addLog(`   x ${n}`, "error");
+      } else {
+        // No parseable JSON — every test is failed. Never infer "all passed".
+        numberOfPassedTestCases = 0;
+        numberOfFailedTestCases = testFile.totalTestCases;
       }
-
-      const numberOfPassedTestCases = passedMatch ? Number(passedMatch[1]) : 0;
-      const numberOfFailedTestCases = failedMatch ? Number(failedMatch[1]) : (testFile.totalTestCases - numberOfPassedTestCases);
 
       const result = {
         passed: numberOfPassedTestCases,
         total: testFile.totalTestCases,
-        failed: numberOfFailedTestCases
+        failed: numberOfFailedTestCases,
       };
 
-      if (numberOfPassedTestCases === testFile.totalTestCases) {
+      if (!executionExitedNonZero && numberOfPassedTestCases === testFile.totalTestCases && numberOfFailedTestCases === 0) {
         await logsManager.addLog(` All tests passed! (${numberOfPassedTestCases}/${testFile.totalTestCases})`);
       } else {
-        await logsManager.addLog(`  Tests completed: ${numberOfPassedTestCases} passed, ${numberOfFailedTestCases} failed (${testFile.totalTestCases} total)`);
+        await logsManager.addLog(`  Tests completed: ${numberOfPassedTestCases} passed, ${numberOfFailedTestCases} failed (${testFile.totalTestCases} total)`, "error");
       }
 
       await logsManager.publishResult(result);
-    } catch (err: any) {
-      await logsManager.addLog(" Test execution encountered errors", "error");
-
-      //@ts-ignore
-      const errorOutput = err.stdout || err.stderr || err.message || '';
-      const clean = errorOutput.toString().replace(/\x1B\[[0-9;]*m/g, "");
-
-      const failedMatch = clean.match(/(\d+)\s+failed/i);
-      const passedMatch = clean.match(/(\d+)\s+passed/i);
-
-      const numberOfFailedTestCases = failedMatch ? Number(failedMatch[1]) : 0;
-      const numberOfPassedTestCases = passedMatch ? Number(passedMatch[1]) : (testFile.totalTestCases - numberOfFailedTestCases);
-
-      const errorLines = clean.split('\n')
-        .filter((line: string) =>
-          line.includes('FAIL') ||
-          line.includes('Error') ||
-          line.includes('failed') ||
-          (line.includes('test') && line.includes('failed'))
-        )
-        .slice(0, 3);
-
-      for (const line of errorLines) {
-        if (line.trim() && line.length < 200) {
-          await logsManager.addLog(`   ${line.trim()}`, "error");
-        }
-      }
-
-      const result = {
-        passed: numberOfPassedTestCases,
+      try { await exec(`rm -f "${resultsJsonPath}"`); } catch {}
+    } catch (fatalErr: any) {
+      console.log("fatal err", fatalErr);
+      await logsManager.addLog(" Test execution encountered a fatal error", "error");
+      await logsManager.publishResult({
+        passed: 0,
         total: testFile.totalTestCases,
-        failed: numberOfFailedTestCases
-      };
-
-      await logsManager.addLog(`  Test results: ${result.passed} passed, ${result.failed} failed (${testFile.totalTestCases} total)`, "error");
-      await logsManager.publishResult(result);
+        failed: testFile.totalTestCases,
+      });
     } finally {
       await logsManager.addLog(" Cleaning up resources...");
       await logsManager.addLog("   Stopping Docker containers...");
