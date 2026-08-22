@@ -78,7 +78,7 @@ export default function Hero() {
 
 
           </div>
-          <div className="mt-16 w-[1000px]  mx-auto flex justify-center perspective-[1000px]">
+          <div className="mt-16 w-full max-w-[1000px] mx-auto flex justify-center perspective-[1000px]">
             <CodeWindow />
           </div>
         </div>

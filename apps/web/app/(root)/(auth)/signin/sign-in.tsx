@@ -2,12 +2,11 @@
 
 import React, { ChangeEvent, useState } from 'react';
 import { Eye, EyeOff } from 'lucide-react';
-import axios from 'axios';
-import { BASE_URL } from '@/app/config/utils';
 import { toast } from 'sonner';
 import { useRouter } from 'next/navigation';
 import { useMutation } from '@tanstack/react-query';
 import { signinType } from '@/app/config/types';
+import { authClient } from '@/app/config/auth-client';
 
 
 // --- HELPER COMPONENTS (ICONS) ---
@@ -83,6 +82,7 @@ export const SignInPage: React.FC<SignInPageProps> = ({
   heroImageSrc,
   testimonials = [],
   onCreateAccount,
+  onGoogleSignIn,
 }) => {
   const [showPassword, setShowPassword] = useState(false);
 
@@ -95,24 +95,28 @@ export const SignInPage: React.FC<SignInPageProps> = ({
   const router = useRouter();
 
   const mutation = useMutation({
-    mutationFn: (user: signinType) => {
-      return axios.post(`${BASE_URL}/api/auth/signin`, user, {
-        withCredentials: true
+    mutationFn: async (user: signinType) => {
+      const { data, error } = await authClient.signIn.email({
+        email: user.email,
+        password: user.password
       });
+      if (error) {
+        throw new Error(error.message || "invalid email or password");
+      }
+      return data;
     },
-    onError: () => {
-      toast.error("something went wrong");
+    onError: (error: Error) => {
+      toast.error(error.message || "something went wrong");
     },
-    onSuccess: (success: any) => {
-      toast.success("successfully sigined in");
-      localStorage.setItem("token", success.data.token);
+    onSuccess: () => {
+      toast.success("successfully signed in");
       router.push(`/contests/1`);
     }
   })
 
 
   function handleForgotPassword() {
-
+    router.push("/forgot-password");
   }
 
   return (
@@ -180,6 +184,26 @@ export const SignInPage: React.FC<SignInPageProps> = ({
                 className="animate-element animate-delay-600 w-full rounded-xl bg-primary py-3 font-medium text-primary-foreground hover:bg-primary/90 transition-colors">
                 Sign In
               </button>
+
+              {onGoogleSignIn && (
+                <div className="animate-element animate-delay-700">
+                  <div className="relative my-2">
+                    <div className="absolute inset-0 flex items-center">
+                      <span className="w-full border-t border-border" />
+                    </div>
+                    <div className="relative flex justify-center text-xs uppercase">
+                      <span className="bg-background px-2 text-muted-foreground">or continue with</span>
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={onGoogleSignIn}
+                    className="w-full flex items-center justify-center gap-3 rounded-xl border border-border bg-card py-3 font-medium text-foreground hover:bg-muted/50 transition-colors">
+                    <GoogleIcon />
+                    Continue with Google
+                  </button>
+                </div>
+              )}
             </form>
 
 

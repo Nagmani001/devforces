@@ -41,9 +41,7 @@ export default function UserContestListClient({ contests }: any) {
           startTimeLabel={contestStatus.startsAtMessage}
           onClick={async () => {
             const res = await axios.post(`${BASE_URL}/api/notification/notify/${x.id}`, {}, {
-              headers: {
-                Authorization: localStorage.getItem("token")
-              }
+              withCredentials: true
             });
 
             if (res.data.success) {

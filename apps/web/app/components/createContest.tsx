@@ -79,9 +79,7 @@ export default function CreateContest() {
           }
         })
       }, {
-        headers: {
-          Authorization: localStorage.getItem("token"),
-        }
+        withCredentials: true
       });
       toast.success("Successfully created contest");
       router.push("/contests/1");

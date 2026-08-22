@@ -11,7 +11,8 @@
   },
   "dependencies": {
     "@prisma/client": "6.3.0",
-    "@repo/typescript-config": "workspace:*"
+    "@repo/typescript-config": "workspace:*",
+    "better-auth": "1.7.1"
   },
   "exports": {
     "./client": "./src/index.ts"

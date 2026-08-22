@@ -4,20 +4,15 @@ import { Suspense } from "react";
 import CardListSkeleton from "@/app/components/cardListSkeleton";
 import AdminContestList from "@/app/components/adminContestList";
 import { PaginationComponent } from "@/app/components/PaginationControls";
-import { BASE_URL, getPageNumbers } from "@/app/config/utils";
-import axios from "axios";
+import { getPageNumbers } from "@/app/config/utils";
+import { BASE_URL } from "@/app/config/utils";
+import { authedGet } from "@/app/config/session";
 
-export default async function AdminContestPage({ token, page }: {
-  token: string,
+export default async function AdminContestPage({ page }: {
   page: string
 }) {
 
-
-  const total = await axios.get(`${BASE_URL}/api/admin/contest/totalPages`, {
-    headers: {
-      Authorization: token
-    }
-  });
+  const total = await authedGet(`${BASE_URL}/api/admin/contest/totalPages`);
 
   //@ts-ignore
   const pageArr = getPageNumbers(parseInt(page), total.data.total);
@@ -28,7 +23,7 @@ export default async function AdminContestPage({ token, page }: {
       <ContestSearchAndFilter />
 
       <Suspense fallback={<CardListSkeleton />}>
-        <AdminContestList token={token} page={page} />
+        <AdminContestList page={page} />
       </Suspense>
       <div className="flex flex-col gap-6">
         <PaginationComponent pageArr={pageArr} />

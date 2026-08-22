@@ -2,6 +2,7 @@
 
 import { Button } from "@repo/ui/components/button";
 import ThemeToggle from "./themeToggle";
+import UserMenu from "./userMenu";
 import { useRouter } from "next/navigation";
 import { useUserInfo } from "../hooks/useUser";
 import Link from "next/link";
@@ -33,13 +34,7 @@ export default function NavBar({ children }: NavBarProps) {
             </div>
           )}
           <div className="flex items-center gap-3">
-            <div className={`relative w-8 h-8 rounded-full overflow-hidden flex items-center justify-center bg-muted text-foreground font-bold text-sm ${user.data.isAdmin ? "ring-2 ring-yellow-400" : ""}`}>
-              {user.data.imageUrl ? (
-                <img src={user.data.imageUrl} alt={user.data.username} className="w-full h-full object-cover" />
-              ) : (
-                <span>{user.data.username.charAt(0).toUpperCase()}</span>
-              )}
-            </div>
+            <UserMenu />
             <ThemeToggle />
           </div>
         </div>

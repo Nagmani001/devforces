@@ -1,9 +1,8 @@
 import { BASE_URL, getStatusOfContest } from "@/app/config/utils";
-import { cookies } from "next/headers";
+import { authedGet } from "@/app/config/session";
 import { ENDED, LIVE } from "@repo/common/consts";
 import LeaderboardEnded from "./leaderboardEnded";
 import LeaderboardLive from "./leaderboardLive";
-import axios from "axios";
 
 export default async function Page({
   params,
@@ -11,12 +10,7 @@ export default async function Page({
   params: Promise<{ contestId: string }>
 }) {
   const { contestId } = await params
-  const token = (await cookies()).get("token")?.value;
-  const contest = await axios.get(`${BASE_URL}/api/user/contest/${contestId}`, {
-    headers: {
-      Authorization: token
-    }
-  });
+  const contest = await authedGet(`${BASE_URL}/api/user/contest/${contestId}`);
   const startsAt = contest.data.contest.startsAt;
   const duration = contest.data.contest.duration;
   const contestStatus = getStatusOfContest(startsAt, duration);

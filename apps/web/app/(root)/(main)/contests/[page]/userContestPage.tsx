@@ -3,21 +3,17 @@ import ContestSearchAndFilter from "@/app/components/contestSearchAndFilter";
 import { Suspense } from "react";
 import CardListSkeleton from "@/app/components/cardListSkeleton";
 import UserContestList from "@/app/components/userContestList";
-import axios from "axios";
-import { BASE_URL, getPageNumbers } from "@/app/config/utils";
+import { getPageNumbers } from "@/app/config/utils";
+import { BASE_URL } from "@/app/config/utils";
+import { authedGet } from "@/app/config/session";
 
 import UserContestHeader from "@/app/components/userContestHeader";
 
-export default async function UserContestPage({ token, page }: {
-  token: string,
+export default async function UserContestPage({ page }: {
   page: string
 }) {
 
-  const total = await axios.get(`${BASE_URL}/api/admin/contest/totalPages`, {
-    headers: {
-      Authorization: token
-    }
-  });
+  const total = await authedGet(`${BASE_URL}/api/user/contest/totalPages`);
 
   //@ts-ignore
   const pageArr = getPageNumbers(parseInt(page), total.data.total);
@@ -28,7 +24,7 @@ export default async function UserContestPage({ token, page }: {
       <ContestSearchAndFilter />
 
       <Suspense fallback={<CardListSkeleton />}>
-        <UserContestList token={token} page={page} />
+        <UserContestList page={page} />
       </Suspense>
 
       <div className="flex flex-col gap-6">

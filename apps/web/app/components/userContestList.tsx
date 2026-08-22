@@ -1,11 +1,10 @@
-import { getContest } from "../config/utils";
+import { getContest } from "../config/session";
 import UserContestListClient from "./userContestListClient";
 
-export default async function UserContestList({ token, page }: {
-  token: string,
+export default async function UserContestList({ page }: {
   page: string
 }) {
-  const contests = await getContest(token, page);
+  const contests = await getContest(page);
 
   return <div className="flex flex-col gap-6">
     <UserContestListClient contests={contests} />

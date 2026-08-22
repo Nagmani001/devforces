@@ -3,11 +3,10 @@ import { ChangeEvent, useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@repo/ui/components/button';
 import { useMutation } from '@tanstack/react-query';
-import axios from 'axios';
-import { BASE_URL } from '@/app/config/utils';
 import { toast } from 'sonner';
 import { signinType } from '@/app/config/types';
 import LabbledInput from '@repo/ui/components/labbledInput';
+import { authClient } from '@/app/config/auth-client';
 
 export default function SigninForm() {
 
@@ -19,17 +18,21 @@ export default function SigninForm() {
   const router = useRouter();
 
   const mutation = useMutation({
-    mutationFn: (user: signinType) => {
-      return axios.post(`${BASE_URL}/api/auth/signin`, user, {
-        withCredentials: true
+    mutationFn: async (user: signinType) => {
+      const { data, error } = await authClient.signIn.email({
+        email: user.email,
+        password: user.password
       });
+      if (error) {
+        throw new Error(error.message || "invalid email or password");
+      }
+      return data;
     },
-    onError: () => {
-      toast.error("something went wrong");
+    onError: (error: Error) => {
+      toast.error(error.message || "something went wrong");
     },
-    onSuccess: (success: any) => {
-      toast.success("successfully sigined in");
-      localStorage.setItem("token", success.data.token);
+    onSuccess: () => {
+      toast.success("successfully signed in");
       router.push(`/contests/1`);
     }
   })
@@ -40,7 +43,7 @@ export default function SigninForm() {
   };
 
   function handleForgotPassword() {
-
+    router.push("/forgot-password");
   }
 
   return <div className="bg-white rounded-2xl shadow-xl p-8">
@@ -78,7 +81,9 @@ export default function SigninForm() {
         <Button
           variant="link"
           type="button"
-          onClick={useCallback(handleForgotPassword, [])}
+          onClick={() => {
+            handleForgotPassword();
+          }}
           className="text-sm text-blue-600 hover:text-blue-700 font-medium"
         >
           Forgot password?
@@ -94,12 +99,12 @@ export default function SigninForm() {
 
     <div className="mt-6 text-center">
       <p className="text-gray-600">
-        Don't have an account?{' '}
+        Don&apos;t have an account?{' '}
         <Button
           variant="link"
-          onClick={useCallback(() => {
+          onClick={() => {
             router.push("/signup");
-          }, [])}
+          }}
           className="text-blue-600 hover:text-blue-700 font-medium"
         >
           Sign up

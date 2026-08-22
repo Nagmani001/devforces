@@ -1,4 +1,5 @@
 import prisma from "@repo/db/client";
+import { hashPassword } from "better-auth/crypto";
 
 interface AdminUser {
     email: string;
@@ -7,15 +8,23 @@ interface AdminUser {
 }
 
 export async function createAdminUser({ email, username, password }: AdminUser) {
+    const hashedPassword = await hashPassword(password);
     const user = await prisma.user.create({
         data: {
+            name: username,
             username,
             email,
-            password,
-            isVerified: true,
-            isAdmin: true,
-            otp: "123456",
-            otpExpiry: new Date()
+            emailVerified: true,
+            isAdmin: true
+        }
+    });
+    await prisma.account.create({
+        data: {
+            accountId: user.id,
+            providerId: "credential",
+            issuer: "local:credential",
+            password: hashedPassword,
+            userId: user.id
         }
     });
     return user;

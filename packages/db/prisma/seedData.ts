@@ -1,23 +1,19 @@
 // actual password = itsboy
-const hashedPassword = "$2b$10$iGcAyCg/LqVLFE0p17ZA0eOR5L3zj5GoY4IvN7zkhBWnQfyhtYdDe";
+export const usersSeedPassword = "itsboy";
 
 export const userDatas = [{
+  name: "nagmani",
   username: "nagmani",
   email: "nagmanipd3@gmail.com",
-  password: hashedPassword,
-  otp: "123456",
-  otpExpiry: new Date(),
   isAdmin: true,
-  isVerified: true,
+  emailVerified: true,
 },
 {
+  name: "nagmani",
   username: "nagmani",
   email: "nagmaniprasad25@gmail.com",
-  password: hashedPassword,
-  otp: "654321",
-  otpExpiry: new Date(),
   isAdmin: false,
-  isVerified: true,
+  emailVerified: true,
 }
 ];
 

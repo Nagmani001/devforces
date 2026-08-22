@@ -1,23 +1,7 @@
 "use client";
 import { SignUpPage } from "./sign-up";
 import { sampleTestimonials } from "@/app/config/consts";
-
-const handleSignIn = (event: React.FormEvent<HTMLFormElement>) => {
-  event.preventDefault();
-  alert(`Sign In Submitted! Check the browser console for form data.`);
-};
-
-const handleGoogleSignIn = () => {
-  alert("Continue with Google clicked");
-};
-
-const handleResetPassword = () => {
-  alert("Reset Password clicked");
-}
-
-const handleCreateAccount = () => {
-  alert("Create Account clicked");
-}
+import { signInWithGoogle } from "@/app/config/auth-client";
 
 export default function SignupPage() {
   return (
@@ -25,10 +9,9 @@ export default function SignupPage() {
       <SignUpPage
         heroImageSrc="/founder_harkirat.png"
         testimonials={sampleTestimonials}
-        onSignIn={handleSignIn}
-        onGoogleSignIn={handleGoogleSignIn}
-        onResetPassword={handleResetPassword}
-        onCreateAccount={handleCreateAccount}
+        onGoogleSignIn={() => {
+          signInWithGoogle();
+        }}
       />
     </div>
   );

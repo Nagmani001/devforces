@@ -57,7 +57,7 @@ export default function UserContest({
 
   // small helpers
   const renderMeta = () => (
-    <div className="flex items-center gap-3 text-sm text-muted-foreground">
+    <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-muted-foreground">
       {duration && (
         <div className="flex items-center gap-2">
           <Clock className="h-4 w-4" />
@@ -76,12 +76,12 @@ export default function UserContest({
 
   return (
     <Card className={rootClasses.join(" ")} onClick={onClick}>
-      <CardContent className="flex w-full items-center gap-4 p-0">
+      <CardContent className="flex w-full items-center gap-2 sm:gap-4 p-0 min-w-0">
         {/* Left column: title + meta */}
-        <div className="flex flex-1 flex-col gap-1 px-4 py-3">
-          <div className="flex items-start justify-between gap-4">
-            <div className="flex flex-col">
-              <h3 className="text-lg font-medium leading-tight">{title}</h3>
+        <div className="flex flex-1 flex-col gap-1 px-1 py-2 sm:px-4 sm:py-3 min-w-0">
+          <div className="flex flex-wrap items-start justify-between gap-x-4 gap-y-2">
+            <div className="flex min-w-0 flex-1 flex-col">
+              <h3 className="text-base sm:text-lg font-medium leading-tight break-words">{title}</h3>
               {subtitle && (
                 <p className="mt-1 text-sm text-muted-foreground">{subtitle}</p>
               )}
@@ -103,7 +103,7 @@ export default function UserContest({
             </div>
           </div>
 
-          <div className="mt-3 flex items-center justify-between">
+          <div className="mt-3 flex flex-wrap items-center justify-between gap-2">
             {renderMeta()}
 
             <div className="flex items-center gap-2">

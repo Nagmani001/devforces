@@ -5,9 +5,8 @@ import { Eye, EyeOff } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useMutation } from '@tanstack/react-query';
 import { signupType } from '@/app/config/types';
-import axios from 'axios';
-import { BASE_URL } from '@/app/config/utils';
 import { toast } from 'sonner';
+import { authClient } from '@/app/config/auth-client';
 
 // --- HELPER COMPONENTS (ICONS) ---
 
@@ -79,7 +78,7 @@ const TestimonialCard = ({ testimonial, delay }: { testimonial: Testimonial, del
 // --- MAIN COMPONENT ---
 
 export const SignUpPage: React.FC<SignInPageProps> = ({
-  title = <span className="font-normal text-foreground tracking-tight">Let's get you started</span>,
+  title = <span className="font-normal text-foreground tracking-tight">Let&apos;s get you started</span>,
   description = "Keep your online test valid and develop fast ",
   heroImageSrc,
   testimonials,
@@ -99,16 +98,25 @@ export const SignUpPage: React.FC<SignInPageProps> = ({
   const router = useRouter();
 
   const mutation = useMutation({
-    mutationFn: (user: signupType) => {
-      return axios.post(`${BASE_URL}/api/auth/signup`, user);
+    mutationFn: async (user: signupType) => {
+      const { data, error } = await authClient.signUp.email({
+        email: user.email,
+        password: user.password,
+        name: user.username,
+        username: user.username,
+      } as Parameters<typeof authClient.signUp.email>[0]);
+      if (error) {
+        throw new Error(error.message || "error while signing up");
+      }
+      return data;
     },
 
-    onError: () => {
-      toast.error("error while completing the requst");
+    onError: (error: Error) => {
+      toast.error(error.message || "error while completing the requst");
     },
-    onSuccess: (success: any) => {
-      toast.success("signed up successfully");
-      router.push(`/otp/${success.data.userId}`);
+    onSuccess: () => {
+      toast.success("account created, please verify with the otp sent to your email");
+      router.push(`/otp/${encodeURIComponent(signupData.email)}`);
     }
   });
 
@@ -194,7 +202,7 @@ export const SignUpPage: React.FC<SignInPageProps> = ({
                   <input type="checkbox" name="rememberMe" className="h-4 w-4 rounded border-border text-primary focus:ring-primary" />
                   <span className="text-foreground">Keep me signed in</span>
                 </label>
-                <a href="#" onClick={(e) => { e.preventDefault(); onResetPassword?.(); }} className="hover:underline text-primary tracking-tight transition-colors">Reset password</a>
+                <a href="/forgot-password" className="hover:underline text-primary tracking-tight transition-colors">Reset password</a>
               </div>
 
               <button
@@ -204,6 +212,26 @@ export const SignUpPage: React.FC<SignInPageProps> = ({
                 type="button" className="animate-element animate-delay-600 w-full rounded-xl bg-primary py-3 font-medium text-primary-foreground hover:bg-primary/90 transition-colors">
                 Sign Up
               </button>
+
+              {onGoogleSignIn && (
+                <div className="animate-element animate-delay-700">
+                  <div className="relative my-2">
+                    <div className="absolute inset-0 flex items-center">
+                      <span className="w-full border-t border-border" />
+                    </div>
+                    <div className="relative flex justify-center text-xs uppercase">
+                      <span className="bg-background px-2 text-muted-foreground">or continue with</span>
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={onGoogleSignIn}
+                    className="w-full flex items-center justify-center gap-3 rounded-xl border border-border bg-card py-3 font-medium text-foreground hover:bg-muted/50 transition-colors">
+                    <GoogleIcon />
+                    Continue with Google
+                  </button>
+                </div>
+              )}
             </form>
 
 

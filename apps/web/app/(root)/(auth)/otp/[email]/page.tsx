@@ -3,11 +3,11 @@ import OtpClient from "./otpPageClient"
 export default async function Page({
   params,
 }: {
-  params: Promise<{ userId: string }>
+  params: Promise<{ email: string }>
 }) {
-  const { userId } = await params
+  const { email } = await params
 
   return <div>
-    <OtpClient userId={userId} />
+    <OtpClient email={decodeURIComponent(email)} />
   </div>
 }

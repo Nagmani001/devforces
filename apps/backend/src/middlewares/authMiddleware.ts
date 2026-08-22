@@ -1,26 +1,33 @@
 import { NextFunction, Request, Response } from "express";
-import jwt from "jsonwebtoken";
+import { fromNodeHeaders } from "better-auth/node";
+import { auth } from "../auth";
+
+declare global {
+  namespace Express {
+    interface Request {
+      authSession: typeof auth.$Infer.Session | null;
+    }
+  }
+}
 
 export async function authMiddleware(req: Request, res: Response, next: NextFunction) {
-  const token = req.headers["authorization"] || req.cookies?.token;
-  if (!token) {
-    return res.status(403).json({
-      message: "token missing"
-    })
-  };
-
   try {
-    //@ts-ignore
-    const decoded = jwt.verify(token, process.env.JWT_SECRET || "");
+    const session = await auth.api.getSession({
+      headers: fromNodeHeaders(req.headers),
+    });
 
-    //@ts-ignore
-    req.userId = decoded.userId;
+    if (!session) {
+      return res.status(403).json({
+        message: "invalid token"
+      });
+    }
+
+    req.userId = session.user.id;
+    req.authSession = session;
     next();
-
   } catch (err) {
     return res.status(403).json({
       message: "invalid token"
-    })
+    });
   }
-
 }

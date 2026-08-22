@@ -72,9 +72,7 @@ export default function ArenaPage({ recordMap, challengeId, baseGithubUrl, conte
     try {
       // Get pre-signed URL and submission token
       const getPresignedUrl = await axios.get(`${BASE_URL}/api/submissions/preSignedUrl/${challengeId}?contestId=${contestId}`, {
-        headers: {
-          Authorization: localStorage.getItem("token")
-        }
+        withCredentials: true
       });
 
       const { preSignedUrl, fields, submissionToken } = getPresignedUrl.data;

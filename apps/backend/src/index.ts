@@ -1,8 +1,10 @@
-import express, { Request, Response } from "express";
 import { config } from "dotenv";
+config();
+
+import express, { Request, Response } from "express";
 import cors from "cors";
-import cookieParser from "cookie-parser";
-import { authRouter } from "./routes/authRouter";
+import { toNodeHandler } from "better-auth/node";
+import { auth } from "./auth";
 import { adminContestRouter } from "./routes/adminContestRouter";
 import { userContestRouter } from "./routes/userContestRouter";
 import { authMiddleware } from "./middlewares/authMiddleware";
@@ -11,10 +13,8 @@ import { createClient, RedisClientType } from "redis";
 import { leaderboardRouter } from "./routes/leaderboardRouter";
 import { notificationRotuer } from "./routes/notificationRouter";
 import { sseRouter } from "./routes/sseRouter";
-import prisma from "@repo/db/client";
 import { initEmail } from "@repo/email/email";
 
-config();
 
 if (process.env.RESEND_API_KEY) {
   initEmail(process.env.RESEND_API_KEY);
@@ -38,8 +38,7 @@ declare global {
     }
   }
 }
-app.use(express.json());
-app.use(cookieParser());
+
 app.use(cors({
   origin: ["http://localhost:3000", "https://devforces.nagmani.site"],
   credentials: true
@@ -51,24 +50,10 @@ app.get("/health", (req: Request, res: Response) => {
   });
 });
 
-app.get("/api/me", authMiddleware, async (req: Request, res: Response) => {
-  const user = await prisma.user.findFirst({
-    where: {
-      id: req.userId!
-    },
-    select: {
-      id: true,
-      email: true,
-      username: true,
-      imageUrl: true,
-      isAdmin: true,
-    }
-  });
-  res.json(user);
-});
+// better-auth must be mounted before express.json()
+app.all("/api/auth/*splat", toNodeHandler(auth));
+app.use(express.json());
 
-
-app.use("/api/auth", authRouter);
 app.use("/api/admin/contest", authMiddleware, adminContestRouter);
 app.use("/api/user/contest", authMiddleware, userContestRouter);
 app.use("/api/submissions", authMiddleware, submitRouter);
@@ -90,9 +75,6 @@ async function main() {
   console.log("connected to pubSub");
 
 
-  //TODO: DRY
-  //INFO : did this since when i was running <docker compose down> in integration test , then backend was throwing error
-  // there should be better way to solve this  since if redis stops i should not take down my backend in production 
   redisClient.on("error", (err: any) => {
     server.close(() => {
       process.exit(1);

@@ -48,7 +48,7 @@ export default function AdminContestListClient({ contests }: any) {
             <DeleteContestDialog
               contestName={x.title}
               onDelete={async () => {
-                const response = await deleteContest(x.id, localStorage.getItem("token")!);
+                const response = await deleteContest(x.id);
                 if (response.success) {
                   router.refresh();
                 }

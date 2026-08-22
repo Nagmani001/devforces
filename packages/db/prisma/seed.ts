@@ -1,13 +1,22 @@
 import prisma from "../src/index.ts";
-import { userDatas, contestDatas, challengeDatas } from "./seedData.ts";
+import { hashPassword } from "better-auth/crypto";
+import { userDatas, contestDatas, challengeDatas, usersSeedPassword } from "./seedData.ts";
 
 async function main() {
-  const prismaCreateUser = userDatas.map((x: any) => {
-    return prisma.user.create({
-      data: x
+  const hashedPassword = await hashPassword(usersSeedPassword);
+
+  for (const userData of userDatas) {
+    const user = await prisma.user.create({ data: userData });
+    await prisma.account.create({
+      data: {
+        accountId: user.id,
+        providerId: "credential",
+        issuer: "local:credential",
+        password: hashedPassword,
+        userId: user.id,
+      },
     });
-  })
-  await prisma.$transaction(prismaCreateUser);
+  }
 
   const adminUser = await prisma.user.findFirst({
     where: { isAdmin: true }

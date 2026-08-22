@@ -1,5 +1,4 @@
-import { getUserInfo } from "@/app/config/utils";
-import { cookies } from "next/headers";
+import { getAuthSession } from "@/app/config/session";
 import AdminContestPage from "./adminContestPage";
 import UserContestPage from "./userContestPage";
 
@@ -9,17 +8,16 @@ export default async function Page({
   params: Promise<{ page: string }>
 }) {
   const { page } = await params;
-  const token = (await cookies()).get("token")?.value;
-  if (!token) return <div>
-    token not found
-  </div>;
+  const session = await getAuthSession();
+  if (!session) {
+    return <div>
+      token not found
+    </div>;
+  }
 
-
-  const me = await getUserInfo(token);
-
-  if (me.data.isAdmin) {
-    return <AdminContestPage token={token} page={page} />
+  if (session.isAdmin) {
+    return <AdminContestPage page={page} />
   } else {
-    return <UserContestPage token={token} page={page} />
+    return <UserContestPage page={page} />
   }
 }

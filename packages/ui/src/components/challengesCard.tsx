@@ -61,7 +61,7 @@ export function ContestCard({
   }
 
   const renderMeta = () => (
-    <div className="flex items-center gap-3 text-sm text-muted-foreground">
+    <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-muted-foreground">
       {duration && (
         <div className="flex items-center gap-2">
           <Clock className="h-4 w-4" />
@@ -82,11 +82,11 @@ export function ContestCard({
 
   return (
     <Card className={rootClasses.join(" ")} onClick={onClick}>
-      <CardContent className="flex w-full items-center gap-4 p-0">
-        <div className="flex flex-1 flex-col gap-1 px-4 py-3">
-          <div className="flex items-start justify-between gap-4">
-            <div className="flex flex-col">
-              <h3 className="text-lg font-medium leading-tight">{title}</h3>
+      <CardContent className="flex w-full items-center gap-2 sm:gap-4 p-0 min-w-0">
+        <div className="flex flex-1 flex-col gap-1 px-1 py-2 sm:px-4 sm:py-3 min-w-0">
+          <div className="flex flex-wrap items-start justify-between gap-x-4 gap-y-2">
+            <div className="flex min-w-0 flex-1 flex-col">
+              <h3 className="text-base sm:text-lg font-medium leading-tight break-words">{title}</h3>
               {subtitle && (
                 <p className="mt-1 text-sm text-muted-foreground">{subtitle}</p>
               )}
@@ -111,10 +111,10 @@ export function ContestCard({
             </div>
           </div>
 
-          <div className="mt-3 flex items-center justify-between">
+          <div className="mt-3 flex flex-wrap items-center justify-between gap-2">
             {renderMeta()}
 
-            <div className="flex items-center gap-2">
+            <div className="flex flex-wrap items-center gap-2">
               {actions ?? (
                 <Button
                   size="sm"
@@ -246,22 +246,22 @@ export function ChallengeCard({
 
   return (
     <Card className={root.join(" ")}>
-      <CardContent className="flex w-full items-center gap-4 p-0">
-        <div className="flex flex-1 flex-col gap-1 px-4 py-3">
-          <div className="flex items-center justify-between">
-            <div className="flex flex-col">
-              <h4 className="text-lg font-medium">{title}</h4>
+      <CardContent className="flex w-full items-center gap-2 sm:gap-4 p-0 min-w-0">
+        <div className="flex flex-1 flex-col gap-1 px-1 py-2 sm:px-4 sm:py-3 min-w-0">
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <div className="flex min-w-0 flex-1 flex-col">
+              <h4 className="text-base sm:text-lg font-medium break-words">{title}</h4>
             </div>
 
           </div>
 
-          <div className="mt-3 flex items-center justify-between">
-            <div className="flex items-center gap-4 text-sm text-muted-foreground">
+          <div className="mt-3 flex flex-wrap items-center justify-between gap-2">
+            <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-muted-foreground">
               <span className="whitespace-nowrap">total test cases : {totalTestCases}</span>
               <span className="whitespace-nowrap">{attempted ? "Attempted" : "Not attempted"}</span>
             </div>
 
-            <div className="flex items-center gap-3">
+            <div className="flex flex-wrap items-center gap-2 sm:gap-3">
               <span className="text-sm font-medium">{rightText}</span>
 
               {!attempted && !submitted ? (

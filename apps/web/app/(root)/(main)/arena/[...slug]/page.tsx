@@ -1,6 +1,5 @@
-import { getChallengeDetails } from "@/app/config/utils";
+import { getChallengeDetails } from "@/app/config/session";
 import { NotionAPI } from 'notion-client'
-import { cookies } from "next/headers";
 import ArenaPage from "./arenaPageClient";
 
 export default async function Page({
@@ -12,14 +11,8 @@ export default async function Page({
   const contestId = slug[0];
   const challengeId = slug[1];
 
-  const token = (await cookies()).get("token")?.value;
-  if (!token) return;
-
-
-
-
   const notion = new NotionAPI()
-  const challenge = await getChallengeDetails(challengeId, token);
+  const challenge = await getChallengeDetails(challengeId);
 
   const recordMap = await notion.getPage(challenge.data?.data.challenge.notionLink);
   return <ArenaPage recordMap={recordMap} challengeId={challengeId} baseGithubUrl={challenge.data!.data.challenge.baseGithubUrl} contestId={contestId} title={challenge.data?.data.challenge.title} />

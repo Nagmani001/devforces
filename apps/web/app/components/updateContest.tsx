@@ -51,7 +51,7 @@ export default function UpdateContest({ contestId }: {
   useEffect(() => {
     const fetchContestDetails = async () => {
       //@ts-ignore
-      const contests = await getContestForUpdate(contestId, localStorage.getItem("token"));
+      const contests = await getContestForUpdate(contestId);
       const actualContest = contests.contests?.data.contests;
 
       const { hour, minutes } = getHourAndMinutesFromduration(actualContest.duration);
@@ -125,9 +125,7 @@ export default function UpdateContest({ contestId }: {
           }
         })
       }, {
-        headers: {
-          Authorization: localStorage.getItem("token"),
-        }
+        withCredentials: true
       });
       toast.success("updated Contest successfully");
       router.push("/contests/1");

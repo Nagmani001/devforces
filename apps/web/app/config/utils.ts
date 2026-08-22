@@ -10,79 +10,6 @@ import { Contest } from "@repo/common/typescript-types";
 export const BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
 export const BASE_FRONTEND_URL = "http://localhost:3000";
 
-export async function getUserInfo(token: string) {
-  try {
-    const me = await axios.get(`${BASE_URL}/api/auth/me`, {
-      headers: {
-        Authorization: token
-      }
-    });
-    return {
-      success: true,
-      data: me.data
-    }
-  } catch (err) {
-    return {
-      success: false,
-    }
-  }
-}
-
-export async function getContest(token: string, page: string) {
-  try {
-    const me = await axios.get(`${BASE_URL}/api/auth/me`, {
-      headers: {
-        Authorization: token
-      }
-    });
-    let contests;
-    let isAdmin;
-    if (me.data.isAdmin) {
-      isAdmin = true;
-      try {
-        const response = await axios.get(`${BASE_URL}/api/admin/contest?page=${page}`, {
-          headers: {
-            Authorization: token
-          }
-        });
-        contests = response.data;
-      } catch (err) {
-        return {
-          success: false,
-          message: "invalid or missing token"
-        }
-      }
-
-    } else {
-      isAdmin = false;
-      try {
-        const response = await axios.get(`${BASE_URL}/api/user/contest?page=${page}`, {
-          headers: {
-            Authorization: token
-          }
-        });
-        contests = response.data;
-      } catch (err) {
-        return {
-          success: false,
-          message: "invalid or missing token"
-        }
-      }
-    }
-
-    return {
-      success: true,
-      contests,
-      isAdmin,
-    }
-  } catch (err) {
-    return {
-      success: false,
-      message: "invalid or missing token"
-    }
-  }
-}
-
 
 export const emptyChallenge = (): Challenge => ({
   id: Date.now().toString() + Math.random().toString(36).slice(2, 8),
@@ -201,69 +128,34 @@ export function getStatusOfContest(startsAt: Date, duration: number): getStatusO
   }
 }
 
-export async function getChallengesForContest(contestId: string, token: string) {
-  const response = await axios.get(`${BASE_URL}/api/user/contest/${contestId}/challenges`, {
-    headers: {
-      Authorization: token
-    }
-  })
-  return {
-    challenges: response.data
-  }
-}
-
-export async function deleteContest(contestId: string, token: string) {
+export async function getContestForUpdate(contestId: string) {
   try {
-    await axios.delete(`${BASE_URL}/api/admin/contest/delete/${contestId}`, {
-      headers: {
-        Authorization: token
-      }
-    });
-    return {
-      success: true
-    }
-  } catch (err) {
-    return {
-      success: false
-    }
-  }
-}
-export async function getContestForUpdate(contestId: string, token: string) {
-  try {
-
     const contests = await axios.get(`${BASE_URL}/api/admin/contest/update/${contestId}`, {
-      headers: {
-        Authorization: token
-      }
+      withCredentials: true
     });
-
     return {
       success: true,
       contests
-    }
+    };
   } catch (err) {
     return {
-      success: false,
-    }
+      success: false
+    };
   }
-
 }
 
-export async function getChallengeDetails(challengeId: string, token: string) {
+export async function deleteContest(contestId: string) {
   try {
-    const challenge = await axios.get(`${BASE_URL}/api/user/contest/challenge/${challengeId}`, {
-      headers: {
-        Authorization: token
-      }
+    await axios.delete(`${BASE_URL}/api/admin/contest/delete/${contestId}`, {
+      withCredentials: true
     });
     return {
-      success: true,
-      data: challenge
-    }
+      success: true
+    };
   } catch (err) {
     return {
-      success: false,
-    }
+      success: false
+    };
   }
 }
 
@@ -292,9 +184,7 @@ export async function confirmFileSent(challengeId: string, contestId: string, su
   const sendConfirmation = await axios.post(`${BASE_URL}/api/submissions/submit/confirm/${contestId}/${challengeId}`, {
     submissionToken
   }, {
-    headers: {
-      Authorization: localStorage.getItem("token")
-    }
+    withCredentials: true
   });
   return sendConfirmation.data;
 }

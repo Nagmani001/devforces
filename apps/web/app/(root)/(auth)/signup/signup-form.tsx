@@ -1,13 +1,12 @@
 "use client";
 import { toast } from "sonner"
-import axios from "axios";
 import { ChangeEvent, FormEvent, useCallback, useState } from 'react';
 import { Button } from '@repo/ui/components/button';
 import LableWithInput from "@repo/ui/components/labbledInput";
 import { useMutation } from '@tanstack/react-query';
 import { useRouter } from "next/navigation";
-import { BASE_URL } from "@/app/config/utils";
 import { signupType } from "@/app/config/types";
+import { authClient } from "@/app/config/auth-client";
 
 export default function SignupForm() {
   const [signupData, setSignupData] = useState({
@@ -19,16 +18,25 @@ export default function SignupForm() {
   const router = useRouter();
 
   const mutation = useMutation({
-    mutationFn: (user: signupType) => {
-      return axios.post(`${BASE_URL}/api/auth/signup`, user);
+    mutationFn: async (user: signupType) => {
+      const { data, error } = await authClient.signUp.email({
+        email: user.email,
+        password: user.password,
+        name: user.username,
+        username: user.username,
+      } as Parameters<typeof authClient.signUp.email>[0]);
+      if (error) {
+        throw new Error(error.message || "error while signing up");
+      }
+      return data;
     },
 
-    onError: () => {
-      toast.error("error while completing the requst");
+    onError: (error: Error) => {
+      toast.error(error.message || "error while completing the requst");
     },
-    onSuccess: (success: any) => {
-      toast.success("signed up successfully");
-      router.push(`/otp/${success.data.userId}`);
+    onSuccess: () => {
+      toast.success("account created, please verify with the otp sent to your email");
+      router.push(`/otp/${encodeURIComponent(signupData.email)}`);
     }
   });
 
@@ -96,9 +104,9 @@ export default function SignupForm() {
           Already have an account?{' '}
           <Button
             variant="link"
-            onClick={useCallback(() => {
+            onClick={() => {
               router.push("/signin")
-            }, [])}
+            }}
             className="text-blue-600 hover:text-blue-700 font-medium"
           >
             Sign in

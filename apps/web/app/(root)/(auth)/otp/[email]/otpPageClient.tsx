@@ -1,27 +1,25 @@
 "use client";
-import { BASE_URL } from "@/app/config/utils";
 import { Button } from "@repo/ui/components/button";
 import OtpArea from "@repo/ui/components/otpPage";
 import { useMutation } from "@tanstack/react-query";
-import axios from "axios";
-import { useState, useEffect, FormEvent } from "react";
+import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { Clock, ShieldCheck, Mail } from "lucide-react";
+import { authClient } from "@/app/config/auth-client";
 
-export default function OtpClient({ userId }: any) {
+export default function OtpClient({ email }: { email: string }) {
   const [otp, setOtp] = useState({
     otp: ""
   });
-  const [timeLeft, setTimeLeft] = useState(60);
-  const [isExpired, setIsExpired] = useState(false);
+  const [timeLeft, setTimeLeft] = useState(300);
+  const [isResending, setIsResending] = useState(false);
   const router = useRouter();
+  const isExpired = timeLeft === 0;
 
   // Countdown timer effect
   useEffect(() => {
     if (timeLeft === 0) {
-      setIsExpired(true);
-      toast.error("OTP verification time expired");
       return;
     }
 
@@ -31,6 +29,12 @@ export default function OtpClient({ userId }: any) {
 
     return () => clearInterval(timer);
   }, [timeLeft]);
+
+  useEffect(() => {
+    if (timeLeft === 0) {
+      toast.error("OTP verification time expired");
+    }
+  }, [isExpired]);
 
   // Format time as MM:SS
   const formatTime = (seconds: number) => {
@@ -44,24 +48,39 @@ export default function OtpClient({ userId }: any) {
   }
 
   const mutation = useMutation({
-    mutationFn: (value: otp) => {
-      return axios.post(`${BASE_URL}/api/auth/verify-otp/${userId}`, value, {
-        withCredentials: true,
-        headers: {
-          'Content-Type': 'application/json'
-        },
+    mutationFn: async (value: otp) => {
+      const { data, error } = await authClient.emailOtp.verifyEmail({
+        email,
+        otp: value.otp
       });
+      if (error) {
+        throw new Error(error.message || "Invalid OTP. Please try again.");
+      }
+      return data;
     },
-    onError: (error: any) => {
-      const message = error.response?.data?.message || "Invalid OTP. Please try again.";
-      toast.error(message);
+    onError: (error: Error) => {
+      toast.error(error.message || "Invalid OTP. Please try again.");
     },
-    onSuccess: (success) => {
+    onSuccess: () => {
       toast.success("OTP verified successfully!");
-      localStorage.setItem("token", success.data.token);
       router.push(`/contests/1`);
     }
   });
+
+  async function handleResend() {
+    setIsResending(true);
+    const { error } = await authClient.emailOtp.sendVerificationOtp({
+      email,
+      type: "email-verification"
+    });
+    setIsResending(false);
+    if (error) {
+      toast.error(error.message || "failed to resend otp");
+      return;
+    }
+    setTimeLeft(300);
+    toast.success("a new otp has been sent to your email");
+  }
 
 
   return (
@@ -76,7 +95,7 @@ export default function OtpClient({ userId }: any) {
             Verify Your Email
           </h1>
           <p className="text-sm text-muted-foreground leading-relaxed">
-            We've sent a 6-digit verification code to your email address.
+            We&apos;ve sent a 6-digit verification code to <span className="font-medium text-foreground">{email}</span>.
             <br />
             Please enter it below to continue.
           </p>
@@ -93,7 +112,7 @@ export default function OtpClient({ userId }: any) {
         {/* OTP Input Section */}
         <div className="bg-card border border-border rounded-xl p-8 mb-6">
           <div className="flex justify-center mb-6">
-            <OtpArea onChange={(e: any) => {
+            <OtpArea onChange={(e: string) => {
               setOtp({
                 otp: e.toString()
               });
@@ -115,17 +134,15 @@ export default function OtpClient({ userId }: any) {
         {/* Footer Info */}
         <div className="text-center space-y-3">
           <p className="text-xs text-muted-foreground">
-            Didn't receive the code? Check your spam folder or request a new one.
+            Didn&apos;t receive the code? Check your spam folder or request a new one.
           </p>
           <Button
             variant="link"
-            onClick={() => {
-              // TODO: Implement resend OTP logic
-              toast.info("Resend OTP feature coming soon");
-            }}
+            onClick={handleResend}
+            disabled={isResending}
             className="text-sm text-primary hover:text-primary/80 font-medium underline-offset-4"
           >
-            Resend Code
+            {isResending ? 'Resending...' : 'Resend Code'}
           </Button>
         </div>
       </div>
