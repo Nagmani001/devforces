@@ -10,7 +10,7 @@ import { useDropzone } from "react-dropzone";
 import { Button } from "@repo/ui/components/button";
 import { Card, CardContent } from "@repo/ui/components/card";
 import { NotionRenderer } from "react-notion-x";
-import { CloudUpload, Play, Loader, GripVertical, CheckCircle, Copy, GitBranch, AlertTriangle, Terminal } from "lucide-react";
+import { CloudUpload, Loader, GripVertical, CheckCircle, Copy, GitBranch, AlertTriangle, Terminal } from "lucide-react";
 import dynamic from 'next/dynamic'
 import axios from "axios";
 import { BASE_URL, confirmFileSent, sendZippedFile } from "@/app/config/utils";
@@ -24,7 +24,7 @@ const Equation = dynamic(() =>
   import('react-notion-x/build/third-party/equation').then((m) => m.Equation)
 )
 
-export default function ArenaPage({ recordMap, challengeId, baseGithubUrl, contestId }: any) {
+export default function ArenaPage({ recordMap, challengeId, baseGithubUrl, contestId, title }: any) {
   const [leftWidth, setLeftWidth] = useState<number>(760);
   const [loadingNotion, setLoadingNotion] = useState<boolean>(false);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
@@ -161,9 +161,6 @@ export default function ArenaPage({ recordMap, challengeId, baseGithubUrl, conte
         <Button onClick={handleSubmit} variant="secondary" size="sm" className="rounded-md h-8">
           Submit
         </Button>
-        <Button size="sm" className="rounded-md gap-1.5 h-8">
-          <Play size={14} /> Run
-        </Button>
       </div>
     ),
     [handleSubmit]
@@ -196,6 +193,11 @@ export default function ArenaPage({ recordMap, challengeId, baseGithubUrl, conte
         >
           <Card className="h-full">
             <CardContent className="h-full min-h-0 overflow-auto p-2">
+              {title && (
+                <h1 className="truncate text-xl font-bold px-4 pt-4" title={title}>
+                  {title}
+                </h1>
+              )}
               <style jsx global>{`
                 .arena-notion .notion {
                   width: 100%;
