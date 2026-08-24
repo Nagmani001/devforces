@@ -7,6 +7,7 @@ import { useMutation } from '@tanstack/react-query';
 import { signupType } from '@/app/config/types';
 import { toast } from 'sonner';
 import { authClient } from '@/app/config/auth-client';
+import { OtpDialog } from '@/app/components/otpDialog';
 
 // --- HELPER COMPONENTS (ICONS) ---
 
@@ -88,6 +89,7 @@ export const SignUpPage: React.FC<SignInPageProps> = ({
   onCreateAccount,
 }) => {
   const [showPassword, setShowPassword] = useState(false);
+  const [otpOpen, setOtpOpen] = useState(false);
 
   const [signupData, setSignupData] = useState({
     username: "",
@@ -116,9 +118,43 @@ export const SignUpPage: React.FC<SignInPageProps> = ({
     },
     onSuccess: () => {
       toast.success("account created, please verify with the otp sent to your email");
-      router.push(`/otp/${encodeURIComponent(signupData.email)}`);
+      setOtpOpen(true);
     }
   });
+
+  const verifyMutation = useMutation({
+    mutationFn: async (otp: string) => {
+      const { data, error } = await authClient.emailOtp.verifyEmail({
+        email: signupData.email,
+        otp
+      });
+      if (error) {
+        throw new Error(error.message || "Invalid OTP. Please try again.");
+      }
+      return data;
+    },
+    onError: (error: Error) => {
+      toast.error(error.message || "Invalid OTP. Please try again.");
+    },
+    onSuccess: () => {
+      toast.success("OTP verified successfully!");
+      setOtpOpen(false);
+      router.push(`/contests/1`);
+    }
+  });
+
+  async function handleResendOtp(): Promise<boolean> {
+    const { error } = await authClient.emailOtp.sendVerificationOtp({
+      email: signupData.email,
+      type: "email-verification"
+    });
+    if (error) {
+      toast.error(error.message || "failed to resend otp");
+      return false;
+    }
+    toast.success("a new otp has been sent to your email");
+    return true;
+  }
 
   function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -255,6 +291,15 @@ export const SignUpPage: React.FC<SignInPageProps> = ({
           )}
         </section>
       )}
+
+      <OtpDialog
+        isOpen={otpOpen}
+        onOpenChange={setOtpOpen}
+        email={signupData.email}
+        onSubmit={(otp) => verifyMutation.mutate(otp)}
+        onResend={handleResendOtp}
+        isLoading={verifyMutation.isPending}
+      />
     </div>
   );
 };  

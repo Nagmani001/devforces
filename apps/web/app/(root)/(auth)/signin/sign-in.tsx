@@ -7,6 +7,7 @@ import { useRouter } from 'next/navigation';
 import { useMutation } from '@tanstack/react-query';
 import { signinType } from '@/app/config/types';
 import { authClient } from '@/app/config/auth-client';
+import { OtpDialog } from '@/app/components/otpDialog';
 
 
 // --- HELPER COMPONENTS (ICONS) ---
@@ -85,6 +86,7 @@ export const SignInPage: React.FC<SignInPageProps> = ({
   onGoogleSignIn,
 }) => {
   const [showPassword, setShowPassword] = useState(false);
+  const [otpOpen, setOtpOpen] = useState(false);
 
 
   const [signinData, setSigninData] = useState({
@@ -106,13 +108,65 @@ export const SignInPage: React.FC<SignInPageProps> = ({
       return data;
     },
     onError: (error: Error) => {
-      toast.error(error.message || "something went wrong");
+      const message = error.message || "something went wrong";
+      if (message.toLowerCase().includes("not verified")) {
+        handleUnverifiedEmail();
+        return;
+      }
+      toast.error(message);
     },
     onSuccess: () => {
       toast.success("successfully signed in");
       router.push(`/contests/1`);
     }
   })
+
+  async function handleUnverifiedEmail() {
+    const { error } = await authClient.emailOtp.sendVerificationOtp({
+      email: signinData.email,
+      type: "email-verification"
+    });
+    if (error) {
+      toast.error(error.message || "failed to send verification otp");
+      return;
+    }
+    toast.info("please verify your email to continue");
+    setOtpOpen(true);
+  }
+
+  const verifyMutation = useMutation({
+    mutationFn: async (otp: string) => {
+      const { data, error } = await authClient.emailOtp.verifyEmail({
+        email: signinData.email,
+        otp
+      });
+      if (error) {
+        throw new Error(error.message || "Invalid OTP. Please try again.");
+      }
+      return data;
+    },
+    onError: (error: Error) => {
+      toast.error(error.message || "Invalid OTP. Please try again.");
+    },
+    onSuccess: () => {
+      toast.success("OTP verified successfully!");
+      setOtpOpen(false);
+      router.push(`/contests/1`);
+    }
+  });
+
+  async function handleResendOtp(): Promise<boolean> {
+    const { error } = await authClient.emailOtp.sendVerificationOtp({
+      email: signinData.email,
+      type: "email-verification"
+    });
+    if (error) {
+      toast.error(error.message || "failed to resend otp");
+      return false;
+    }
+    toast.success("a new otp has been sent to your email");
+    return true;
+  }
 
 
   function handleForgotPassword() {
@@ -233,6 +287,14 @@ export const SignInPage: React.FC<SignInPageProps> = ({
           </section>
         )
       }
+      <OtpDialog
+        isOpen={otpOpen}
+        onOpenChange={setOtpOpen}
+        email={signinData.email}
+        onSubmit={(otp) => verifyMutation.mutate(otp)}
+        onResend={handleResendOtp}
+        isLoading={verifyMutation.isPending}
+      />
     </div >
   );
 };  

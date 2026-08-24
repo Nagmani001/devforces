@@ -59,7 +59,7 @@ describe("POST /api/auth/sign-up/email", () => {
     });
   });
 
-  it("should not create a duplicate user for an existing email", async () => {
+  it("should return a duplicate email error and not create a second user", async () => {
     const res = await axios.post(`${BACKEND_URL}/api/auth/sign-up/email`, {
       name: "testuser",
       email: "testuser@example.com",
@@ -71,8 +71,9 @@ describe("POST /api/auth/sign-up/email", () => {
       where: { email: "testuser@example.com" }
     });
 
-    expect(res.status).toBe(200);
-    expect(res.data.token).toBeNull();
+    expect(res.status).toBe(422);
+    expect(res.data.code).toBe("USER_ALREADY_EXISTS_USE_ANOTHER_EMAIL");
+    expect(res.data.message).toBe("User already exists. Use another email.");
     expect(count).toBe(1);
   });
 });

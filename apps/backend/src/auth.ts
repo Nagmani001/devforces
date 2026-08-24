@@ -1,6 +1,7 @@
-import { betterAuth } from "better-auth";
+import { betterAuth, APIError, BASE_ERROR_CODES } from "better-auth";
 import { prismaAdapter } from "better-auth/adapters/prisma";
 import { emailOTP } from "better-auth/plugins";
+import { createAuthMiddleware } from "better-auth/api";
 import prisma from "@repo/db/client";
 import { sendEmail } from "@repo/email/email";
 
@@ -76,6 +77,26 @@ export const auth = betterAuth({
         },
       },
     },
+  },
+  hooks: {
+    before: createAuthMiddleware(async (ctx) => {
+      if (ctx.path === "/sign-up/email") {
+        const body = ctx.body as { email?: string } | undefined;
+        const email = typeof body?.email === "string" ? body.email.toLowerCase().trim() : null;
+        if (email) {
+          const existingUser = await prisma.user.findFirst({
+            where: { email: { equals: email, mode: "insensitive" } },
+            select: { id: true },
+          });
+          if (existingUser) {
+            throw APIError.from(
+              "UNPROCESSABLE_ENTITY",
+              BASE_ERROR_CODES.USER_ALREADY_EXISTS_USE_ANOTHER_EMAIL,
+            );
+          }
+        }
+      }
+    }),
   },
   plugins: [
     emailOTP({

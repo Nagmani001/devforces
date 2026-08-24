@@ -471,13 +471,12 @@ describe("GET /summary/:userId", () => {
   });
 });`;
 
-const NOTION_LINK = "https://www.notion.so/Projects-2ce674d192f88024b3aec88fe8d21dcc?source=copy_link";
 
 export const challengeDatas = [
   // ─── Existing challenge (contest index 0) ───────────────────────────
   {
     title: "Build a Todo API with Database",
-    notionLink: NOTION_LINK,
+    notionLink: "https://www.notion.so/Assignment-3-Build-a-Basic-TODO-Backend-2a3fd88043d481be8024ec4cf8303d87",
     testFile: testFileContent,
     baseGithubUrl: "https://github.com/Nagmani001/with-database",
     totalTestCases: 2,
