@@ -1,18 +1,12 @@
 import { Router, Response, Request } from "express";
 import { v4 as uuidv4 } from 'uuid';
-import * as AWS from "@aws-sdk/client-s3";
-import { createPresignedPost } from '@aws-sdk/s3-presigned-post';
+import { createUploadUrl, getDownloadUrl } from "@repo/storage/storage";
 import { calculateScoreAndUpdateDb, checkContestResultOrCreate, unauthorized } from "../lib/utils";
 import { pubSub, redisClient } from "..";
 import { REDIS_QUEUE_NAME } from "@repo/common/consts";
 import { PAYLOAD_TO_PUSH, PAYLOAD_TO_RECEIVE } from "@repo/common/typescript-types";
 import prisma from "@repo/db/client";
 export const submitRouter: Router = Router();
-
-// envs automatically infered
-const s3Client = new AWS.S3({
-  region: "ap-south-1"
-});
 
 submitRouter.get("/preSignedUrl/:challengeId", async (req: Request, res: Response) => {
   const userId = req.userId;
@@ -42,18 +36,17 @@ submitRouter.get("/preSignedUrl/:challengeId", async (req: Request, res: Respons
     });
   }
 
-  const { url, fields } = await createPresignedPost(s3Client, {
-    Bucket: "nagmanidevforces",
-    Key: `${userId}-challenge-${challengeId}`,
-    Conditions: [
-      ['content-length-range', 0, 50 * 1024 * 1024]
-    ],
-    Expires: 3600
+  const { url, method, fields, headers } = await createUploadUrl({
+    key: `${userId}-challenge-${challengeId}`,
+    maxSizeBytes: 50 * 1024 * 1024,
+    expiresInSeconds: 3600
   })
 
   res.json({
     preSignedUrl: url,
-    fields,
+    method,
+    fields: fields ?? {},
+    headers: headers ?? {},
     submissionToken
   })
 });
@@ -101,7 +94,7 @@ submitRouter.post("/submit/confirm/:contestId/:challengeId", async (req: Request
   const payload: PAYLOAD_TO_PUSH = {
     id: uniqueId,
     challengeId: challengeId!,
-    url: `https://nagmanidevforces.s3.ap-south-1.amazonaws.com/${userId}-challenge-${challengeId}`
+    url: getDownloadUrl(`${userId}-challenge-${challengeId}`)
   };
 
   const { contestResultId } = await checkContestResultOrCreate(contestId!, userId);

@@ -159,25 +159,33 @@ export async function deleteContest(contestId: string) {
   }
 }
 
-export async function sendZippedFile(url: string, conf: S3PresignedPostFields, file: Blob) {
-  let data = new FormData();
-  data.append('Policy', conf.Policy);
-  data.append('X-Amz-Signature', conf["X-Amz-Signature"]);
-  data.append('bucket', conf.bucket);
-  data.append('X-Amz-Algorithm', conf["X-Amz-Algorithm"]);
-  data.append('X-Amz-Credential', conf["X-Amz-Credential"]);
-  data.append('key', conf.key);
-  data.append('X-Amz-Date', conf["X-Amz-Date"]);
-  data.append('file', file);
+export async function sendZippedFile(
+  url: string,
+  method: string,
+  conf: S3PresignedPostFields | undefined,
+  headers: Record<string, string> | undefined,
+  file: Blob
+) {
+  if (method === "POST" && conf) {
+    let data = new FormData();
+    data.append('Policy', conf.Policy);
+    data.append('X-Amz-Signature', conf["X-Amz-Signature"]);
+    data.append('bucket', conf.bucket);
+    data.append('X-Amz-Algorithm', conf["X-Amz-Algorithm"]);
+    data.append('X-Amz-Credential', conf["X-Amz-Credential"]);
+    data.append('key', conf.key);
+    data.append('X-Amz-Date', conf["X-Amz-Date"]);
+    data.append('file', file);
 
-  let config = {
-    method: 'post',
-    maxBodyLength: Infinity,
-    url: url,
-    data: data
-  };
-
-  await axios.request(config);
+    await axios.request({
+      method: 'post',
+      maxBodyLength: Infinity,
+      url: url,
+      data: data
+    });
+  } else {
+    await axios.put(url, file, { headers });
+  }
 }
 
 export async function confirmFileSent(challengeId: string, contestId: string, submissionToken: string) {

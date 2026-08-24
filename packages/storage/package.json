@@ -1,0 +1,26 @@
+{
+  "name": "@repo/storage",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "exports": {
+    "./storage": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@aws-sdk/client-s3": "^3.958.0",
+    "@aws-sdk/s3-presigned-post": "^3.958.0",
+    "@google-cloud/storage": "^7.15.2",
+    "@repo/typescript-config": "workspace:*"
+  }
+}

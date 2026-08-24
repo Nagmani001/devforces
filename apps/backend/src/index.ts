@@ -14,11 +14,10 @@ import { leaderboardRouter } from "./routes/leaderboardRouter";
 import { notificationRotuer } from "./routes/notificationRouter";
 import { sseRouter } from "./routes/sseRouter";
 import { initEmail } from "@repo/email/email";
+import { initStorage } from "@repo/storage/storage";
 
 
-if (process.env.RESEND_API_KEY) {
-  initEmail(process.env.RESEND_API_KEY);
-}
+
 const app = express();
 
 export const redisClient: RedisClientType = createClient({
@@ -87,6 +86,44 @@ async function main() {
       process.exit(1);
     })
   });
+
+  if (process.env.RESEND_API_KEY) {
+    initEmail(process.env.RESEND_API_KEY);
+  }
+
+  if (process.env.OBJECT_STORE_PROVIDER === "gcs") {
+    const gcsCredentials = process.env.GCS_SERVICE_ACCOUNT_KEY
+      ? JSON.parse(process.env.GCS_SERVICE_ACCOUNT_KEY)
+      : undefined;
+
+    initStorage("gcs", {
+      bucket: process.env.GCS_BUCKET!,
+      ...(process.env.GCS_PROJECT_ID ? { projectId: process.env.GCS_PROJECT_ID } : {}),
+      ...(gcsCredentials ? { credentials: gcsCredentials } : {}),
+      ...(process.env.GCS_SERVICE_ACCOUNT_KEY_PATH
+        ? { keyFilename: process.env.GCS_SERVICE_ACCOUNT_KEY_PATH }
+        : {}),
+      ...(process.env.GCS_PUBLIC_BASE_URL
+        ? { publicBaseUrl: process.env.GCS_PUBLIC_BASE_URL }
+        : {}),
+    });
+  } else {
+    initStorage("s3", {
+      region: process.env.S3_REGION ?? "ap-south-1",
+      bucket: process.env.S3_BUCKET ?? "nagmanidevforces",
+      ...(process.env.S3_ENDPOINT ? { endpoint: process.env.S3_ENDPOINT } : {}),
+      ...(process.env.S3_ACCESS_KEY_ID && process.env.S3_SECRET_ACCESS_KEY
+        ? {
+          accessKeyId: process.env.S3_ACCESS_KEY_ID,
+          secretAccessKey: process.env.S3_SECRET_ACCESS_KEY,
+        }
+        : {}),
+      ...(process.env.S3_PUBLIC_BASE_URL
+        ? { publicBaseUrl: process.env.S3_PUBLIC_BASE_URL }
+        : {}),
+    });
+  }
+
 }
 
 main();

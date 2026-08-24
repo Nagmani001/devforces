@@ -75,7 +75,7 @@ export default function ArenaPage({ recordMap, challengeId, baseGithubUrl, conte
         withCredentials: true
       });
 
-      const { preSignedUrl, fields, submissionToken } = getPresignedUrl.data;
+      const { preSignedUrl, method, fields, headers, submissionToken } = getPresignedUrl.data;
 
       if (!submissionToken) {
         throw new Error("No submission token received");
@@ -130,7 +130,7 @@ export default function ArenaPage({ recordMap, challengeId, baseGithubUrl, conte
       }
 
       const zipFile = await zip.generateAsync({ type: "blob" });
-      await sendZippedFile(preSignedUrl, fields, zipFile);
+      await sendZippedFile(preSignedUrl, method, fields, headers, zipFile);
 
       // Confirm submission (this will trigger the worker to start processing)
       await confirmFileSent(challengeId, contestId, submissionToken);
