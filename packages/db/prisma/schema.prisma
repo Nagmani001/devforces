@@ -85,7 +85,7 @@ model Contest {
   isDeleted     Boolean        @default(false)
   startsAt      DateTime       @db.Timestamptz(3)
   challenges    Challenge[]
-  contestResult ContestResult?
+  contestResult ContestResult[]
   createdAt     DateTime       @default(now())
   updatedAt     DateTime?
   user          User           @relation(fields: [userId], references: [id])
@@ -111,7 +111,7 @@ model ContestResult {
   penalty Int           @default(0)
 
   challengeResult ChallengeResult[]
-  contestId       String            @unique
+  contestId       String
   contest         Contest           @relation(fields: [contestId], references: [id])
   userId          String
   user            User              @relation(fields: [userId], references: [id])

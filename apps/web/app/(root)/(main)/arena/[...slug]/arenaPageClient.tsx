@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useCallback, useEffect, useMemo } from "react";
+import { useState, useCallback, useEffect, useMemo, useRef } from "react";
 import { useTheme } from "next-themes";
 // @ts-ignore
 import { ResizableBox } from "react-resizable";
@@ -30,6 +30,8 @@ export default function ArenaPage({ recordMap, challengeId, baseGithubUrl, conte
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [files, setFiles] = useState<File[]>([]);
   const [logs, setLogs] = useState<string[]>([]);
+  const terminalRef = useRef<HTMLDivElement | null>(null);
+  const [isPinnedToBottom, setIsPinnedToBottom] = useState(true);
   const [testResult, setTestResult] = useState({
     passed: 0,
     total: 0,
@@ -168,6 +170,20 @@ export default function ArenaPage({ recordMap, challengeId, baseGithubUrl, conte
     setActions(navActions);
     return () => setActions(null);
   }, [navActions, setActions]);
+
+  const handleTerminalScroll = () => {
+    const el = terminalRef.current;
+    if (!el) return;
+    const distanceFromBottom = el.scrollHeight - el.scrollTop - el.clientHeight;
+    setIsPinnedToBottom(distanceFromBottom < 20);
+  };
+
+  useEffect(() => {
+    const el = terminalRef.current;
+    if (el && isPinnedToBottom) {
+      el.scrollTop = el.scrollHeight;
+    }
+  }, [logs, isPinnedToBottom]);
 
   return (
     <div className="h-[calc(100vh-3.5rem)] bg-background text-foreground flex flex-col w-full overflow-hidden">
@@ -341,7 +357,7 @@ export default function ArenaPage({ recordMap, challengeId, baseGithubUrl, conte
             </div>
 
             {/* Terminal Content */}
-            <div className="flex-1 p-4 text-gray-300 overflow-auto font-mono">
+            <div ref={terminalRef} onScroll={handleTerminalScroll} className="flex-1 p-4 text-gray-300 overflow-auto font-mono">
               {isSubmitting ? (
                 <div className="flex flex-col gap-1">
                   <div className="text-blue-400">
