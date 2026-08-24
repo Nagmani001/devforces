@@ -13,6 +13,7 @@ import { createClient, RedisClientType } from "redis";
 import { leaderboardRouter } from "./routes/leaderboardRouter";
 import { notificationRotuer } from "./routes/notificationRouter";
 import { sseRouter } from "./routes/sseRouter";
+import { profileRouter } from "./routes/profileRouter";
 import { initEmail } from "@repo/email/email";
 import { initStorage } from "@repo/storage/storage";
 
@@ -59,6 +60,7 @@ app.use("/api/submissions", authMiddleware, submitRouter);
 app.use("/api/notification", authMiddleware, notificationRotuer);
 app.use("/api/leaderboard", leaderboardRouter);
 app.use("/api/live", sseRouter);
+app.use("/api/profile", authMiddleware, profileRouter);
 
 
 

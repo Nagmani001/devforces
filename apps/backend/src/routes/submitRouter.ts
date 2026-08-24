@@ -8,6 +8,55 @@ import { PAYLOAD_TO_PUSH, PAYLOAD_TO_RECEIVE } from "@repo/common/typescript-typ
 import prisma from "@repo/db/client";
 export const submitRouter: Router = Router();
 
+submitRouter.get("/", async (req: Request, res: Response) => {
+  const userId = req.userId;
+  if (!userId) return unauthorized(res);
+
+  try {
+    const sessions = await prisma.submissionSession.findMany({
+      where: { userId },
+      orderBy: { createdAt: "desc" },
+      select: {
+        id: true,
+        challengeId: true,
+        contestId: true,
+        status: true,
+        createdAt: true,
+      },
+    });
+
+    const challengeIds = [...new Set(sessions.map((s) => s.challengeId))];
+    const contestIds = [...new Set(sessions.map((s) => s.contestId))];
+
+    const [challenges, contests] = await Promise.all([
+      prisma.challenge.findMany({
+        where: { id: { in: challengeIds } },
+        select: { id: true, title: true },
+      }),
+      prisma.contest.findMany({
+        where: { id: { in: contestIds } },
+        select: { id: true, title: true },
+      }),
+    ]);
+
+    const challengeTitle = new Map(challenges.map((c) => [c.id, c.title]));
+    const contestTitle = new Map(contests.map((c) => [c.id, c.title]));
+
+    res.json({
+      submissions: sessions.map((s) => ({
+        id: s.id,
+        challenge: challengeTitle.get(s.challengeId) ?? "Unknown challenge",
+        contest: contestTitle.get(s.contestId) ?? "Unknown contest",
+        status: s.status,
+        submittedAt: s.createdAt,
+      })),
+    });
+  } catch (err) {
+    console.error("error listing submissions", err);
+    return res.status(500).json({ message: "error while fetching submissions" });
+  }
+});
+
 submitRouter.get("/preSignedUrl/:challengeId", async (req: Request, res: Response) => {
   const userId = req.userId;
   const challengeId = req.params.challengeId;

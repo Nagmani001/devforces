@@ -10,12 +10,20 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@repo/ui/components/dropdown-menu";
-import { User, Trophy, FileCode2, Settings, Shield, LogOut } from "lucide-react";
+import { User, FileCode2, Settings, LogOut, Sun, Moon, Monitor, Check } from "lucide-react";
+import { useTheme } from "next-themes";
 import { authClient } from "../config/auth-client";
+
+const THEME_OPTIONS = [
+  { value: "light", label: "Light", icon: Sun },
+  { value: "dark", label: "Dark", icon: Moon },
+  { value: "system", label: "System", icon: Monitor },
+] as const;
 
 export default function UserMenu() {
   const router = useRouter();
   const user = useUserInfo();
+  const { theme, setTheme } = useTheme();
 
   if (!user.data) return null;
 
@@ -66,24 +74,25 @@ export default function UserMenu() {
           <User className="mr-2 h-4 w-4" />
           View Profile
         </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => router.push("/contests")}>
-          <Trophy className="mr-2 h-4 w-4" />
-          My Contests
-        </DropdownMenuItem>
-        <DropdownMenuItem>
+        <DropdownMenuItem onClick={() => router.push("/submissions")}>
           <FileCode2 className="mr-2 h-4 w-4" />
           My Submissions
         </DropdownMenuItem>
-        <DropdownMenuItem>
+        <DropdownMenuItem onClick={() => router.push("/settings")}>
           <Settings className="mr-2 h-4 w-4" />
           Settings
         </DropdownMenuItem>
-        {user.data.isAdmin && (
-          <DropdownMenuItem onClick={() => router.push("/admin")}>
-            <Shield className="mr-2 h-4 w-4" />
-            Admin Panel
+        <DropdownMenuSeparator />
+        <DropdownMenuLabel className="text-xs text-muted-foreground font-medium">
+          Theme
+        </DropdownMenuLabel>
+        {THEME_OPTIONS.map(({ value, label, icon: Icon }) => (
+          <DropdownMenuItem key={value} onClick={() => setTheme(value)}>
+            <Icon className="mr-2 h-4 w-4" />
+            {label}
+            {theme === value && <Check className="ml-auto h-4 w-4" />}
           </DropdownMenuItem>
-        )}
+        ))}
         <DropdownMenuSeparator />
         <DropdownMenuItem
           variant="destructive"
