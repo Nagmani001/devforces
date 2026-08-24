@@ -1,0 +1,166 @@
+/*
+ * Theme-aware Prism syntax highlighting for react-notion-x code blocks.
+ *
+ * Previously a dark theme (prism-tomorrow) was imported globally, which made
+ * code blocks render with a dark background even in light mode. Instead we
+ * ship a light palette by default and switch to the dark (tomorrow) palette
+ * only inside react-notion-x's `.dark-mode` wrapper.
+ */
+
+/* ---- Light mode (default) ---- */
+
+.arena-notion .notion-code {
+  background: var(--bg-color-1);
+  color: var(--fg-color);
+}
+
+.arena-notion .notion-code code[class*="language-"],
+.arena-notion .notion-code pre[class*="language-"] {
+  background: none;
+  color: var(--fg-color);
+  text-shadow: none;
+}
+
+.arena-notion .notion-code .token.comment,
+.arena-notion .notion-code .token.prolog,
+.arena-notion .notion-code .token.doctype,
+.arena-notion .notion-code .token.cdata {
+  color: #687080;
+}
+
+.arena-notion .notion-code .token.punctuation {
+  color: #5f6368;
+}
+
+.arena-notion .notion-code .token.namespace {
+  opacity: 0.7;
+}
+
+.arena-notion .notion-code .token.property,
+.arena-notion .notion-code .token.tag,
+.arena-notion .notion-code .token.boolean,
+.arena-notion .notion-code .token.number,
+.arena-notion .notion-code .token.constant,
+.arena-notion .notion-code .token.symbol,
+.arena-notion .notion-code .token.deleted {
+  color: #c92a2a;
+}
+
+.arena-notion .notion-code .token.selector,
+.arena-notion .notion-code .token.attr-name,
+.arena-notion .notion-code .token.string,
+.arena-notion .notion-code .token.char,
+.arena-notion .notion-code .token.builtin,
+.arena-notion .notion-code .token.inserted {
+  color: #2f9e44;
+}
+
+.arena-notion .notion-code .token.operator,
+.arena-notion .notion-code .token.entity,
+.arena-notion .notion-code .token.url,
+.arena-notion .notion-code .language-css .token.string,
+.arena-notion .notion-code .style .token.string {
+  color: #e8590c;
+  background: none;
+}
+
+.arena-notion .notion-code .token.atrule,
+.arena-notion .notion-code .token.attr-value,
+.arena-notion .notion-code .token.keyword {
+  color: #1971c2;
+}
+
+.arena-notion .notion-code .token.function,
+.arena-notion .notion-code .token.class-name {
+  color: #e64980;
+}
+
+.arena-notion .notion-code .token.regex,
+.arena-notion .notion-code .token.important,
+.arena-notion .notion-code .token.variable {
+  color: #e8590c;
+}
+
+.arena-notion .notion-code .token.important,
+.arena-notion .notion-code .token.bold {
+  font-weight: bold;
+}
+
+.arena-notion .notion-code .token.italic {
+  font-style: italic;
+}
+
+.arena-notion .notion-code .token.entity {
+  cursor: help;
+}
+
+/* ---- Dark mode (react-notion-x `.dark-mode` wrapper) ---- */
+
+.arena-notion .dark-mode .notion-code {
+  background: #2d2d2d;
+  color: #ccc;
+}
+
+.arena-notion .dark-mode .notion-code code[class*="language-"] {
+  background: none;
+  color: #ccc;
+  text-shadow: none;
+}
+
+.arena-notion .dark-mode .notion-code .token.comment,
+.arena-notion .dark-mode .notion-code .token.block-comment,
+.arena-notion .dark-mode .notion-code .token.prolog,
+.arena-notion .dark-mode .notion-code .token.doctype,
+.arena-notion .dark-mode .notion-code .token.cdata {
+  color: #999;
+}
+
+.arena-notion .dark-mode .notion-code .token.punctuation {
+  color: #ccc;
+}
+
+.arena-notion .dark-mode .notion-code .token.tag,
+.arena-notion .dark-mode .notion-code .token.attr-name,
+.arena-notion .dark-mode .notion-code .token.namespace,
+.arena-notion .dark-mode .notion-code .token.deleted {
+  color: #e2777a;
+}
+
+.arena-notion .dark-mode .notion-code .token.function-name {
+  color: #6196cc;
+}
+
+.arena-notion .dark-mode .notion-code .token.boolean,
+.arena-notion .dark-mode .notion-code .token.number,
+.arena-notion .dark-mode .notion-code .token.function {
+  color: #f08d49;
+}
+
+.arena-notion .dark-mode .notion-code .token.property,
+.arena-notion .dark-mode .notion-code .token.class-name,
+.arena-notion .dark-mode .notion-code .token.constant,
+.arena-notion .dark-mode .notion-code .token.symbol {
+  color: #f8c555;
+}
+
+.arena-notion .dark-mode .notion-code .token.selector,
+.arena-notion .dark-mode .notion-code .token.important,
+.arena-notion .dark-mode .notion-code .token.atrule,
+.arena-notion .dark-mode .notion-code .token.keyword,
+.arena-notion .dark-mode .notion-code .token.builtin {
+  color: #cc99cd;
+}
+
+.arena-notion .dark-mode .notion-code .token.string,
+.arena-notion .dark-mode .notion-code .token.char,
+.arena-notion .dark-mode .notion-code .token.attr-value,
+.arena-notion .dark-mode .notion-code .token.regex,
+.arena-notion .dark-mode .notion-code .token.variable {
+  color: #7ec699;
+}
+
+.arena-notion .dark-mode .notion-code .token.operator,
+.arena-notion .dark-mode .notion-code .token.entity,
+.arena-notion .dark-mode .notion-code .token.url {
+  color: #67cdcc;
+}

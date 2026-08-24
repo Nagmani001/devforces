@@ -32,6 +32,7 @@ export default function ArenaPage({ recordMap, challengeId, baseGithubUrl, conte
   const [logs, setLogs] = useState<string[]>([]);
   const terminalRef = useRef<HTMLDivElement | null>(null);
   const [isPinnedToBottom, setIsPinnedToBottom] = useState(true);
+  const [mounted, setMounted] = useState(false);
   const [testResult, setTestResult] = useState({
     passed: 0,
     total: 0,
@@ -40,6 +41,10 @@ export default function ArenaPage({ recordMap, challengeId, baseGithubUrl, conte
   const { resolvedTheme } = useTheme();
   const isDarkMode = resolvedTheme === "dark";
   const { setActions } = useNavBarActions();
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
 
   // SSE connection will be handled in handleSubmit
@@ -222,7 +227,7 @@ export default function ArenaPage({ recordMap, challengeId, baseGithubUrl, conte
                   padding: 16px;
                 }
               `}</style>
-              {loadingNotion ? (
+              {loadingNotion || !mounted ? (
                 <div className="flex items-center gap-3">
                   <Loader className="animate-spin" />
                   <span>Loading notion page...</span>
@@ -232,7 +237,6 @@ export default function ArenaPage({ recordMap, challengeId, baseGithubUrl, conte
                   <NotionRenderer
                     recordMap={recordMap}
                     darkMode={isDarkMode}
-                    className={isDarkMode ? "notion notion-dark" : "notion"}
                     fullPage={false}
                     components={{
                       Code,
