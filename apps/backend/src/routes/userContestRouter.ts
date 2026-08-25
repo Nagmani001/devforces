@@ -45,6 +45,20 @@ userContestRouter.get("/", async (req: Request, res: Response) => {
   }
 });
 
+//WARNING:repeated in adminRouter as well 
+// must be declared BEFORE the "/:contestId" route, otherwise "/totalPages"
+// gets matched by ":contestId" and pagination breaks for normal users.
+userContestRouter.get("/totalPages", async (req: Request, res: Response) => {
+  const totalContestRows = await prisma.contest.count();
+  const totalPage = totalContestRows / 10;
+
+  res.json({
+    total: totalPage < 1 ? 1
+      : totalPage % 1 == 0 ? totalPage
+        : Math.floor(totalPage + 1)
+  });
+});
+
 userContestRouter.get("/:contestId", async (req: Request, res: Response) => {
   const contestId = req.params.contestId!;
   const contest = await prisma.contest.findFirst({
@@ -115,16 +129,4 @@ userContestRouter.get("/challenge/:challengeId", async (req: Request, res: Respo
 userContestRouter.post("/started/:contestId/:challengeId", (req: Request, res: Response) => {
   const contestId = req.params.contestId;
 
-});
-
-//WARNING:repeated in adminRouter as well 
-userContestRouter.get("/totalPages", async (req: Request, res: Response) => {
-  const totalContestRows = await prisma.contest.count();
-  const totalPage = totalContestRows / 10;
-
-  res.json({
-    total: totalPage < 1 ? 1
-      : totalPage % 1 == 0 ? totalPage
-        : Math.floor(totalPage + 1)
-  });
 });
