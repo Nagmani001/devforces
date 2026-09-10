@@ -7,8 +7,8 @@ import { getStatusOfContestReturns, S3PresignedPostFields } from "./types";
 import { ENDED, LIVE, MONTH_NAMES, NOT_STARTED } from "@repo/common/consts";
 import { Contest } from "@repo/common/typescript-types";
 
-export const BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
-export const BASE_FRONTEND_URL = "http://localhost:3000";
+export const BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:7001";
+export const BASE_FRONTEND_URL = "http://localhost:7000";
 
 
 export const emptyChallenge = (): Challenge => ({

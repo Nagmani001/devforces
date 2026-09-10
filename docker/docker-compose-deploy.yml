@@ -32,7 +32,7 @@ services:
     container_name: devforces-backend
     restart: always
     ports:
-      - "2001:3001"
+      - "2001:7001"
     env_file:
       - .env.backend
     depends_on:

@@ -40,7 +40,7 @@ declare global {
 }
 
 app.use(cors({
-  origin: ["http://localhost:3000", "https://devforces.nagmani.site"],
+  origin: ["http://localhost:7000", "https://devforces.nagmani.site"],
   credentials: true
 }));
 
@@ -65,8 +65,8 @@ app.use("/api/profile", authMiddleware, profileRouter);
 
 
 async function main() {
-  let server = app.listen(3001, () => {
-    console.log("Server is running on port 3001");
+  let server = app.listen(7001, () => {
+    console.log("Server is running on port 7001");
   });
 
   await redisClient.connect();

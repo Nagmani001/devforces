@@ -41,7 +41,7 @@ services:
       redis:
         condition: service_healthy
     ports:
-      - "3001:3001"
+      - "7001:7001"
 
   worker:
     build:
@@ -67,8 +67,8 @@ services:
       context: ../
       dockerfile: docker/web/Dockerfile
       args:
-        NEXT_PUBLIC_API_URL: "http://localhost:3001"
+        NEXT_PUBLIC_API_URL: "http://localhost:7001"
     container_name: web
     env_file: ../apps/web/.env
     ports:
-      - "3000:3000"
+      - "7000:3000"

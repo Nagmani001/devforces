@@ -26,7 +26,7 @@ DATABASE_URL="postgresql://postgres:nagmani@localhost:5432/postgres" pnpm start 
 BACKEND_PID=$!
 
 echo '🟡 - Waiting for backend to be ready...'
-$PROJECT_ROOT/apps/backend/src/scripts/wait-for-it.sh localhost:3001 -- echo "backend has started"
+$PROJECT_ROOT/apps/backend/src/scripts/wait-for-it.sh localhost:7001 -- echo "backend has started"
 
 echo "Run integration test"
 pnpm run test

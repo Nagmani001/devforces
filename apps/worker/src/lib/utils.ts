@@ -1,6 +1,4 @@
 import axios from "axios";
-import util from "util";
-const exec = util.promisify(require('child_process').exec);
 import fs from "fs";
 import path from "path";
 import StreamZip from "node-stream-zip";
@@ -99,15 +97,35 @@ export async function downloadAndUnzipFile(url: string, id: string, logsManager?
       await logsManager.addLog(` Successfully extracted ${count} files`);
     }
 
-    const folder = await exec(`cd "${extractedDir}" && ls -d */ 2>/dev/null | head -1 || ls -1 | head -1`);
-    const projectName = folder.stdout.trim().replace(/\//g, '');
+    // The submission zip can arrive in two shapes:
+    //   1. Drag-and-drop / cloned-repo uploads: entries are prefixed with a
+    //      top-level folder (e.g. "myproject/package.json"), so the archive has
+    //      a single wrapper directory.
+    //   2. In-browser Monaco editor uploads: entries are repo-relative
+    //      (e.g. "package.json", "src/index.ts"), so files sit at the archive root.
+    // Detect a single wrapper directory; otherwise treat the extraction root as
+    // the project itself so both flows resolve to the same project path.
+    const topLevel = await fs.promises.readdir(extractedDir, { withFileTypes: true });
+    const significantDirs = topLevel.filter(
+      (e) => e.isDirectory() && !e.name.startsWith(".") && e.name !== "__MACOSX"
+    );
+    const topFiles = topLevel.filter((e) => e.isFile() && !e.name.startsWith("."));
 
-    if (logsManager && projectName) {
-      await logsManager.addLog(` Project identified: ${projectName}`);
+    let projectPath: string;
+    if (significantDirs.length === 1 && topFiles.length === 0 && significantDirs[0]) {
+      projectPath = path.join(extractedDir, significantDirs[0].name);
+      if (logsManager) {
+        await logsManager.addLog(` Project identified: ${significantDirs[0].name}`);
+      }
+    } else {
+      projectPath = extractedDir;
+      if (logsManager) {
+        await logsManager.addLog(" Project identified: (files at archive root)");
+      }
     }
 
     // Return the full absolute path to the project
-    return path.join(extractedDir, projectName);
+    return projectPath;
 
   } catch (err: any) {
     const errorMessage = err?.message || "Unknown error occurred";

@@ -1,5 +1,6 @@
 import { getChallengeDetails } from "@/app/config/session";
 import { NotionAPI } from 'notion-client'
+import { notFound } from "next/navigation";
 import ArenaPage from "./arenaPageClient";
 
 export default async function Page({
@@ -14,6 +15,11 @@ export default async function Page({
   const notion = new NotionAPI()
   const challenge = await getChallengeDetails(challengeId);
 
-  const recordMap = await notion.getPage(challenge.data?.data.challenge.notionLink);
-  return <ArenaPage recordMap={recordMap} challengeId={challengeId} baseGithubUrl={challenge.data!.data.challenge.baseGithubUrl} contestId={contestId} title={challenge.data?.data.challenge.title} />
+  if (!challenge.success || !challenge.data?.data?.challenge) {
+    notFound();
+  }
+
+  const challengeData = challenge.data.data.challenge;
+  const recordMap = await notion.getPage(challengeData.notionLink);
+  return <ArenaPage recordMap={recordMap} challengeId={challengeId} baseGithubUrl={challengeData.baseGithubUrl} contestId={contestId} title={challengeData.title} />
 }
