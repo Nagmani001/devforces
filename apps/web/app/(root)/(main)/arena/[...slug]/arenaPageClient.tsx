@@ -9,7 +9,7 @@ import { Card, CardContent } from "@repo/ui/components/card";
 import { NotionRenderer } from "react-notion-x";
 
 type RecordMap = React.ComponentProps<typeof NotionRenderer>["recordMap"];
-import { Loader, GripVertical, GitBranch, Copy, Terminal, PanelLeft, PanelLeftClose, Maximize2, Minimize2, SquareTerminal, Code2, FolderUp } from "lucide-react";
+import { Loader, GripVertical, GitBranch, Copy, Terminal, PanelLeft, PanelLeftClose, Maximize2, Minimize2, SquareTerminal, Code2, FolderUp, FileText, History } from "lucide-react";
 import dynamic from 'next/dynamic'
 import axios from "axios";
 import { BASE_URL, confirmFileSent, sendZippedFile } from "@/app/config/utils";
@@ -17,6 +17,7 @@ import { ArenaDropzoneLoader } from "@/app/components/arenaDropzoneLoader";
 import { ArenaFolderUpload } from "@/app/components/arenaFolderUpload";
 import { useNavBarActions } from "@/app/components/navBarActions";
 import { CodeWorkspace } from "@/app/components/codeWorkspace";
+import { SubmissionList } from "@/app/components/submissionList";
 import { useCodeWorkspace } from "@/app/hooks/useCodeWorkspace";
 import type { WorkspaceEntry } from "@/app/hooks/useCodeWorkspace";
 
@@ -37,6 +38,7 @@ type ArenaPageProps = {
 
 export default function ArenaPage({ recordMap, challengeId, baseGithubUrl, contestId, title }: ArenaPageProps) {
   const [leftWidth, setLeftWidth] = useState<number>(520);
+  const [leftTab, setLeftTab] = useState<"problems" | "submissions">("problems");
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [logs, setLogs] = useState<string[]>([]);
   const terminalRef = useRef<HTMLDivElement | null>(null);
@@ -162,6 +164,16 @@ export default function ArenaPage({ recordMap, challengeId, baseGithubUrl, conte
     }
   }, [challengeId, contestId, mode, localFiles, workspaceEntries.length, workspace]);
 
+  const handleDownload = useCallback(async () => {
+    const zipFile = await workspace.getZip();
+    const url = URL.createObjectURL(zipFile);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `solution-${challengeId}.zip`;
+    link.click();
+    URL.revokeObjectURL(url);
+  }, [workspace, challengeId]);
+
   const navActions = useMemo(
     () => (
       <div className="flex items-center gap-2">
@@ -221,16 +233,6 @@ export default function ArenaPage({ recordMap, challengeId, baseGithubUrl, conte
   const selectEntry = useCallback((entry: WorkspaceEntry) => {
     setActivePath(entry.path);
   }, []);
-
-  const handleDownload = useCallback(async () => {
-    const zipFile = await workspace.getZip();
-    const url = URL.createObjectURL(zipFile);
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = `solution-${challengeId}.zip`;
-    link.click();
-    URL.revokeObjectURL(url);
-  }, [workspace, challengeId]);
 
   const importFolderResult = useCallback(async (files: FileList) => {
     return workspace.importLocalFiles(files);
@@ -296,55 +298,90 @@ export default function ArenaPage({ recordMap, challengeId, baseGithubUrl, conte
             }
             onResizeStop={(_e: Event, data: { size: { width: number } }) => setLeftWidth(data.size.width)}
           >
-            <Card className="h-full">
-              <CardContent className="h-full min-h-0 overflow-auto p-2">
-                <div className="flex items-start justify-between gap-2 px-4 pt-4">
-                  {title && (
-                    <h1 className="truncate text-xl font-bold" title={title}>
-                      {title}
-                    </h1>
-                  )}
-                  <Button variant="ghost" size="icon" className="h-7 w-7 shrink-0" title="Hide problem statement" onClick={() => setShowProblem(false)}>
-                    <PanelLeftClose className="h-4 w-4" />
-                  </Button>
+            <Card className="flex h-full flex-col">
+              <div className="flex shrink-0 items-center gap-1 border-b border-border px-2 py-1.5">
+                <div className="flex items-center gap-0.5 rounded-lg border border-border bg-muted/60 p-0.5">
+                  <button
+                    type="button"
+                    title="Problem statement"
+                    onClick={() => setLeftTab("problems")}
+                    className={`flex items-center gap-1.5 rounded-md px-2.5 py-1 text-xs font-medium transition-colors ${
+                      leftTab === "problems"
+                        ? "bg-background text-foreground shadow-sm"
+                        : "text-muted-foreground hover:text-foreground"
+                    }`}
+                  >
+                    <FileText className="h-3.5 w-3.5" /> Problems
+                  </button>
+                  <button
+                    type="button"
+                    title="Your submissions"
+                    onClick={() => setLeftTab("submissions")}
+                    className={`flex items-center gap-1.5 rounded-md px-2.5 py-1 text-xs font-medium transition-colors ${
+                      leftTab === "submissions"
+                        ? "bg-background text-foreground shadow-sm"
+                        : "text-muted-foreground hover:text-foreground"
+                    }`}
+                  >
+                    <History className="h-3.5 w-3.5" /> Submissions
+                  </button>
                 </div>
-                <style jsx global>{`
-                  .arena-notion .notion {
-                    width: 100%;
-                  }
-                  .arena-notion .notion-page {
-                    max-width: none;
-                    width: 100%;
-                    padding: 16px;
-                  }
-                `}</style>
-                {!mounted ? (
-                  <div className="flex items-center gap-3">
-                    <Loader className="animate-spin" />
-                    <span>Loading notion page...</span>
+                <Button variant="ghost" size="icon" className="ml-auto h-7 w-7 shrink-0" title="Hide problem statement" onClick={() => setShowProblem(false)}>
+                  <PanelLeftClose className="h-4 w-4" />
+                </Button>
+              </div>
+
+              {leftTab === "problems" ? (
+                <CardContent className="min-h-0 flex-1 overflow-auto p-2">
+                  <div className="flex items-start justify-between gap-2 px-4 pt-4">
+                    {title && (
+                      <h1 className="truncate text-xl font-bold" title={title}>
+                        {title}
+                      </h1>
+                    )}
                   </div>
-                ) : recordMap ? (
-                  <div className="arena-notion">
-                    <NotionRenderer
-                      recordMap={recordMap}
-                      darkMode={isDarkMode}
-                      fullPage={false}
-                      components={{
-                        Code,
-                        Equation,
-                      }}
-                    />
-                  </div>
-                ) : (
-                  <div className="prose prose-invert">
-                    <h2>Question title (placeholder)</h2>
-                    <p>
-                      This area is a placeholder for the Notion content. Hook up your server-side fetch
-                      to create a recordMap for react-notion-x and pass it into <code>NotionRenderer</code>.
-                    </p>
-                  </div>
-                )}
-              </CardContent>
+                  <style jsx global>{`
+                    .arena-notion .notion {
+                      width: 100%;
+                    }
+                    .arena-notion .notion-page {
+                      max-width: none;
+                      width: 100%;
+                      padding: 16px;
+                    }
+                  `}</style>
+                  {!mounted ? (
+                    <div className="flex items-center gap-3">
+                      <Loader className="animate-spin" />
+                      <span>Loading notion page...</span>
+                    </div>
+                  ) : recordMap ? (
+                    <div className="arena-notion">
+                      <NotionRenderer
+                        recordMap={recordMap}
+                        darkMode={isDarkMode}
+                        fullPage={false}
+                        components={{
+                          Code,
+                          Equation,
+                        }}
+                      />
+                    </div>
+                  ) : (
+                    <div className="prose prose-invert">
+                      <h2>Question title (placeholder)</h2>
+                      <p>
+                        This area is a placeholder for the Notion content. Hook up your server-side fetch
+                        to create a recordMap for react-notion-x and pass it into <code>NotionRenderer</code>.
+                      </p>
+                    </div>
+                  )}
+                </CardContent>
+              ) : (
+                <div className="min-h-0 flex-1 overflow-auto">
+                  <SubmissionList contestId={contestId} challengeId={challengeId} />
+                </div>
+              )}
             </Card>
           </ResizableBox>
         )}

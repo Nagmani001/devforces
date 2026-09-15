@@ -139,14 +139,16 @@ model ChallengeResult {
 }
 
 model SubmissionSession {
-  id          String   @id @default(uuid())
-  token       String   @unique
-  userId      String
-  contestId   String
-  challengeId String
-  status      String   @default("pending") // pending | processing | completed
-  createdAt   DateTime @default(now())
-  expiresAt   DateTime
+  id              String   @id @default(uuid())
+  token           String   @unique
+  userId          String
+  contestId       String
+  challengeId     String
+  status          String   @default("pending") // pending | processing | completed
+  testCasesPassed Int?
+  testCasesTotal  Int?
+  createdAt       DateTime @default(now())
+  expiresAt       DateTime
 }
 
 enum ContestStatus {

@@ -8,6 +8,13 @@ import { PAYLOAD_TO_PUSH, PAYLOAD_TO_RECEIVE } from "@repo/common/typescript-typ
 import prisma from "@repo/db/client";
 export const submitRouter: Router = Router();
 
+// Each submission must live at its own object key, otherwise every new submission
+// overwrites the previous one and past code becomes unrecoverable. The submission
+// token is unique per submission, so fold it into the key.
+function submissionStorageKey(userId: string, challengeId: string, token: string) {
+  return `${userId}-challenge-${challengeId}-${token}`;
+}
+
 submitRouter.get("/", async (req: Request, res: Response) => {
   const userId = req.userId;
   if (!userId) return unauthorized(res);
@@ -57,6 +64,79 @@ submitRouter.get("/", async (req: Request, res: Response) => {
   }
 });
 
+// All submissions by the current user for a specific challenge, newest first.
+// `slug` is the short public identifier used in the arena URL.
+submitRouter.get("/challenge/:challengeId", async (req: Request, res: Response) => {
+  const userId = req.userId;
+  if (!userId) return unauthorized(res);
+
+  const challengeId = req.params.challengeId;
+  const contestId = req.query.contestId as string | undefined;
+
+  try {
+    const sessions = await prisma.submissionSession.findMany({
+      where: {
+        userId,
+        challengeId,
+        ...(contestId ? { contestId } : {}),
+      },
+      orderBy: { createdAt: "desc" },
+      select: {
+        id: true,
+        token: true,
+        status: true,
+        testCasesPassed: true,
+        testCasesTotal: true,
+        createdAt: true,
+      },
+    });
+
+    res.json({
+      submissions: sessions.map((s) => ({
+        id: s.id,
+        slug: s.token,
+        status: s.status,
+        testCasesPassed: s.testCasesPassed,
+        testCasesTotal: s.testCasesTotal,
+        createdAt: s.createdAt,
+      })),
+    });
+  } catch (err) {
+    console.error("error listing challenge submissions", err);
+    return res.status(500).json({ message: "error while fetching submissions" });
+  }
+});
+
+// Returns a direct URL to the submitted archive so the client can download the
+// code straight from object storage. Ownership is enforced by looking the
+// session up for the current user before touching storage.
+submitRouter.get("/:submissionId/downloadUrl", async (req: Request, res: Response) => {
+  const userId = req.userId;
+  if (!userId) return unauthorized(res);
+
+  const submissionId = req.params.submissionId;
+
+  try {
+    const session = await prisma.submissionSession.findFirst({
+      where: { id: submissionId, userId },
+      select: { userId: true, challengeId: true, token: true },
+    });
+
+    if (!session) {
+      return res.status(404).json({ message: "submission not found" });
+    }
+
+    res.json({
+      url: getDownloadUrl(
+        submissionStorageKey(session.userId, session.challengeId, session.token)
+      ),
+    });
+  } catch (err) {
+    console.error("error getting submission download url", err);
+    return res.status(500).json({ message: "error while getting submission download url" });
+  }
+});
+
 submitRouter.get("/preSignedUrl/:challengeId", async (req: Request, res: Response) => {
   const userId = req.userId;
   const challengeId = req.params.challengeId;
@@ -86,7 +166,7 @@ submitRouter.get("/preSignedUrl/:challengeId", async (req: Request, res: Respons
   }
 
   const { url, method, fields, headers } = await createUploadUrl({
-    key: `${userId}-challenge-${challengeId}`,
+    key: submissionStorageKey(userId, challengeId!, submissionToken),
     maxSizeBytes: 50 * 1024 * 1024,
     expiresInSeconds: 3600
   })
@@ -143,7 +223,7 @@ submitRouter.post("/submit/confirm/:contestId/:challengeId", async (req: Request
   const payload: PAYLOAD_TO_PUSH = {
     id: uniqueId,
     challengeId: challengeId!,
-    url: getDownloadUrl(`${userId}-challenge-${challengeId}`)
+    url: getDownloadUrl(submissionStorageKey(userId, challengeId!, uniqueId))
   };
 
   const { contestResultId } = await checkContestResultOrCreate(contestId!, userId);
@@ -188,7 +268,11 @@ submitRouter.post("/submit/confirm/:contestId/:challengeId", async (req: Request
         // Mark session as completed
         await prisma.submissionSession.update({
           where: { id: session.id },
-          data: { status: "completed" }
+          data: {
+            status: "completed",
+            testCasesPassed: parsedResponse.passed,
+            testCasesTotal: parsedResponse.total,
+          }
         });
 
         // Unsubscribe after processing result
