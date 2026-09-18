@@ -17,12 +17,16 @@ export default async function Page({
 
 
   if (contestStatus.status == LIVE) {
+    const leaderboard = await authedGet(`${BASE_URL}/api/leaderboard/live/${contestId}`);
     return <div>
-      <LeaderboardLive />
+      <LeaderboardLive contestId={contestId} initialData={leaderboard.data} />
     </div>
   } else if (contestStatus.status == ENDED) {
+    const leaderboard = await authedGet(`${BASE_URL}/api/leaderboard/stale/${contestId}`);
     return <div>
-      <LeaderboardEnded />
+      <LeaderboardEnded initialData={leaderboard.data} />
     </div>
   }
+
+  return <div className="mx-auto max-w-3xl px-4 py-10 text-slate-200">Leaderboard will be available when the contest starts.</div>
 }

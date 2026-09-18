@@ -9,7 +9,7 @@ import { Card, CardContent } from "@repo/ui/components/card";
 import { NotionRenderer } from "react-notion-x";
 
 type RecordMap = React.ComponentProps<typeof NotionRenderer>["recordMap"];
-import { Loader, GripVertical, GitBranch, Copy, Terminal, PanelLeft, PanelLeftClose, Maximize2, Minimize2, SquareTerminal, Code2, FolderUp, FileText, History } from "lucide-react";
+import { Loader, GripVertical, GitBranch, Copy, Terminal, PanelLeft, PanelLeftClose, Maximize2, Minimize2, SquareTerminal, Code2, FolderUp, FileText, History, Radio } from "lucide-react";
 import dynamic from 'next/dynamic'
 import axios from "axios";
 import { BASE_URL, confirmFileSent, sendZippedFile } from "@/app/config/utils";
@@ -18,6 +18,7 @@ import { ArenaFolderUpload } from "@/app/components/arenaFolderUpload";
 import { useNavBarActions } from "@/app/components/navBarActions";
 import { CodeWorkspace } from "@/app/components/codeWorkspace";
 import { SubmissionList } from "@/app/components/submissionList";
+import { LiveLeaderboardPanel } from "@/app/components/liveLeaderboardPanel";
 import { useCodeWorkspace } from "@/app/hooks/useCodeWorkspace";
 import type { WorkspaceEntry } from "@/app/hooks/useCodeWorkspace";
 
@@ -38,7 +39,7 @@ type ArenaPageProps = {
 
 export default function ArenaPage({ recordMap, challengeId, baseGithubUrl, contestId, title }: ArenaPageProps) {
   const [leftWidth, setLeftWidth] = useState<number>(520);
-  const [leftTab, setLeftTab] = useState<"problems" | "submissions">("problems");
+  const [leftTab, setLeftTab] = useState<"problems" | "submissions" | "leaderboard">("problems");
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [logs, setLogs] = useState<string[]>([]);
   const terminalRef = useRef<HTMLDivElement | null>(null);
@@ -325,6 +326,22 @@ export default function ArenaPage({ recordMap, challengeId, baseGithubUrl, conte
                   >
                     <History className="h-3.5 w-3.5" /> Submissions
                   </button>
+                  <button
+                    type="button"
+                    title="Live leaderboard"
+                    onClick={() => setLeftTab("leaderboard")}
+                    className={`flex items-center gap-1.5 rounded-md px-2.5 py-1 text-xs font-medium transition-colors ${
+                      leftTab === "leaderboard"
+                        ? "bg-emerald-500/15 text-emerald-300 shadow-sm"
+                        : "text-muted-foreground hover:text-foreground"
+                    }`}
+                  >
+                    <span className="relative flex h-2 w-2">
+                      <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
+                      <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-400" />
+                    </span>
+                    <Radio className="h-3.5 w-3.5" /> Live Leaderboard
+                  </button>
                 </div>
                 <Button variant="ghost" size="icon" className="ml-auto h-7 w-7 shrink-0" title="Hide problem statement" onClick={() => setShowProblem(false)}>
                   <PanelLeftClose className="h-4 w-4" />
@@ -377,9 +394,13 @@ export default function ArenaPage({ recordMap, challengeId, baseGithubUrl, conte
                     </div>
                   )}
                 </CardContent>
-              ) : (
+              ) : leftTab === "submissions" ? (
                 <div className="min-h-0 flex-1 overflow-auto">
                   <SubmissionList contestId={contestId} challengeId={challengeId} />
+                </div>
+              ) : (
+                <div className="min-h-0 flex-1 overflow-auto">
+                  <LiveLeaderboardPanel contestId={contestId} />
                 </div>
               )}
             </Card>

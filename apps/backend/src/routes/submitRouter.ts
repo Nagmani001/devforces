@@ -3,7 +3,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { createUploadUrl, getDownloadUrl } from "@repo/storage/storage";
 import { calculateScoreAndUpdateDb, checkContestResultOrCreate, unauthorized } from "../lib/utils";
 import { pubSub, redisClient } from "..";
-import { REDIS_QUEUE_NAME } from "@repo/common/consts";
+import { leaderboardChannel, leaderboardKey, leaderboardSortScore, REDIS_QUEUE_NAME } from "@repo/common/consts";
 import { PAYLOAD_TO_PUSH, PAYLOAD_TO_RECEIVE } from "@repo/common/typescript-types";
 import prisma from "@repo/db/client";
 export const submitRouter: Router = Router();
@@ -256,14 +256,32 @@ submitRouter.post("/submit/confirm/:contestId/:challengeId", async (req: Request
           },
         });
 
-        await redisClient.zAdd(`contest_leaderboard_${contestId}`, {
-          score: scoreSum._sum.score! - (scoreSum._sum.penalty!) / 1000,
+        const totalScore = scoreSum._sum.score ?? 0;
+        const totalPenalty = scoreSum._sum.penalty ?? 0;
+
+        await prisma.contestResult.update({
+          where: { id: contestResultId },
+          data: {
+            score: totalScore,
+            penalty: totalPenalty,
+          },
+        });
+
+        await redisClient.zAdd(leaderboardKey(contestId!), {
+          score: leaderboardSortScore(totalScore, totalPenalty),
           value: userId
         });
 
-        await redisClient.hSet(`contest_leaderboard_${contestId}_userId_${userId}`, {
-          penalty: scoreSum._sum.penalty!,
+        await redisClient.hSet(`${leaderboardKey(contestId!)}_userId_${userId}`, {
+          score: totalScore,
+          penalty: totalPenalty,
         });
+
+        await redisClient.publish(leaderboardChannel(contestId!), JSON.stringify({
+          type: "leaderboardUpdated",
+          contestId,
+          updatedAt: new Date().toISOString(),
+        }));
 
         // Mark session as completed
         await prisma.submissionSession.update({

@@ -2,7 +2,7 @@
 "use client";
 
 import { cn } from "../lib/utils";
-import { Star } from "lucide-react";
+import { Radio, Star } from "lucide-react";
 
 // ================= Types =================
 
@@ -23,15 +23,23 @@ export type LeaderboardRow = {
 
 export type ProblemHeader = {
   id: string;
+  title?: string;
   solved: number;
   total: number;
 };
 
+export type LeaderboardPayload = {
+  mode: "live" | "static";
+  updatedAt: string;
+  problems: ProblemHeader[];
+  rows: LeaderboardRow[];
+};
+
 // ================= Helpers =================
 
-function ProblemCell({ submission }: { submission?: ProblemSubmission }) {
+function ProblemCell({ submission, compact = false }: { submission?: ProblemSubmission; compact?: boolean }) {
   if (!submission || submission.status === "not_attempted") {
-    return <div className="h-full w-full bg-[#1a2840] min-h-[60px]" />;
+    return <div className={cn("h-full w-full bg-[#1a2840]", compact ? "min-h-[44px]" : "min-h-[60px]")} />;
   }
 
   // VJudge uses a consistent bright green for solved problems
@@ -40,8 +48,8 @@ function ProblemCell({ submission }: { submission?: ProblemSubmission }) {
     : "bg-[#4a5568]";
 
   return (
-    <div className={cn("h-full w-full flex flex-col items-center justify-center py-3 min-h-[60px] transition-colors", bgColor)}>
-      <span className="text-sm font-medium text-white">{submission.time}</span>
+    <div className={cn("h-full w-full flex flex-col items-center justify-center transition-colors", compact ? "min-h-[44px] py-2" : "min-h-[60px] py-3", bgColor)}>
+      <span className={cn("font-medium text-white", compact ? "text-xs" : "text-sm")}>{submission.time}</span>
       {submission.attempts !== 0 && (
         <span className="text-xs text-red-300 font-medium">({submission.attempts})</span>
       )}
@@ -51,122 +59,66 @@ function ProblemCell({ submission }: { submission?: ProblemSubmission }) {
 
 // ================= Component =================
 
-export default function LeaderboardPage() {
-  const problems: ProblemHeader[] = [
-    { id: "A", solved: 15, total: 29 },
-    { id: "B", solved: 15, total: 24 },
-    { id: "C", solved: 8, total: 10 },
-    { id: "D", solved: 5, total: 12 },
-    { id: "E", solved: 5, total: 12 },
-  ];
-
-  const data: LeaderboardRow[] = [
-    {
-      rank: 1,
-      username: "prsweet",
-      score: 5,
-      penalty: 187,
-      problems: {
-        A: { time: "0:02:59", attempts: -1, status: "solved" },
-        B: { time: "0:19:10", attempts: -2, status: "solved" },
-        C: { time: "0:12:36", attempts: 0, status: "solved" },
-        D: { time: "0:24:10", attempts: -1, status: "solved" },
-        E: { time: "0:28:28", attempts: -1, status: "solved" },
-      },
-    },
-    {
-      rank: 2,
-      username: "Deep_",
-      score: 5,
-      penalty: 350,
-      problems: {
-        A: { time: "0:49:40", attempts: -1, status: "solved" },
-        B: { time: "0:49:53", attempts: -1, status: "solved" },
-        C: { time: "0:50:02", attempts: -1, status: "solved" },
-        D: { time: "0:53:10", attempts: 0, status: "solved" },
-        E: { time: "1:27:52", attempts: 0, status: "solved" },
-      },
-    },
-    {
-      rank: 3,
-      username: "aeron_agarwal",
-      score: 5,
-      penalty: 1605,
-      problems: {
-        A: { time: "0:44:42", attempts: -1, status: "solved" },
-        B: { time: "0:49:50", attempts: 0, status: "solved" },
-        C: { time: "7:09:34", attempts: 0, status: "solved" },
-        D: { time: "8:30:29", attempts: -1, status: "solved" },
-        E: { time: "8:50:33", attempts: 0, status: "solved" },
-      },
-    },
-    {
-      rank: 4,
-      username: "niteshyadav14",
-      score: 5,
-      penalty: 2349,
-      problems: {
-        A: { time: "7:09:31", attempts: 0, status: "solved" },
-        B: { time: "7:09:50", attempts: 0, status: "solved" },
-        C: { time: "7:10:06", attempts: 0, status: "solved" },
-        D: { time: "7:44:35", attempts: -1, status: "solved" },
-        E: { time: "8:35:21", attempts: -3, status: "solved" },
-      },
-    },
-    {
-      rank: 5,
-      username: "Warrior07A",
-      score: 4,
-      penalty: 3317,
-      problems: {
-        A: { time: "17:05:44", attempts: -1, status: "solved" },
-        B: { time: "0:47:54", attempts: 0, status: "solved" },
-        C: { time: "17:03:09", attempts: 0, status: "solved" },
-        D: { time: "", attempts: -1, status: "attempted" },
-        E: { time: "20:00:29", attempts: 0, status: "solved" },
-      },
-    },
-    {
-      rank: 6,
-      username: "mr_mango",
-      score: 3,
-      penalty: 599,
-      problems: {
-        A: { time: "0:13:33", attempts: -2, status: "solved" },
-        B: { time: "0:10:31", attempts: 0, status: "solved" },
-        C: { time: "8:55:37", attempts: 0, status: "solved" },
-        D: { time: "", attempts: -2, status: "attempted" },
-        E: { time: "", attempts: -3, status: "attempted" },
-      },
-    },
-  ];
+export default function LeaderboardPage({ data, compact = false }: { data: LeaderboardPayload; compact?: boolean }) {
+  const problems = data.problems;
+  const rows = data.rows;
 
   return (
-    <div className="w-full max-w-7xl mx-auto px-4 py-6">
-      <div className="overflow-x-auto rounded-lg border border-[#1e3a5f] bg-[#0f1f36]">
+    <div className={cn("w-full", compact ? "px-0 py-0" : "max-w-7xl mx-auto px-4 py-6")}>
+      <div className={cn(
+        "flex flex-col gap-1 text-gray-200 sm:flex-row sm:items-end sm:justify-between",
+        compact ? "border-b border-[#1e3a5f] bg-[#0f1f36] px-3 py-2" : "mb-4"
+      )}>
+        <div>
+          <div className="flex items-center gap-2">
+            <h1 className={cn("font-semibold", compact ? "text-sm" : "text-2xl")}>Leaderboard</h1>
+            {data.mode === "live" && (
+              <span className="inline-flex items-center gap-1 rounded-full border border-emerald-400/30 bg-emerald-400/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-emerald-300">
+                <span className="relative flex h-1.5 w-1.5">
+                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
+                  <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-emerald-300" />
+                </span>
+                Live
+              </span>
+            )}
+          </div>
+          <p className={cn("text-gray-400", compact ? "text-xs" : "text-sm")}>
+            {data.mode === "live" ? "Updates as submissions finish." : "Final frozen standings."}
+          </p>
+        </div>
+        <p className="flex items-center gap-1 text-xs text-gray-400">
+          {data.mode === "live" && <Radio className="h-3 w-3 text-emerald-300" />}
+          Updated {new Date(data.updatedAt).toLocaleString()}
+        </p>
+      </div>
+      <div className={cn(
+        "overflow-x-auto border border-[#1e3a5f] bg-[#0f1f36]",
+        compact ? "rounded-none border-x-0 border-t-0" : "rounded-lg"
+      )}>
         <table className="w-full border-collapse text-sm">
           {/* Header */}
           <thead>
             <tr className="border-b border-[#1e3a5f] bg-[#1a2f4a]">
-              <th className="border-r border-[#1e3a5f] px-6 py-3 text-left font-semibold text-gray-200 min-w-[80px]">
+              <th className={cn("border-r border-[#1e3a5f] text-left font-semibold text-gray-200", compact ? "min-w-[60px] px-3 py-2" : "min-w-[80px] px-6 py-3")}>
                 Rank
               </th>
-              <th className="border-r border-[#1e3a5f] px-6 py-3 text-left font-semibold text-gray-200 min-w-[200px]">
+              <th className={cn("border-r border-[#1e3a5f] text-left font-semibold text-gray-200", compact ? "min-w-[150px] px-3 py-2" : "min-w-[200px] px-6 py-3")}>
                 Team
               </th>
-              <th className="border-r border-[#1e3a5f] px-6 py-3 text-center font-semibold text-gray-200 min-w-[80px]">
+              <th className={cn("border-r border-[#1e3a5f] text-center font-semibold text-gray-200", compact ? "min-w-[70px] px-3 py-2" : "min-w-[80px] px-6 py-3")}>
                 Score
               </th>
-              <th className="border-r border-[#1e3a5f] px-6 py-3 text-center font-semibold text-gray-200 min-w-[100px]">
+              <th className={cn("border-r border-[#1e3a5f] text-center font-semibold text-gray-200", compact ? "min-w-[80px] px-3 py-2" : "min-w-[100px] px-6 py-3")}>
                 Penalty
               </th>
               {problems.map((problem) => (
                 <th
                   key={problem.id}
-                  className="border-r border-[#1e3a5f] px-4 py-3 text-center font-semibold text-gray-200 last:border-r-0 min-w-[120px]"
+                  className={cn("border-r border-[#1e3a5f] text-center font-semibold text-gray-200 last:border-r-0", compact ? "min-w-[90px] px-3 py-2" : "min-w-[120px] px-4 py-3")}
                 >
                   <div className="flex flex-col items-center gap-1">
-                    <span className="text-base font-bold">{problem.id}</span>
+                    <span className={cn("font-bold", compact ? "text-sm" : "text-base")}>{problem.id}</span>
+                    {problem.title && <span className={cn("truncate text-xs font-normal text-gray-300", compact ? "max-w-16" : "max-w-24")}>{problem.title}</span>}
                     <span className="text-xs font-normal text-gray-400">
                       {problem.solved} / {problem.total}
                     </span>
@@ -178,7 +130,14 @@ export default function LeaderboardPage() {
 
           {/* Body */}
           <tbody>
-            {data.map((row, idx) => (
+            {rows.length === 0 && (
+              <tr>
+                <td colSpan={4 + problems.length} className="px-6 py-10 text-center text-gray-400">
+                  No submissions yet.
+                </td>
+              </tr>
+            )}
+            {rows.map((row, idx) => (
               <tr
                 key={row.rank}
                 className={cn(
@@ -187,12 +146,12 @@ export default function LeaderboardPage() {
                 )}
               >
                 {/* Rank */}
-                <td className="border-r border-[#1e3a5f] px-6 py-3 text-center font-semibold text-gray-200">
+                <td className={cn("border-r border-[#1e3a5f] text-center font-semibold text-gray-200", compact ? "px-3 py-2" : "px-6 py-3")}>
                   {row.rank}
                 </td>
 
                 {/* Team/Username */}
-                <td className="border-r border-[#1e3a5f] px-6 py-3">
+                <td className={cn("border-r border-[#1e3a5f]", compact ? "px-3 py-2" : "px-6 py-3")}>
                   <div className="flex items-center gap-2">
                     <Star className="h-4 w-4 text-gray-400" />
                     {row.avatar && (
@@ -207,12 +166,12 @@ export default function LeaderboardPage() {
                 </td>
 
                 {/* Score */}
-                <td className="border-r border-[#1e3a5f] px-6 py-3 text-center font-semibold text-gray-200">
+                <td className={cn("border-r border-[#1e3a5f] text-center font-semibold text-gray-200", compact ? "px-3 py-2" : "px-6 py-3")}>
                   {row.score}
                 </td>
 
                 {/* Penalty */}
-                <td className="border-r border-[#1e3a5f] px-6 py-3 text-center font-semibold text-gray-200">
+                <td className={cn("border-r border-[#1e3a5f] text-center font-semibold text-gray-200", compact ? "px-3 py-2" : "px-6 py-3")}>
                   {row.penalty}
                 </td>
 
@@ -222,7 +181,7 @@ export default function LeaderboardPage() {
                     key={problem.id}
                     className="border-r border-[#1e3a5f] p-0 last:border-r-0"
                   >
-                    <ProblemCell submission={row.problems[problem.id]} />
+                    <ProblemCell submission={row.problems[problem.id]} compact={compact} />
                   </td>
                 ))}
               </tr>
@@ -232,7 +191,7 @@ export default function LeaderboardPage() {
       </div>
 
       {/* Legend */}
-      <div className="mt-6 flex flex-wrap gap-6 text-sm text-gray-300">
+      <div className={cn("flex flex-wrap text-sm text-gray-300", compact ? "gap-3 border-t border-[#1e3a5f] bg-[#0f1f36] px-3 py-3" : "mt-6 gap-6")}>
         <div className="flex items-center gap-2">
           <div className="h-5 w-16 rounded bg-[#2d7738]" />
           <span>Solved</span>

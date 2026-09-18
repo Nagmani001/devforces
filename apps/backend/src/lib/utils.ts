@@ -117,8 +117,10 @@ export async function calculateScoreAndUpdateDb(testResult: PAYLOAD_TO_RECEIVE, 
 
     await prisma.challengeResult.upsert({
       where: {
-        userId,
-        challengeId
+        userId_challengeId: {
+          userId,
+          challengeId
+        }
       },
       update: {
         score: testResult.passed,
@@ -145,8 +147,10 @@ export async function calculateScoreAndUpdateDb(testResult: PAYLOAD_TO_RECEIVE, 
   } else {
     await prisma.challengeResult.upsert({
       where: {
-        userId,
-        challengeId
+        userId_challengeId: {
+          userId,
+          challengeId
+        }
       },
       update: {
         score: testResult.passed,

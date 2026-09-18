@@ -1,6 +1,6 @@
 "use client"
-import LeaderboardPage from "@repo/ui/components/leaderboardComponent";
+import LeaderboardPage, { type LeaderboardPayload } from "@repo/ui/components/leaderboardComponent";
 
-export default function LeaderboardEnded() {
-  return <LeaderboardPage />
+export default function LeaderboardEnded({ initialData }: { initialData: LeaderboardPayload }) {
+  return <LeaderboardPage data={initialData} />
 }
