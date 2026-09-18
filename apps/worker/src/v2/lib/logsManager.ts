@@ -20,15 +20,18 @@ export class LogsManager {
     const logMessage: LogMessage = {
       type,
       message,
-      timestamp: Date.now()
+      timestamp: Date.now(),
     };
 
     this.logs.push(logMessage);
 
-    await this.pubSub.publish(this.channel, JSON.stringify({
-      type: "log",
-      data: logMessage
-    }));
+    await this.pubSub.publish(
+      this.channel,
+      JSON.stringify({
+        type: "log",
+        data: logMessage,
+      }),
+    );
   }
 
   async publishResult(result: {
@@ -39,13 +42,16 @@ export class LogsManager {
     const resultMessage: LogMessage = {
       type: "result",
       message: JSON.stringify(result),
-      timestamp: Date.now()
+      timestamp: Date.now(),
     };
 
-    await this.pubSub.publish(this.channel, JSON.stringify({
-      type: "result",
-      data: resultMessage
-    }));
+    await this.pubSub.publish(
+      this.channel,
+      JSON.stringify({
+        type: "result",
+        data: resultMessage,
+      }),
+    );
   }
 
   getLogs(): LogMessage[] {

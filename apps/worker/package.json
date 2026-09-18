@@ -10,6 +10,7 @@
     "dev": "npm run build && npm run start"
   },
   "dependencies": {
+    "@kubernetes/client-node": "^1.4.0",
     "@repo/common": "workspace:*",
     "@repo/db": "workspace:*",
     "@repo/typescript-config": "workspace:*",
